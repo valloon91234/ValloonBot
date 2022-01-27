@@ -1,0 +1,41 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "f3bd020b-76bf-491a-8f09-b627b3bfdac3": {
+      "ProjectGuid": "f3bd020b-76bf-491a-8f09-b627b3bfdac3",
+      "DisplayName": "TradeBucketed",
+      "ColorIndex": 0
+    },
+    "d411f327-9a40-4603-8171-617336a19975": {
+      "ProjectGuid": "d411f327-9a40-4603-8171-617336a19975",
+      "DisplayName": "ValloonBot3",
+      "ColorIndex": 1
+    },
+    "f7b182e4-ed12-47d9-ae73-ceda1ed14a2b": {
+      "ProjectGuid": "f7b182e4-ed12-47d9-ae73-ceda1ed14a2b",
+      "DisplayName": "ValloonBot4",
+      "ColorIndex": 2
+    },
+    "53ba509f-35ac-49f3-8b62-0949a7ea59f9": {
+      "ProjectGuid": "53ba509f-35ac-49f3-8b62-0949a7ea59f9",
+      "DisplayName": "IO.Swagger",
+      "ColorIndex": 3
+    },
+    "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3": {
+      "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
+      "DisplayName": "Miscellaneous Files",
+      "ColorIndex": -1
+    },
+    "a3dbe4ee-2e12-466a-b563-1eddfc154305": {
+      "ProjectGuid": "a3dbe4ee-2e12-466a-b563-1eddfc154305",
+      "DisplayName": "ValloonBitMEXBot",
+      "ColorIndex": 4
+    },
+    "d6c0f035-1712-4a3f-bd93-f583a03d8890": {
+      "ProjectGuid": "d6c0f035-1712-4a3f-bd93-f583a03d8890",
+      "DisplayName": "APITester",
+      "ColorIndex": 5
+    }
+  },
+  "NextColorIndex": 6
+}
