@@ -107,6 +107,13 @@ namespace Valloon.BitMEX
                 TestHCS(list, 2);
             }
 
+            runHCS(new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc));
+            runHCS(new DateTime(2021, 10, 1, 0, 0, 0, DateTimeKind.Utc));
+            runHCS(new DateTime(2021, 12, 1, 0, 0, 0, DateTimeKind.Utc));
+            runHCS(new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            goto end;
+
+
             ThreadPool.QueueUserWorkItem(state => runHCS(new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2021, 11, 1, 0, 0, 0, DateTimeKind.Utc)));
             ThreadPool.QueueUserWorkItem(state => runHCS(new DateTime(2021, 8, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2021, 11, 1, 0, 0, 0, DateTimeKind.Utc)));
             ThreadPool.QueueUserWorkItem(state => runHCS(new DateTime(2021, 9, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2021, 11, 1, 0, 0, 0, DateTimeKind.Utc)));
@@ -427,15 +434,15 @@ namespace Valloon.BitMEX
 
             List<Dictionary<string, decimal>> topList = new List<Dictionary<string, decimal>>();
 
-            for (decimal heightX = 0.0050m; heightX <= 0.0200m; heightX += 0.0001m)
-            //decimal heightX = 0.009m;
+            for (decimal heightX = 0.0200m; heightX <= 0.0350m; heightX += 0.0001m)
+            //decimal heightX = 0.0246m;
             {
                 logger.WriteLine($"\n\n----    heightX = {heightX}    ----\n");
-                //for (decimal closeX = 0.5m; closeX <= 2m; closeX += 0.05m)
-                for (decimal closeX = 0.7m; closeX <= 1.1m; closeX += 0.05m)
+                for (decimal closeX = 0.75m; closeX <= 1.5m; closeX += 0.05m)
+                //for (decimal closeX = 0.9m; closeX <= 1.1m; closeX += 0.01m)
                 {
-                    //for (decimal stopX = 3m; stopX <= 8; stopX += 0.5m)
-                    for (decimal stopX = 5; stopX <= 8; stopX += 0.5m)
+                    for (decimal stopX = 2m; stopX <= 8; stopX += 0.5m)
+                    //for (decimal stopX = 2.5m; stopX <= 3.5m; stopX += 0.1m)
                     {
                         int succeedCount = 0, failedCount = 0;
                         decimal positionCloseHeight = 0, positionStopHeight = 0, closePrice = 0, stopPrice = 0;
@@ -543,7 +550,7 @@ namespace Valloon.BitMEX
                         else
                             score = (decimal)succeedCount / failedCount;
                         decimal avgProfit = totalProfit / totalDays;
-                        if (avgProfit > 50)
+                        if (avgProfit > 20)
                         {
                             Dictionary<string, decimal> dic = new Dictionary<string, decimal>
                             {

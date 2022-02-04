@@ -97,30 +97,44 @@ namespace Valloon.BitMEX
 
     public class ShovelConfig
     {
-        [JsonProperty("bin_size")]
-        public string BinSize { get; set; } = "1m";
-
         [JsonProperty("sma")]
         public int SMALength { get; set; } = 660;
 
-        [JsonProperty("upper_limit_x")]
-        public decimal UpperLimitX { get; set; } = 0.0107m;
+        [JsonProperty("upper_limit_1")]
+        public decimal UpperLimitX1 { get; set; } = 0.0107m;
 
-        [JsonProperty("upper_close_x")]
-        public decimal UpperCloseX { get; set; } = 1.04m;
+        [JsonProperty("upper_close_1")]
+        public decimal UpperCloseX1 { get; set; } = 1.04m;
 
-        [JsonProperty("upper_stop_x")]
-        public decimal UpperStopX { get; set; } = 7.6m;
+        [JsonProperty("upper_stop_1")]
+        public decimal UpperStopX1 { get; set; } = 7.6m;
 
-        [JsonProperty("lower_limit_x")]
-        public decimal LowerLimitX { get; set; } = 0.009m;
+        [JsonProperty("lower_limit_1")]
+        public decimal LowerLimitX1 { get; set; } = 0.009m;
 
-        [JsonProperty("lower_close_x")]
-        public decimal LowerCloseX { get; set; } = 0.95m;
+        [JsonProperty("lower_close_1")]
+        public decimal LowerCloseX1 { get; set; } = 0.95m;
 
-        [JsonProperty("lower_stop_x")]
-        public decimal LowerStopX { get; set; } = 6.2m;
+        [JsonProperty("lower_stop_1")]
+        public decimal LowerStopX1 { get; set; } = 6.2m;
 
+        [JsonProperty("upper_limit_2")]
+        public decimal UpperLimitX2 { get; set; } = 0.0202m;
+
+        [JsonProperty("upper_close_2")]
+        public decimal UpperCloseX2 { get; set; } = 1.50m;
+
+        [JsonProperty("upper_stop_2")]
+        public decimal UpperStopX2 { get; set; } = 6.5m;
+
+        [JsonProperty("lower_limit_2")]
+        public decimal LowerLimitX2 { get; set; } = 0.0246m;
+
+        [JsonProperty("lower_close_2")]
+        public decimal LowerCloseX2 { get; set; } = 1.01m;
+
+        [JsonProperty("lower_stop_2")]
+        public decimal LowerStopX2 { get; set; } = 2.8m;
     }
 
     public class Config
@@ -145,17 +159,17 @@ namespace Valloon.BitMEX
         [JsonProperty("connection_interval")]
         public int ConnectionInverval { get; set; } = 15;
 
-        [JsonProperty("buy_or_sell")]
-        public int BuyOrSell { get; set; } = 3;
+        [JsonProperty("upper_qty_1")]
+        public decimal UpperQtyX1 { get; set; } = 1;
 
-        [JsonProperty("upper_qty_x")]
-        public decimal UpperQtyX { get; set; } = 1;
+        [JsonProperty("lower_qty_1")]
+        public decimal LowerQtyX1 { get; set; } = 1;
 
-        [JsonProperty("lower_qty_x")]
-        public decimal LowerQtyX { get; set; } = 1;
+        [JsonProperty("upper_qty_2")]
+        public decimal UpperQtyX2 { get; set; } = 0;
 
-        [JsonProperty("force_close")]
-        public int ForceClose { get; set; }
+        [JsonProperty("lower_qty_2")]
+        public decimal LowerQtyX2 { get; set; } = 0;
 
         [JsonProperty("strategy")]
         public string Strategy { get; set; }

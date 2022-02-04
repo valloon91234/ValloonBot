@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="BackendClient.cs" />
     <Compile Include="BitMEXApiHelper.cs" />
-    <Compile Include="ShovelStrategy0.cs" />
+    <Compile Include="Logger2.cs" />
     <Compile Include="ShovelStrategy.cs" />
     <Compile Include="DropStrategy.cs" />
     <Compile Include="BStepStrategy.cs" />
