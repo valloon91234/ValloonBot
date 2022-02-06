@@ -139,5 +139,20 @@ namespace Valloon.BitMEX
             textBox_Result.Text = message + "\r\n\t\n" + apiHelper.SendChat(message, 7).ToString();
         }
 
+        private void buttonLimitBuy_Click(object sender, EventArgs e)
+        {
+            var apiHelper = GetApiHelper();
+            int price = Int32.Parse(textBoxPrice.Text);
+            int qty = Int32.Parse(textBoxQty.Text);
+            textBox_Result.Text = apiHelper.OrderNewLimit("Buy", price, qty).ToString();
+        }
+
+        private void buttonLimitSell_Click(object sender, EventArgs e)
+        {
+            var apiHelper = GetApiHelper();
+            int price = Int32.Parse(textBoxPrice.Text);
+            int qty = Int32.Parse(textBoxQty.Text);
+            textBox_Result.Text = apiHelper.OrderNewLimit("Sell", price, qty).ToString();
+        }
     }
 }

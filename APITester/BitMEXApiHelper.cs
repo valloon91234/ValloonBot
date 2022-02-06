@@ -5,11 +5,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 /**
  * @author Valloon Project
@@ -48,16 +48,29 @@ namespace Valloon.BitMEX
 
         private static string BuildQueryData(Dictionary<string, string> param)
         {
-            if (param == null)
+            if (param == null || param.Count == 0)
                 return "";
 
             StringBuilder b = new StringBuilder();
             foreach (var item in param)
-                if (item.Value != null)
+                if (item.Value != null && item.Value != "")
                     b.Append(string.Format("&{0}={1}", item.Key, WebUtility.UrlEncode(item.Value)));
 
-            try { return b.ToString().Substring(1); }
-            catch (Exception) { return ""; }
+            try
+            {
+                LastPlain4Sign = b.ToString().Substring(1);
+                return LastPlain4Sign;
+            }
+            catch (Exception e)
+            {
+                LastPlain4Sign = e.ToString();
+                return "";
+            }
+        }
+
+        public static int FixQty(int qty)
+        {
+            return Math.Max(qty / 100, 1) * 100;
         }
 
         public const string SYMBOL = "XBTUSD";
@@ -74,7 +87,9 @@ namespace Valloon.BitMEX
         private readonly PositionApi PositionApiInstance;
         private readonly ChatApi ChatApiInstance;
 
-        public static DateTime ServerTime { get; set; }
+        public static DateTime? ServerTime { get; set; }
+        public int RequestCount { get; set; }
+        public static string LastPlain4Sign { get; set; }
 
         public BitMEXApiHelper(string apiKey, string apiSecret, bool testnet = false)
         {
@@ -112,6 +127,7 @@ namespace Valloon.BitMEX
 
         public Instrument GetInstrument()
         {
+            RequestCount++;
             List<Instrument> list = InstrumentApiInstance.InstrumentGet(SYMBOL, null, null, 1, null, true);
             Instrument item = list[0];
             ServerTime = item.Timestamp.Value;
@@ -120,11 +136,51 @@ namespace Valloon.BitMEX
 
         public List<TradeBin> GetRencentBinList(string binSize, int count, bool? partial = null)
         {
+            RequestCount++;
             return TradeApiInstance.TradeGetBucketed(binSize, partial, SYMBOL, null, null, count, null, true);
+        }
+
+        //public TradeBin GetVolume(string binSize, int volumeCount, out decimal ema)
+        //{
+        //    RequestCount++;
+        //    List<TradeBin> list = TradeApiInstance.TradeGetBucketed(binSize, true, SYMBOL, null, null, 1000, null, true);
+        //    int count = list.Count;
+        //    if (count < 1)
+        //    {
+        //        ema = 0;
+        //        return null;
+        //    }
+        //    //List<decimal> priceList = new List<decimal>();
+        //    EMA eMA = new EMA(volumeCount);
+        //    double f = 0;
+        //    for (int i = count - 1; i >= 0; i--)
+        //    {
+        //        //priceList.Add(list[i].Close.Value);
+        //        f = eMA.NextValue((double)list[i].Close.Value);
+        //        //Console.WriteLine(list[i].Close + "\t" + f);
+        //    }
+        //    //ema = priceList.Average();
+        //    ema = (decimal)f;
+        //    return list[0];
+        //}
+
+        public int GetRecentVolume(int minutes = 5)
+        {
+            RequestCount++;
+            List<TradeBin> list = TradeApiInstance.TradeGetBucketed("1m", false, SYMBOL, null, null, minutes + 1, null, true);
+            List<decimal> volumeList = new List<decimal>();
+            int count = list.Count;
+            for (int i = 1; i < count; i++)
+            {
+                var item = list[i];
+                volumeList.Add(item.Volume.Value);
+            }
+            return (int)volumeList.Average();
         }
 
         public Margin GetMargin(string currency = CURRENCY)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["currency"] = currency
@@ -135,6 +191,7 @@ namespace Valloon.BitMEX
 
         public List<Order> GetOrders(string filter = null)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL,
@@ -159,6 +216,7 @@ namespace Valloon.BitMEX
 
         public List<Order> GetLimitOrders()
         {
+            RequestCount++;
             string filter = "{\"ordType\":\"Limit\"}";
             Dictionary<string, string> param = new Dictionary<string, string>
             {
@@ -177,8 +235,20 @@ namespace Valloon.BitMEX
             return resultList;
         }
 
+        public List<Order> CancelOrder(string orderID)
+        {
+            RequestCount++;
+            Dictionary<string, string> param = new Dictionary<string, string>
+            {
+                ["orderID"] = orderID
+            };
+            CreateSignature("DELETE", "/order", BuildQueryData(param));
+            return OrderApiInstance.OrderCancel(orderID);
+        }
+
         public List<Order> CancelOrders(List<string> orderIDList)
         {
+            RequestCount++;
             JObject jObject = new JObject()
             {
                 ["orderID"] = JArray.FromObject(orderIDList)
@@ -190,6 +260,7 @@ namespace Valloon.BitMEX
 
         public List<Order> CancelAllOrders()
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL
@@ -198,30 +269,53 @@ namespace Valloon.BitMEX
             return OrderApiInstance.OrderCancelAll(SYMBOL);
         }
 
-        public List<Order> OrderAmendBulk(List<Order> orderList)
+        public Order OrderAmend(Order order, String newClOrdID = null)
         {
-            JObject jObject = new JObject()
+            RequestCount++;
+            Dictionary<string, string> param = new Dictionary<string, string>
             {
-                ["orders"] = JArray.FromObject(orderList)
+                ["orderID"] = order.OrderID,
+                ["origClOrdID"] = order.ClOrdID,
+                ["clOrdID"] = newClOrdID,
+                ["simpleOrderQty"] = order.SimpleOrderQty.ToString(),
+                ["orderQty"] = order.OrderQty.ToString(),
+                ["simpleLeavesQty"] = order.SimpleLeavesQty.ToString(),
+                ["leavesQty"] = order.LeavesQty.ToString(),
+                ["price"] = order.Price.ToString(),
+                ["stopPx"] = order.StopPx.ToString(),
+                ["pegOffsetValue"] = order.PegOffsetValue.ToString(),
+                ["text"] = order.Text
             };
-            string json = jObject.ToString(Formatting.None);
-            CreateSignature("PUT", "/order/bulk", null, json);
-            return OrderApiInstance.OrderAmendBulk(json);
+            CreateSignature("PUT", "/order", null, BuildQueryData(param));
+            return OrderApiInstance.OrderAmend(order.OrderID, order.ClOrdID, newClOrdID, order.SimpleOrderQty, order.OrderQty, order.SimpleLeavesQty, order.LeavesQty, order.Price, order.StopPx, order.PegOffsetValue, order.Text);
         }
 
-        public List<Order> OrderNewBulk(List<Order> orderList)
+        public Order OrderNew(Order order)
         {
-            JObject jObject = new JObject()
-            {
-                ["orders"] = JArray.FromObject(orderList)
-            };
-            string json = jObject.ToString(Formatting.None);
-            CreateSignature("POST", "/order/bulk", null, json);
-            return OrderApiInstance.OrderNewBulk(json);
+            return OrderNew(order.Side, order.OrderQty, order.Price, order.StopPx, order.OrdType, order.ExecInst, order.Text);
         }
 
-        public Order OrderNewLimit(string side, int price, int qty, string text = null)
+        public Order OrderNew(string side, int? orderQty, decimal? price, decimal? stopPx = null, string ordType = null, string execInst = null, string text = null)
         {
+            RequestCount++;
+            Dictionary<string, string> param = new Dictionary<string, string>
+            {
+                ["symbol"] = SYMBOL,
+                ["side"] = side,
+                ["orderQty"] = orderQty.ToString(),
+                ["price"] = price.ToString(),
+                ["stopPx"] = stopPx.ToString(),
+                ["ordType"] = ordType,
+                ["execInst"] = execInst,
+                ["text"] = text
+            };
+            CreateSignature("POST", "/order", null, BuildQueryData(param));
+            return OrderApiInstance.OrderNew(SYMBOL, side, null, orderQty, price, null, stopPx, null, null, null, null, ordType, null, execInst, null, text);
+        }
+
+        public Order OrderNewLimit(string side, decimal? price, int? qty, string text = null)
+        {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL,
@@ -235,8 +329,9 @@ namespace Valloon.BitMEX
             return OrderApiInstance.OrderNew(SYMBOL, side, null, qty, price, null, null, null, null, null, null, "Limit", null, null, null, text);
         }
 
-        public Order OrderNewLimitClose(string side, int price, int? qty = null, string text = null)
+        public Order OrderNewLimitClose(string side, decimal? price, int? qty = null, string text = null)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL,
@@ -251,8 +346,9 @@ namespace Valloon.BitMEX
             return OrderApiInstance.OrderNew(SYMBOL, side, null, qty, price, null, null, null, null, null, null, "Limit", null, "Close", null, text);
         }
 
-        public Order OrderNewMarket(string side, int qty, string text = null)
+        public Order OrderNewMarket(string side, int? qty, string text = null)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL,
@@ -267,6 +363,7 @@ namespace Valloon.BitMEX
 
         public Order OrderNewMarketClose(string side, int? qty = null, string text = null)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL,
@@ -282,6 +379,7 @@ namespace Valloon.BitMEX
 
         public Order OrderNewStopMarket(string side, int stopPx, int? qty, string execInst = null, string text = null)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL,
@@ -298,6 +396,7 @@ namespace Valloon.BitMEX
 
         public Order OrderNewStopMarketClose(string side, int stopPx, string text = null)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL,
@@ -313,6 +412,7 @@ namespace Valloon.BitMEX
 
         public Order OrderNewTakeProfitMarketClose(string side, int stopPx, int? qty = null, string text = null)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["symbol"] = SYMBOL,
@@ -329,7 +429,8 @@ namespace Valloon.BitMEX
 
         public Position GetPosition()
         {
-            string filter = "{\"symbol\":\"XBTUSD\"}";
+            RequestCount++;
+            string filter = "{\"symbol\":\"" + SYMBOL + "\"}";
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["filter"] = filter,
@@ -343,6 +444,7 @@ namespace Valloon.BitMEX
 
         public List<APIKey> GetApiKey(bool? reverse = null)
         {
+			RequestCount++;
             CreateSignature("GET", "/apiKey");
             List<APIKey> list = ApiKeyApiInstance.APIKeyGet(reverse);
             return list;
@@ -350,12 +452,14 @@ namespace Valloon.BitMEX
 
         public User GetUser()
         {
+            RequestCount++;
             CreateSignature("GET", "/user");
             return UserApiInstance.UserGet();
         }
 
         public Wallet GetWallet(string currency = CURRENCY)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["currency"] = currency
@@ -366,6 +470,7 @@ namespace Valloon.BitMEX
 
         public List<Transaction> GetWalletHistory(string currency = CURRENCY, int count = 10)
         {
+            RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["currency"] = currency,
@@ -377,6 +482,7 @@ namespace Valloon.BitMEX
 
         public Chat SendChat(string message, int channelID = 1)
         {
+			RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["message"] = message,

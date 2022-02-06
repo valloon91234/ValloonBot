@@ -33,6 +33,7 @@
             this.textBox_ApiKey = new System.Windows.Forms.TextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.textBox_Result = new System.Windows.Forms.TextBox();
+            this.button_User = new System.Windows.Forms.Button();
             this.button_Chat7 = new System.Windows.Forms.Button();
             this.button_Chat6 = new System.Windows.Forms.Button();
             this.button_Chat3 = new System.Windows.Forms.Button();
@@ -41,7 +42,10 @@
             this.button_Wallet = new System.Windows.Forms.Button();
             this.button_ApiKeyAll = new System.Windows.Forms.Button();
             this.button_ApiKey = new System.Windows.Forms.Button();
-            this.button_User = new System.Windows.Forms.Button();
+            this.textBoxPrice = new System.Windows.Forms.TextBox();
+            this.textBoxQty = new System.Windows.Forms.TextBox();
+            this.buttonLimitBuy = new System.Windows.Forms.Button();
+            this.buttonLimitSell = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -63,6 +67,8 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.textBoxQty);
+            this.splitContainer1.Panel1.Controls.Add(this.textBoxPrice);
             this.splitContainer1.Panel1.Controls.Add(this.textBox_ApiSecret);
             this.splitContainer1.Panel1.Controls.Add(this.textBox_ApiKey);
             // 
@@ -77,9 +83,9 @@
             // 
             this.textBox_ApiSecret.Location = new System.Drawing.Point(248, 12);
             this.textBox_ApiSecret.Name = "textBox_ApiSecret";
-            this.textBox_ApiSecret.Size = new System.Drawing.Size(428, 25);
+            this.textBox_ApiSecret.Size = new System.Drawing.Size(420, 25);
             this.textBox_ApiSecret.TabIndex = 3;
-            this.textBox_ApiSecret.Text = "D-rn1xHTxrufBPogovBu439H5z_HNIKS1d2jwQsLIq0Gi-K2";
+            this.textBox_ApiSecret.Text = "t-Q2UtO-c4zm9iejpKU5lpkVIFsbAL35sjHSufMhXMkXNyZV";
             // 
             // textBox_ApiKey
             // 
@@ -87,7 +93,7 @@
             this.textBox_ApiKey.Name = "textBox_ApiKey";
             this.textBox_ApiKey.Size = new System.Drawing.Size(230, 25);
             this.textBox_ApiKey.TabIndex = 2;
-            this.textBox_ApiKey.Text = "0VyjTYbUTj0frLCP1z3RGe3Q";
+            this.textBox_ApiKey.Text = "D2aygzGznqkUcI32F6uSRrZQ";
             // 
             // splitContainer2
             // 
@@ -103,6 +109,8 @@
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.buttonLimitSell);
+            this.splitContainer2.Panel2.Controls.Add(this.buttonLimitBuy);
             this.splitContainer2.Panel2.Controls.Add(this.button_User);
             this.splitContainer2.Panel2.Controls.Add(this.button_Chat7);
             this.splitContainer2.Panel2.Controls.Add(this.button_Chat6);
@@ -113,7 +121,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.button_ApiKeyAll);
             this.splitContainer2.Panel2.Controls.Add(this.button_ApiKey);
             this.splitContainer2.Size = new System.Drawing.Size(1033, 539);
-            this.splitContainer2.SplitterDistance = 854;
+            this.splitContainer2.SplitterDistance = 671;
             this.splitContainer2.TabIndex = 0;
             // 
             // textBox_Result
@@ -124,14 +132,24 @@
             this.textBox_Result.Multiline = true;
             this.textBox_Result.Name = "textBox_Result";
             this.textBox_Result.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_Result.Size = new System.Drawing.Size(841, 519);
+            this.textBox_Result.Size = new System.Drawing.Size(658, 519);
             this.textBox_Result.TabIndex = 3;
+            // 
+            // button_User
+            // 
+            this.button_User.Location = new System.Drawing.Point(3, 107);
+            this.button_User.Name = "button_User";
+            this.button_User.Size = new System.Drawing.Size(119, 37);
+            this.button_User.TabIndex = 8;
+            this.button_User.Text = "User";
+            this.button_User.UseVisualStyleBackColor = true;
+            this.button_User.Click += new System.EventHandler(this.button_User_Click);
             // 
             // button_Chat7
             // 
             this.button_Chat7.Location = new System.Drawing.Point(3, 402);
             this.button_Chat7.Name = "button_Chat7";
-            this.button_Chat7.Size = new System.Drawing.Size(160, 37);
+            this.button_Chat7.Size = new System.Drawing.Size(119, 37);
             this.button_Chat7.TabIndex = 7;
             this.button_Chat7.Text = "Chat 7";
             this.button_Chat7.UseVisualStyleBackColor = true;
@@ -141,7 +159,7 @@
             // 
             this.button_Chat6.Location = new System.Drawing.Point(3, 359);
             this.button_Chat6.Name = "button_Chat6";
-            this.button_Chat6.Size = new System.Drawing.Size(160, 37);
+            this.button_Chat6.Size = new System.Drawing.Size(119, 37);
             this.button_Chat6.TabIndex = 6;
             this.button_Chat6.Text = "Chat 6";
             this.button_Chat6.UseVisualStyleBackColor = true;
@@ -151,7 +169,7 @@
             // 
             this.button_Chat3.Location = new System.Drawing.Point(3, 316);
             this.button_Chat3.Name = "button_Chat3";
-            this.button_Chat3.Size = new System.Drawing.Size(160, 37);
+            this.button_Chat3.Size = new System.Drawing.Size(119, 37);
             this.button_Chat3.TabIndex = 5;
             this.button_Chat3.Text = "Chat 3";
             this.button_Chat3.UseVisualStyleBackColor = true;
@@ -161,7 +179,7 @@
             // 
             this.button_Chat2.Location = new System.Drawing.Point(3, 273);
             this.button_Chat2.Name = "button_Chat2";
-            this.button_Chat2.Size = new System.Drawing.Size(160, 37);
+            this.button_Chat2.Size = new System.Drawing.Size(119, 37);
             this.button_Chat2.TabIndex = 4;
             this.button_Chat2.Text = "Chat 2";
             this.button_Chat2.UseVisualStyleBackColor = true;
@@ -171,7 +189,7 @@
             // 
             this.button_Chat.Location = new System.Drawing.Point(3, 230);
             this.button_Chat.Name = "button_Chat";
-            this.button_Chat.Size = new System.Drawing.Size(160, 37);
+            this.button_Chat.Size = new System.Drawing.Size(119, 37);
             this.button_Chat.TabIndex = 3;
             this.button_Chat.Text = "Chat";
             this.button_Chat.UseVisualStyleBackColor = true;
@@ -181,7 +199,7 @@
             // 
             this.button_Wallet.Location = new System.Drawing.Point(3, 177);
             this.button_Wallet.Name = "button_Wallet";
-            this.button_Wallet.Size = new System.Drawing.Size(160, 37);
+            this.button_Wallet.Size = new System.Drawing.Size(119, 37);
             this.button_Wallet.TabIndex = 2;
             this.button_Wallet.Text = "Wallet";
             this.button_Wallet.UseVisualStyleBackColor = true;
@@ -191,7 +209,7 @@
             // 
             this.button_ApiKeyAll.Location = new System.Drawing.Point(3, 53);
             this.button_ApiKeyAll.Name = "button_ApiKeyAll";
-            this.button_ApiKeyAll.Size = new System.Drawing.Size(160, 37);
+            this.button_ApiKeyAll.Size = new System.Drawing.Size(119, 37);
             this.button_ApiKeyAll.TabIndex = 1;
             this.button_ApiKeyAll.Text = "APIKey All";
             this.button_ApiKeyAll.UseVisualStyleBackColor = true;
@@ -201,21 +219,47 @@
             // 
             this.button_ApiKey.Location = new System.Drawing.Point(3, 10);
             this.button_ApiKey.Name = "button_ApiKey";
-            this.button_ApiKey.Size = new System.Drawing.Size(160, 37);
+            this.button_ApiKey.Size = new System.Drawing.Size(119, 37);
             this.button_ApiKey.TabIndex = 0;
             this.button_ApiKey.Text = "APIKey";
             this.button_ApiKey.UseVisualStyleBackColor = true;
             this.button_ApiKey.Click += new System.EventHandler(this.button_ApiKey_Click);
             // 
-            // button_User
+            // textBoxPrice
             // 
-            this.button_User.Location = new System.Drawing.Point(3, 107);
-            this.button_User.Name = "button_User";
-            this.button_User.Size = new System.Drawing.Size(160, 37);
-            this.button_User.TabIndex = 8;
-            this.button_User.Text = "User";
-            this.button_User.UseVisualStyleBackColor = true;
-            this.button_User.Click += new System.EventHandler(this.button_User_Click);
+            this.textBoxPrice.Location = new System.Drawing.Point(678, 12);
+            this.textBoxPrice.Name = "textBoxPrice";
+            this.textBoxPrice.Size = new System.Drawing.Size(119, 25);
+            this.textBoxPrice.TabIndex = 4;
+            this.textBoxPrice.Text = "40000";
+            // 
+            // textBoxQty
+            // 
+            this.textBoxQty.Location = new System.Drawing.Point(803, 12);
+            this.textBoxQty.Name = "textBoxQty";
+            this.textBoxQty.Size = new System.Drawing.Size(119, 25);
+            this.textBoxQty.TabIndex = 5;
+            this.textBoxQty.Text = "200";
+            // 
+            // buttonLimitBuy
+            // 
+            this.buttonLimitBuy.Location = new System.Drawing.Point(128, 10);
+            this.buttonLimitBuy.Name = "buttonLimitBuy";
+            this.buttonLimitBuy.Size = new System.Drawing.Size(119, 37);
+            this.buttonLimitBuy.TabIndex = 9;
+            this.buttonLimitBuy.Text = "Limit Buy";
+            this.buttonLimitBuy.UseVisualStyleBackColor = true;
+            this.buttonLimitBuy.Click += new System.EventHandler(this.buttonLimitBuy_Click);
+            // 
+            // buttonLimitSell
+            // 
+            this.buttonLimitSell.Location = new System.Drawing.Point(128, 53);
+            this.buttonLimitSell.Name = "buttonLimitSell";
+            this.buttonLimitSell.Size = new System.Drawing.Size(119, 37);
+            this.buttonLimitSell.TabIndex = 10;
+            this.buttonLimitSell.Text = "Limit Sell";
+            this.buttonLimitSell.UseVisualStyleBackColor = true;
+            this.buttonLimitSell.Click += new System.EventHandler(this.buttonLimitSell_Click);
             // 
             // Form1
             // 
@@ -258,6 +302,10 @@
         private System.Windows.Forms.Button button_Chat3;
         private System.Windows.Forms.Button button_Chat2;
         private System.Windows.Forms.Button button_User;
+        private System.Windows.Forms.TextBox textBoxQty;
+        private System.Windows.Forms.TextBox textBoxPrice;
+        private System.Windows.Forms.Button buttonLimitSell;
+        private System.Windows.Forms.Button buttonLimitBuy;
     }
 }
 
