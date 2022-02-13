@@ -9,7 +9,7 @@ using System.Text;
  * @author Valloon Project
  * @version 1.0 @2020-03-03
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     static class BackendClient
     {

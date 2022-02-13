@@ -12,7 +12,7 @@ using Valloon.Utils;
  * @author Valloon Project
  * @version 1.0 @2020-04-07
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     class Program
     {

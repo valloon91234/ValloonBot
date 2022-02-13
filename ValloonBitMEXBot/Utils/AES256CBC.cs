@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web.Script.Serialization;
 
-namespace Valloon.BitMEX.Utils
+namespace Valloon.Trading.Utils
 {
     public class AES256CBC
     {

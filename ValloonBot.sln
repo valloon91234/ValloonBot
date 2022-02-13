@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValloonBot4", "ValloonBot4\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APITester", "APITester\APITester.csproj", "{D6C0F035-1712-4A3F-BD93-F583A03D8890}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValloonTrader", "ValloonTrader\ValloonTrader.csproj", "{4D7245F7-BC3C-4F2D-AD19-BEAA912A3149}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValloonBot5", "ValloonBot5\ValloonBot5.csproj", "{765C8C11-0E07-4A67-BA33-9C92D7848E05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,14 @@ Global
 		{D6C0F035-1712-4A3F-BD93-F583A03D8890}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6C0F035-1712-4A3F-BD93-F583A03D8890}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6C0F035-1712-4A3F-BD93-F583A03D8890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D7245F7-BC3C-4F2D-AD19-BEAA912A3149}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D7245F7-BC3C-4F2D-AD19-BEAA912A3149}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D7245F7-BC3C-4F2D-AD19-BEAA912A3149}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D7245F7-BC3C-4F2D-AD19-BEAA912A3149}.Release|Any CPU.Build.0 = Release|Any CPU
+		{765C8C11-0E07-4A67-BA33-9C92D7848E05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{765C8C11-0E07-4A67-BA33-9C92D7848E05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{765C8C11-0E07-4A67-BA33-9C92D7848E05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{765C8C11-0E07-4A67-BA33-9C92D7848E05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

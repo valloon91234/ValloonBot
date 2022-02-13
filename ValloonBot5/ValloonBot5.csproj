@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F7B182E4-ED12-47D9-AE73-CEDA1ED14A2B}</ProjectGuid>
+    <ProjectGuid>{765C8C11-0E07-4A67-BA33-9C92D7848E05}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Valloon.BitMEX</RootNamespace>
     <AssemblyName>ValloonBot5</AssemblyName>
@@ -56,21 +56,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackendClient.cs" />
-    <Compile Include="BitMEXApiHelper.cs" />
-    <Compile Include="Logger2.cs" />
-    <Compile Include="ShovelStrategy.cs" />
-    <Compile Include="DropStrategy.cs" />
-    <Compile Include="BStepStrategy.cs" />
+    <Compile Include="SolShotStrategy.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="BollingerBandStrategy.cs" />
-    <Compile Include="BollingerBandConfig.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\EMA.cs" />
-    <Compile Include="Utils\RSI.cs" />
-    <Compile Include="Utils\StringUtils.cs" />
-    <Compile Include="Utils\TripleDES.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -83,6 +72,10 @@
     <ProjectReference Include="..\IO.Swagger\IO.Swagger.csproj">
       <Project>{53ba509f-35ac-49f3-8b62-0949a7ea59f9}</Project>
       <Name>IO.Swagger</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ValloonTrader\ValloonTrader.csproj">
+      <Project>{4d7245f7-bc3c-4f2d-ad19-beaa912a3149}</Project>
+      <Name>ValloonTrader</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

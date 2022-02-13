@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
  * @version 4.0
  * @2022-01-04
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     public class ShovelStrategy
     {
@@ -225,7 +225,7 @@ namespace Valloon.BitMEX
                                         Order newOrder = apiHelper.OrderAmend(new Order()
                                         {
                                             OrderID = order.OrderID,
-                                            OrderQty = order.OrderQty,
+                                            OrderQty = lowerQty1,
                                             Price = lowerLimit1,
                                             Text = $"<BOT><LIMIT><1><A={sma}></BOT>",
                                         });
@@ -271,7 +271,7 @@ namespace Valloon.BitMEX
                                         Order newOrder = apiHelper.OrderAmend(new Order()
                                         {
                                             OrderID = order.OrderID,
-                                            OrderQty = order.OrderQty,
+                                            OrderQty = upperQty1,
                                             Price = upperLimit1,
                                             Text = $"<BOT><LIMIT><1><A={sma}></BOT>",
                                         });
@@ -337,7 +337,7 @@ namespace Valloon.BitMEX
                                         Order newOrder = apiHelper.OrderAmend(new Order()
                                         {
                                             OrderID = order.OrderID,
-                                            OrderQty = order.OrderQty,
+                                            OrderQty = lowerQty2,
                                             Price = lowerLimit2,
                                             Text = $"<BOT><LIMIT><2><A={sma}></BOT>",
                                         });
@@ -383,7 +383,7 @@ namespace Valloon.BitMEX
                                         Order newOrder = apiHelper.OrderAmend(new Order()
                                         {
                                             OrderID = order.OrderID,
-                                            OrderQty = order.OrderQty,
+                                            OrderQty = upperQty2,
                                             Price = upperLimit2,
                                             Text = $"<BOT><LIMIT><2><A={sma}></BOT>",
                                         });
@@ -434,7 +434,7 @@ namespace Valloon.BitMEX
                         {
                             cancelOrderList.Add(order.OrderID);
 #if !LICENSE_MODE
-                            Logger.WriteLine($"        Old bot order has been canceled: {order}", ConsoleColor.Yellow);
+                            Logger.WriteFile($"--- Old bot order has been canceled: {order}");
 #endif
                         }
                     }

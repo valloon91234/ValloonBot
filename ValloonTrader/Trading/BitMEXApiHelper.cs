@@ -85,9 +85,23 @@ namespace Valloon.Trading
         private readonly OrderApi OrderApiInstance;
         private readonly PositionApi PositionApiInstance;
 
-        public static DateTime? ServerTime { get; set; }
+        private static long _serverTimeDiff;
+        public static DateTime ServerTime
+        {
+            get
+            {
+                return DateTime.UtcNow.AddTicks(_serverTimeDiff);
+            }
+            set
+            {
+                _serverTimeDiff = (value - DateTime.UtcNow).Ticks;
+            }
+        }
+
         public int RequestCount { get; set; }
         public static string LastPlain4Sign { get; set; }
+
+        private static long ServerTimeDiff = 0;
 
         public BitMEXApiHelper(string apiKey = null, string apiSecret = null, bool testnet = false)
         {
@@ -120,57 +134,19 @@ namespace Valloon.Trading
             return message;
         }
 
-        public Instrument GetInstrument()
+        public Instrument GetInstrument(string symbol)
         {
             RequestCount++;
-            List<Instrument> list = InstrumentApiInstance.InstrumentGet(SYMBOL_XBTUSD, null, null, 1, null, true);
-            Instrument item = list[0];
-            ServerTime = item.Timestamp.Value;
+            ApiResponse<List<Instrument>> localVarResponse = InstrumentApiInstance.InstrumentGetWithHttpInfo(symbol, null, null, 1, null, true);
+            Instrument item = localVarResponse.Data[0];
+            ServerTime = DateTime.Parse(localVarResponse.Headers["Date"]);
             return item;
         }
 
-        public List<TradeBin> GetRencentBinList(string binSize, int count, bool? partial = null)
+        public List<TradeBin> GetRencentBinList(string symbol, string binSize, int count, bool? partial = null)
         {
             RequestCount++;
-            return TradeApiInstance.TradeGetBucketed(binSize, partial, SYMBOL_XBTUSD, null, null, count, null, true);
-        }
-
-        public TradeBin GetVolume(string binSize, int volumeCount, out decimal ema)
-        {
-            RequestCount++;
-            List<TradeBin> list = TradeApiInstance.TradeGetBucketed(binSize, true, SYMBOL_XBTUSD, null, null, 1000, null, true);
-            int count = list.Count;
-            if (count < 1)
-            {
-                ema = 0;
-                return null;
-            }
-            //List<decimal> priceList = new List<decimal>();
-            EMA eMA = new EMA(volumeCount);
-            double f = 0;
-            for (int i = count - 1; i >= 0; i--)
-            {
-                //priceList.Add(list[i].Close.Value);
-                f = eMA.NextValue((double)list[i].Close.Value);
-                //Console.WriteLine(list[i].Close + "\t" + f);
-            }
-            //ema = priceList.Average();
-            ema = (decimal)f;
-            return list[0];
-        }
-
-        public int GetRecentVolume(int minutes = 5)
-        {
-            RequestCount++;
-            List<TradeBin> list = TradeApiInstance.TradeGetBucketed("1m", false, SYMBOL_XBTUSD, null, null, minutes + 1, null, true);
-            List<decimal> volumeList = new List<decimal>();
-            int count = list.Count;
-            for (int i = 1; i < count; i++)
-            {
-                var item = list[i];
-                volumeList.Add(item.Volume.Value);
-            }
-            return (int)volumeList.Average();
+            return TradeApiInstance.TradeGetBucketed(binSize, partial, symbol, null, null, count, null, true);
         }
 
         public List<TradeBin> GetBinList(string binSize = null, bool? partial = null, string symbol = null, decimal? count = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
@@ -189,22 +165,22 @@ namespace Valloon.Trading
             return UserApiInstance.UserGetMargin(CURRENCY_XBt);
         }
 
-        public List<Order> GetOrders(string filter = null)
+        public List<Order> GetOrders(string symbol, string filter = null)
         {
             RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
-                ["symbol"] = SYMBOL_XBTUSD,
+                ["symbol"] = symbol,
                 ["filter"] = filter,
                 ["reverse"] = true.ToString()
             };
             CreateSignature("GET", "/order", BuildQueryData(param));
-            return OrderApiInstance.OrderGetOrders(SYMBOL_XBTUSD, filter, null, null, null, true);
+            return OrderApiInstance.OrderGetOrders(symbol, filter, null, null, null, true);
         }
 
-        public List<Order> GetActiveOrders()
+        public List<Order> GetActiveOrders(string symbol)
         {
-            List<Order> list = GetOrders();
+            List<Order> list = GetOrders(symbol);
             List<Order> resultList = new List<Order>();
             foreach (Order order in list)
             {
@@ -214,18 +190,18 @@ namespace Valloon.Trading
             return resultList;
         }
 
-        public List<Order> GetLimitOrders()
+        public List<Order> GetLimitOrders(string symbol)
         {
             RequestCount++;
             string filter = "{\"ordType\":\"Limit\"}";
             Dictionary<string, string> param = new Dictionary<string, string>
             {
-                ["symbol"] = SYMBOL_XBTUSD,
+                ["symbol"] = symbol,
                 ["filter"] = filter,
                 ["reverse"] = true.ToString()
             };
             CreateSignature("GET", "/order", BuildQueryData(param));
-            List<Order> list = OrderApiInstance.OrderGetOrders(SYMBOL_XBTUSD, filter, null, null, null, true);
+            List<Order> list = OrderApiInstance.OrderGetOrders(symbol, filter, null, null, null, true);
             List<Order> resultList = new List<Order>();
             foreach (Order order in list)
             {
@@ -258,15 +234,15 @@ namespace Valloon.Trading
             return OrderApiInstance.OrderCancelBulk(json);
         }
 
-        public List<Order> CancelAllOrders()
+        public List<Order> CancelAllOrders(string symbol)
         {
             RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
-                ["symbol"] = SYMBOL_XBTUSD
+                ["symbol"] = symbol
             };
             CreateSignature("DELETE", "/order/all", BuildQueryData(param));
-            return OrderApiInstance.OrderCancelAll(SYMBOL_XBTUSD);
+            return OrderApiInstance.OrderCancelAll(symbol);
         }
 
         public Order OrderAmend(Order order, String newClOrdID = null)
@@ -292,145 +268,37 @@ namespace Valloon.Trading
 
         public Order OrderNew(Order order)
         {
-            return OrderNew(order.Side, order.OrderQty, order.Price, order.StopPx, order.OrdType, order.ExecInst, order.Text);
+            RequestCount++;
+            Dictionary<string, string> param = new Dictionary<string, string>
+            {
+                ["symbol"] = order.Symbol,
+                ["side"] = order.Side,
+                ["orderQty"] = order.OrderQty.ToString(),
+                ["price"] = order.Price.ToString(),
+                ["stopPx"] = order.StopPx.ToString(),
+                ["ordType"] = order.OrdType,
+                ["execInst"] = order.ExecInst,
+                ["text"] = order.Text
+            };
+            CreateSignature("POST", "/order", null, BuildQueryData(param));
+            return OrderApiInstance.OrderNew(order.Symbol, order.Side, null, order.OrderQty, order.Price, null, order.StopPx, null, null, null, null, order.OrdType, null, order.ExecInst, null, order.Text);
         }
 
-        public Order OrderNew(string side, int? orderQty, decimal? price, decimal? stopPx = null, string ordType = null, string execInst = null, string text = null)
+        public Object OrderCancelAllAfter(long timeoutMilliseconds)
         {
             RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
-                ["symbol"] = SYMBOL_XBTUSD,
-                ["side"] = side,
-                ["orderQty"] = orderQty.ToString(),
-                ["price"] = price.ToString(),
-                ["stopPx"] = stopPx.ToString(),
-                ["ordType"] = ordType,
-                ["execInst"] = execInst,
-                ["text"] = text
+                ["timeout"] = timeoutMilliseconds.ToString(),
             };
-            CreateSignature("POST", "/order", null, BuildQueryData(param));
-            return OrderApiInstance.OrderNew(SYMBOL_XBTUSD, side, null, orderQty, price, null, stopPx, null, null, null, null, ordType, null, execInst, null, text);
+            CreateSignature("POST", "/order/cancelAllAfter", null, BuildQueryData(param));
+            return OrderApiInstance.OrderCancelAllAfter(timeoutMilliseconds);
         }
 
-        public Order OrderNewLimit(string side, decimal? price, int? qty, string text = null)
+        public Position GetPosition(string symbol)
         {
             RequestCount++;
-            Dictionary<string, string> param = new Dictionary<string, string>
-            {
-                ["symbol"] = SYMBOL_XBTUSD,
-                ["side"] = side,
-                ["orderQty"] = qty.ToString(),
-                ["price"] = price.ToString(),
-                ["ordType"] = "Limit",
-                ["text"] = text
-            };
-            CreateSignature("POST", "/order", null, BuildQueryData(param));
-            return OrderApiInstance.OrderNew(SYMBOL_XBTUSD, side, null, qty, price, null, null, null, null, null, null, "Limit", null, null, null, text);
-        }
-
-        public Order OrderNewLimitClose(string side, decimal? price, int? qty = null, string text = null)
-        {
-            RequestCount++;
-            Dictionary<string, string> param = new Dictionary<string, string>
-            {
-                ["symbol"] = SYMBOL_XBTUSD,
-                ["side"] = side,
-                ["orderQty"] = qty?.ToString(),
-                ["price"] = price.ToString(),
-                ["ordType"] = "Limit",
-                ["execInst"] = "Close",
-                ["text"] = text
-            };
-            CreateSignature("POST", "/order", null, BuildQueryData(param));
-            return OrderApiInstance.OrderNew(SYMBOL_XBTUSD, side, null, qty, price, null, null, null, null, null, null, "Limit", null, "Close", null, text);
-        }
-
-        public Order OrderNewMarket(string side, int? qty, string text = null)
-        {
-            RequestCount++;
-            Dictionary<string, string> param = new Dictionary<string, string>
-            {
-                ["symbol"] = SYMBOL_XBTUSD,
-                ["side"] = side,
-                ["orderQty"] = qty.ToString(),
-                ["ordType"] = "Market",
-                ["text"] = text
-            };
-            CreateSignature("POST", "/order", null, BuildQueryData(param));
-            return OrderApiInstance.OrderNew(SYMBOL_XBTUSD, side, null, qty, null, null, null, null, null, null, null, "Market", null, null, null, text);
-        }
-
-        public Order OrderNewMarketClose(string side, int? qty = null, string text = null)
-        {
-            RequestCount++;
-            Dictionary<string, string> param = new Dictionary<string, string>
-            {
-                ["symbol"] = SYMBOL_XBTUSD,
-                ["side"] = side,
-                ["orderQty"] = qty?.ToString(),
-                ["ordType"] = "Market",
-                ["execInst"] = "Close",
-                ["text"] = text
-            };
-            CreateSignature("POST", "/order", null, BuildQueryData(param));
-            return OrderApiInstance.OrderNew(SYMBOL_XBTUSD, side, null, qty, null, null, null, null, null, null, null, "Market", null, "Close", null, text);
-        }
-
-        public Order OrderNewStopMarket(string side, int stopPx, int? qty, string execInst = null, string text = null)
-        {
-            RequestCount++;
-            Dictionary<string, string> param = new Dictionary<string, string>
-            {
-                ["symbol"] = SYMBOL_XBTUSD,
-                ["side"] = side,
-                ["orderQty"] = qty?.ToString(),
-                ["stopPx"] = stopPx.ToString(),
-                ["ordType"] = "Stop",
-                ["execInst"] = execInst,
-                ["text"] = text
-            };
-            CreateSignature("POST", "/order", null, BuildQueryData(param));
-            return OrderApiInstance.OrderNew(SYMBOL_XBTUSD, side, null, qty, null, null, stopPx, null, null, null, null, "Stop", null, execInst, null, text);
-        }
-
-        public Order OrderNewStopMarketClose(string side, int stopPx, string text = null)
-        {
-            RequestCount++;
-            Dictionary<string, string> param = new Dictionary<string, string>
-            {
-                ["symbol"] = SYMBOL_XBTUSD,
-                ["side"] = side,
-                ["stopPx"] = stopPx.ToString(),
-                ["ordType"] = "Stop",
-                ["execInst"] = "Close",
-                ["text"] = text
-            };
-            CreateSignature("POST", "/order", null, BuildQueryData(param));
-            return OrderApiInstance.OrderNew(SYMBOL_XBTUSD, side, null, null, null, null, stopPx, null, null, null, null, "Stop", null, "Close", null, text);
-        }
-
-        public Order OrderNewTakeProfitMarketClose(string side, int stopPx, int? qty = null, string text = null)
-        {
-            RequestCount++;
-            Dictionary<string, string> param = new Dictionary<string, string>
-            {
-                ["symbol"] = SYMBOL_XBTUSD,
-                ["side"] = side,
-                ["orderQty"] = qty?.ToString(),
-                ["stopPx"] = stopPx.ToString(),
-                ["ordType"] = "MarketIfTouched",
-                ["execInst"] = "Close",
-                ["text"] = text
-            };
-            CreateSignature("POST", "/order", null, BuildQueryData(param));
-            return OrderApiInstance.OrderNew(SYMBOL_XBTUSD, side, null, qty, null, null, stopPx, null, null, null, null, "MarketIfTouched", null, "Close", null, text);
-        }
-
-        public Position GetPosition()
-        {
-            RequestCount++;
-            string filter = "{\"symbol\":\"" + SYMBOL_XBTUSD + "\"}";
+            string filter = "{\"symbol\":\"" + symbol + "\"}";
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["filter"] = filter,

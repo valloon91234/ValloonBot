@@ -9,7 +9,7 @@ using IO.Swagger.Client;
 using IO.Swagger.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Valloon.BitMEX.Utils;
+using Valloon.Trading.Utils;
 
 /**
  * @author Valloon Project
@@ -17,7 +17,7 @@ using Valloon.BitMEX.Utils;
  * @version 1.1 @2020-06-02
  * @version 1.2 @2020-06-18
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     public class BollingerBandStrategy
     {

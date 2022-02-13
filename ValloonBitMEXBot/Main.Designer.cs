@@ -1,4 +1,4 @@
-﻿namespace Valloon.BitMEX
+﻿namespace Valloon.Trading
 {
     partial class Main
     {

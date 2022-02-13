@@ -7,14 +7,14 @@ using System.Threading;
 using IO.Swagger.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Valloon.BitMEX.Utils;
+using Valloon.Trading.Utils;
 
 /**
  * @author Valloon Project
  * @version 4.0
  * @2022-01-04
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     public class BStepStrategy
     {

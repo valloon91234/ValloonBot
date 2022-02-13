@@ -11,7 +11,7 @@ using Valloon.Utils;
  * @author Valloon Project
  * @version 2.0 @2020-05-10
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     [DataContract]
     public class Config

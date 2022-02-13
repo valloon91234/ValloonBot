@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Valloon.BitMEX.Utils
+namespace Valloon.Trading.Utils
 {
     class EMA
     {

@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Valloon.BitMEX.dao;
 
-namespace Valloon.BitMEX
+namespace Valloon.Trading.Backtest
 {
-    class TradeBinBB
+    public class TradeBinModel
     {
         public DateTime Timestamp { get; set; }
         public string Date { get; set; }
@@ -22,11 +21,15 @@ namespace Valloon.BitMEX
         public double BB_SMA_H { get; set; }
         public double BB_SD { get; set; }
         public double BB_Value { get; set; }
+        public decimal SMA_M { get; set; }
+        public double RSI { get; set; }
+        public decimal RSI_M { get; set; }
+
         public int BB_Level { get; set; }
 
-        public TradeBinBB() { }
+        public TradeBinModel() { }
 
-        public TradeBinBB(TradeBin t)
+        public TradeBinModel(TradeBin t)
         {
             this.Timestamp = t.Timestamp.Value;
             this.Date = t.Timestamp.Value.ToString(MainDao.DATE_FORMAT);

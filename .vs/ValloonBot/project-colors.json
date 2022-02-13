@@ -35,7 +35,17 @@
       "ProjectGuid": "d6c0f035-1712-4a3f-bd93-f583a03d8890",
       "DisplayName": "APITester",
       "ColorIndex": 5
+    },
+    "4d7245f7-bc3c-4f2d-ad19-beaa912a3149": {
+      "ProjectGuid": "4d7245f7-bc3c-4f2d-ad19-beaa912a3149",
+      "DisplayName": "ValloonTrader",
+      "ColorIndex": 6
+    },
+    "765c8c11-0e07-4a67-ba33-9c92d7848e05": {
+      "ProjectGuid": "765c8c11-0e07-4a67-ba33-9c92d7848e05",
+      "DisplayName": "ValloonBot5",
+      "ColorIndex": 7
     }
   },
-  "NextColorIndex": 6
+  "NextColorIndex": 8
 }

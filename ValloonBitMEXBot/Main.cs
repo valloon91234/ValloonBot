@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ValloonBitMEXBot.Properties;
 
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     public partial class Main : Form
     {

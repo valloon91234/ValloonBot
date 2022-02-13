@@ -9,8 +9,8 @@ using System.Threading;
 using Valloon.Utils;
 
 /**
- * @author Valloon Project
- * @version 1.0 @2020-04-07
+ * @author Valloon Present
+ * @version 2022-02-10
  */
 namespace Valloon.Trading
 {
@@ -81,23 +81,18 @@ namespace Valloon.Trading
             CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
-            Config config = Config.Load(out _, true);
-            switch (config.Strategy)
-            {
-                case "drop":
-                    new DropStrategy().Run(config);
-                    break;
-                case "bstep":
-                    new BStepStrategy().Run(config);
-                    break;
-                case "shovel":
-                    new ShovelStrategy().Run(config);
-                    break;
-                default:
-                    new ShovelStrategy().Run(config);
-                    break;
-            }
-            Logger.WriteLine($"\r\nPress any key to exit... ");
+            new SolShotStrategy().Run();
+            //Config config = Config.Load(out _, true);
+            //switch (config.Strategy)
+            //{
+            //    case "drop":
+            //        new SolShotStrategy().Run(config);
+            //        break;
+            //    default:
+            //        new ShovelStrategy().Run(config);
+            //        break;
+            //}
+            Console.WriteLine($"\r\nPress any key to exit... ");
             Console.ReadKey(false);
         }
 

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Valloon.BitMEX.dao
+namespace Valloon.Trading.Backtest
 {
     abstract class MainDao
     {
@@ -47,18 +47,18 @@ namespace Valloon.BitMEX.dao
             return false;
         }
 
-        public static List<TradeBinBB> SelectAll(string binSize)
+        public static List<TradeBinModel> SelectAll(string binSize)
         {
             using (SQLiteCommand command = connection.CreateCommand())
             {
                 command.CommandText = $"SELECT * FROM tbl_{binSize} ORDER BY timestamp";
                 SQLiteDataReader dr = command.ExecuteReader();
-                List<TradeBinBB> list = new List<TradeBinBB>();
+                List<TradeBinModel> list = new List<TradeBinModel>();
                 while (dr.Read())
                 {
                     try
                     {
-                        TradeBinBB m = new TradeBinBB
+                        TradeBinModel m = new TradeBinModel
                         {
                             Timestamp = ParseDateTimeString(GetValue<string>(dr["timestamp"])),
                             Date = GetValue<string>(dr["date"]),
@@ -67,7 +67,8 @@ namespace Valloon.BitMEX.dao
                             High = GetValue<decimal>(dr["high"]),
                             Low = GetValue<decimal>(dr["low"]),
                             Close = GetValue<decimal>(dr["close"]),
-                            //Volume = GetValue<int>(dr["volume"]),
+                            Volume = GetValue<int>(dr["volume"]),
+                            RSI_M = GetValue<decimal>(dr["rsi_14"]),
                         };
                         list.Add(m);
                     }
@@ -81,18 +82,18 @@ namespace Valloon.BitMEX.dao
             }
         }
 
-        public static List<TradeBinBB> SelectAllSMA(string binSize, int bbLength)
+        public static List<TradeBinModel> SelectAllSMA(string binSize, int bbLength)
         {
             using (SQLiteCommand command = connection.CreateCommand())
             {
                 command.CommandText = $"SELECT * FROM tbl_{binSize} ORDER BY timestamp";
                 SQLiteDataReader dr = command.ExecuteReader();
-                List<TradeBinBB> list = new List<TradeBinBB>();
+                List<TradeBinModel> list = new List<TradeBinModel>();
                 while (dr.Read())
                 {
                     try
                     {
-                        TradeBinBB m = new TradeBinBB
+                        TradeBinModel m = new TradeBinModel
                         {
                             Timestamp = ParseDateTimeString(GetValue<string>(dr["timestamp"])),
                             Date = GetValue<string>(dr["date"]),
@@ -116,18 +117,18 @@ namespace Valloon.BitMEX.dao
             }
         }
 
-        public static List<TradeBinBB> SelectAll(string binSize, int bbLength)
+        public static List<TradeBinModel> SelectAll(string binSize, int bbLength)
         {
             using (SQLiteCommand command = connection.CreateCommand())
             {
                 command.CommandText = $"SELECT * FROM tbl_{binSize} ORDER BY timestamp";
                 SQLiteDataReader dr = command.ExecuteReader();
-                List<TradeBinBB> list = new List<TradeBinBB>();
+                List<TradeBinModel> list = new List<TradeBinModel>();
                 while (dr.Read())
                 {
                     try
                     {
-                        TradeBinBB m = new TradeBinBB
+                        TradeBinModel m = new TradeBinModel
                         {
                             Timestamp = ParseDateTimeString(GetValue<string>(dr["timestamp"])),
                             Date = GetValue<string>(dr["date"]),
@@ -170,7 +171,7 @@ namespace Valloon.BitMEX.dao
             }
         }
 
-        public static int Insert(TradeBinBB m, string binSize)
+        public static int Insert(TradeBinModel m, string binSize)
         {
             using (var command = connection.CreateCommand())
             {
@@ -187,7 +188,7 @@ namespace Valloon.BitMEX.dao
             }
         }
 
-        public static int UpdateBB(TradeBinBB m, int bbLength, string binSize)
+        public static int UpdateBB(TradeBinModel m, int bbLength, string binSize)
         {
             using (SQLiteCommand command = connection.CreateCommand())
             {
@@ -201,13 +202,24 @@ namespace Valloon.BitMEX.dao
             }
         }
 
-        public static int UpdateSMA(TradeBinBB m, string binSize, int bbLength)
+        public static int UpdateSMA(TradeBinModel m, string binSize, int bbLength)
         {
             using (SQLiteCommand command = connection.CreateCommand())
             {
                 command.CommandText = $"UPDATE tbl_{binSize} SET sma_{bbLength}=@bb_sma WHERE timestamp=@timestamp";
                 command.Parameters.Add("timestamp", System.Data.DbType.String).Value = ToDateTimestring(m.Timestamp);
                 command.Parameters.Add("bb_sma", System.Data.DbType.Double).Value = m.BB_SMA;
+                return command.ExecuteNonQuery();
+            }
+        }
+
+        public static int UpdateRSI(TradeBinModel m, string binSize, int length)
+        {
+            using (SQLiteCommand command = connection.CreateCommand())
+            {
+                command.CommandText = $"UPDATE tbl_{binSize} SET rsi_{length}=@rsi WHERE timestamp=@timestamp";
+                command.Parameters.Add("timestamp", System.Data.DbType.String).Value = ToDateTimestring(m.Timestamp);
+                command.Parameters.Add("rsi", System.Data.DbType.Double).Value = m.RSI;
                 return command.ExecuteNonQuery();
             }
         }

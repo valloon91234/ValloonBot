@@ -10,7 +10,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Valloon.BitMEX.Utils;
+using Valloon.Trading.Utils;
 
 /**
  * @author Valloon Project
@@ -18,7 +18,7 @@ using Valloon.BitMEX.Utils;
  * @version 1.1 @2020-05-08
  * @version 1.2 @2020-05-24
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     class BitMEXApiHelper
     {

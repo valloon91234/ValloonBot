@@ -15,9 +15,9 @@ using System.Text;
  * @version 1.1 @2020-05-08
  * @version 1.2 @2020-05-24
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
-    class BitMEXApiHelper
+    class BitMEXApiHelper0
     {
         private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -72,7 +72,7 @@ namespace Valloon.BitMEX
 
         public static DateTime ServerTime { get; set; }
 
-        public BitMEXApiHelper(string apiKey = null, string apiSecret = null, bool testnet = false)
+        public BitMEXApiHelper0(string apiKey = null, string apiSecret = null, bool testnet = false)
         {
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;

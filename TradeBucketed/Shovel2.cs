@@ -10,74 +10,78 @@ using System.Threading.Tasks;
 
 namespace Valloon.Trading.Backtest
 {
-    class Program
+    static class Shovel2
     {
-        static void Main(string[] args)
+        public static void Run()
         {
-            CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
-            Thread.CurrentThread.CurrentCulture = culture;
-            Thread.CurrentThread.CurrentUICulture = culture;
-
+            List<TradeBinModel> getListWithRSI()
             {
-                Sol.Run();
-                goto end;
+                const int rsiLength = 14;
+                List<TradeBinModel> list = MainDao.SelectAll("1m");
+                int countAll = list.Count;
+                List<TradeBin> binList = new List<TradeBin>();
+                foreach (TradeBinModel m in list)
+                {
+                    binList.Add(new TradeBin(m.Timestamp, "XBTUSD", m.Open, m.High, m.Low, m.Close));
+                }
+                double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
+                int count = rsiArray.Length;
+                for (int i = 0; i < count; i++)
+                {
+                    TradeBinModel m = list[i];
+                    m.RSI = rsiArray[i];
+                    m.RSI_M = (decimal)m.RSI;
+                }
+                return list;
             }
 
-            //{
-            //    DateTime startTime = new DateTime(2022, 1, 27, 0, 0, 0, DateTimeKind.Utc);
-            //    DateTime endTime = DateTime.UtcNow;
-            //    Load_1m(startTime, endTime);
-            //    goto end;
-            //}
+            {
+                List<TradeBinModel> list = getListWithRSI();
+                Console.WriteLine($"List loaded with RSI: {list.Count}");
+                DateTime startTime = new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc);
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 5, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 10, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 15, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 20, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 25, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 30, startTime));
+                Test(list, 2, 35, startTime);
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 40, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 45, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 50, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 55, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 60, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 70, startTime));
+                Test(list, 2, 80, startTime);
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 90, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 100, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 110, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 120, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 150, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 180, startTime));
+                Test(list, 2, 210, startTime);
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 240, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 300, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 360, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 420, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 480, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 540, startTime));
+                Test(list, 2, 600, startTime);
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 660, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 720, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 780, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 840, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 900, startTime));
+                ThreadPool.QueueUserWorkItem(state => Test(list, 2, 960, startTime));
+                Test(list, 2, 600, startTime);
 
-            //{
-            //    DateTime startTime = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            //    TestBuyOrSell(null, startTime, 1, 0, 660, 0.009m, 0.95m, 6.2m);
-            //    goto end;
-            //}
+                return;
+            }
 
-            //BB("1m", 20, 0.004d / 3);
-            //Test1("1m", 30);
-
-            //WriteSMA("1m", 660);
-            //goto end;
-
-
-            //int[] lengthArray = { 5, 10, 15, 20, 25, 30, 40, 50, 60, 90, 120, 180, 240, 360, 420, 480, 520, 600, 660, 720, 780, 840, 900, 960 };
-            //int[] lengthArray = { 660 };
-            //decimal[] stopXArray = { 1m / 10, 1m / 8, 1m / 6, 1m / 5, 1m / 4, 1m / 3, 1m / 2, 2m / 3, 1, 3m / 2, 2, 3, 4, 5, 6, 8, 10 };
-            //decimal[] stopXArray = { 1m / 5, 1m / 4, 1m / 3, 1m / 2, 2m / 3, 1, 3m / 2, 2, 3, 4, 5, 6, 8, 10 };
-            //decimal[] stopXArray = { 6.5m, 6, 5.5m, 5 };
-            //foreach (int length in lengthArray)
-            //    foreach (decimal stopX in stopXArray)
-            //    {
-            //        //{
-            //        //    DateTime startTime = new DateTime(2021, 4, 1, 0, 0, 0, DateTimeKind.Utc);
-            //        //    Test2(startTime, 1, length, stopX);
-            //        //}
-            //        {
-            //            DateTime startTime = new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc);
-            //            Test2(startTime, 1, length, stopX);
-            //        }
-            //        {
-            //            DateTime startTime = new DateTime(2021, 10, 1, 0, 0, 0, DateTimeKind.Utc);
-            //            Test2(startTime, 1, length, stopX);
-            //        }
-            //        {
-            //            DateTime startTime = new DateTime(2021, 12, 1, 0, 0, 0, DateTimeKind.Utc);
-            //            Test2(startTime, 1, length, stopX);
-            //        }
-            //        {
-            //            DateTime startTime = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            //            Test2(startTime, 1, length, stopX);
-            //        }
-            //    }
-
-            List<TradeBinModel> getList(DateTime startTime, DateTime? endTime = null)
+            List<TradeBinModel> getList(DateTime startTime, DateTime? endTime = null, int mLength = 660)
             {
                 List<TradeBinModel> list = MainDao.SelectAll("1m");
                 {
-                    int mLength = 660;
                     int countAll = list.Count;
                     for (int i = mLength; i < countAll; i++)
                     {
@@ -105,7 +109,7 @@ namespace Valloon.Trading.Backtest
             {
                 List<TradeBinModel> list = getList(startTime, endTime);
                 //TestHCS(list, 1);
-                TestHCS(list, 2);
+                //TestHCS(list, 2);
             }
 
             runHCS(new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc));
@@ -161,303 +165,77 @@ namespace Valloon.Trading.Backtest
             Console.ReadKey(false);
         }
 
-        static void Load_1m(DateTime startTime, DateTime endTime)
+        static void WriteRSI()
         {
-            const string binSize = "1m";
-            //DateTime? startTime = MainDao.SelectLastTimestamp(binSize);
-            //if (startTime == null) startTime = new DateTime(2020, 12, 1, 0, 0, 0, DateTimeKind.Utc);
-            //DateTime endTime = DateTime.UtcNow;
-            BitMEXApiHelper0 apiHelper = new BitMEXApiHelper0();
-            while (true)
+            const int rsiLength = 14;
+            List<TradeBinModel> list = MainDao.SelectAll("1m");
+            int countAll = list.Count;
+            List<TradeBin> binList = new List<TradeBin>();
+            foreach (TradeBinModel m in list)
             {
-                try
-                {
-                    DateTime nextTime = startTime.AddHours(12);
-                    if (startTime >= endTime)
-                    {
-                        Console.WriteLine($"End.");
-                        break;
-                    }
-                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, 1000, null, startTime, nextTime.AddMinutes(-1));
-                    foreach (TradeBin t in list)
-                    {
-                        try
-                        {
-                            TradeBinModel tb = new TradeBinModel(t);
-                            MainDao.Insert(tb, binSize);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Failed: {t.Timestamp} - {ex.Message}");
-                        }
-                    }
-                    Console.WriteLine($"Inserted: {startTime}");
-                    startTime = nextTime;
-                    //Thread.Sleep(3000);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Exception: {ex.Message}");
-                    Thread.Sleep(30000);
-                }
+                binList.Add(new TradeBin(m.Timestamp, "XBTUSD", m.Open, m.High, m.Low, m.Close));
             }
-        }
-
-        static void Load_5m(DateTime startTime, DateTime endTime)
-        {
-            const string binSize = "5m";
-            BitMEXApiHelper0 apiHelper = new BitMEXApiHelper0();
-            while (true)
+            double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
+            int count = rsiArray.Length;
+            for (int i = 0; i < count; i++)
             {
-                try
-                {
-                    DateTime nextTime = startTime.AddDays(1);
-                    if (nextTime > endTime)
-                    {
-                        Console.WriteLine($"end: {startTime} > {endTime}");
-                        break;
-                    }
-                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, 1000, null, startTime, nextTime.AddMinutes(-5));
-                    foreach (TradeBin t in list)
-                    {
-                        try
-                        {
-                            TradeBinModel tb = new TradeBinModel(t);
-                            MainDao.Insert(tb, binSize);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Failed: {t.Timestamp} - {ex.Message}");
-                        }
-                    }
-                    Console.WriteLine($"Inserted: {startTime}");
-                    startTime = nextTime;
-                    Thread.Sleep(3000);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Exception: {ex.Message}");
-                    Thread.Sleep(30000);
-                }
-            }
-        }
-
-        static void Load_1h(DateTime startTime, DateTime endTime)
-        {
-            const string binSize = "1h";
-            BitMEXApiHelper0 apiHelper = new BitMEXApiHelper0();
-            while (true)
-            {
-                try
-                {
-                    DateTime nextTime = startTime.AddHours(960);
-                    if (startTime >= endTime)
-                    {
-                        Console.WriteLine($"End.");
-                        break;
-                    }
-                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, 1000, null, startTime, nextTime.AddHours(-1));
-                    foreach (TradeBin t in list)
-                    {
-                        try
-                        {
-                            TradeBinModel tb = new TradeBinModel(t);
-                            MainDao.Insert(tb, binSize);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Failed: {t.Timestamp} - {ex}");
-                        }
-                    }
-                    Console.WriteLine($"Inserted: {startTime}");
-                    startTime = nextTime;
-                    //Thread.Sleep(3000);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Exception: {ex}");
-                    Thread.Sleep(30000);
-                }
-            }
-        }
-
-        static void BB(string binSize, int bbLength, double hold)
-        {
-            List<TradeBinModel> list = MainDao.SelectAll(binSize, bbLength);
-            int count = list.Count;
-            Console.WriteLine($"{count} loaded.");
-            for (int i = bbLength; i < count; i++)
-            {
-                double[] closeArray = new double[bbLength];
-                double[] sd2Array = new double[bbLength];
-                for (int j = 0; j < bbLength; j++)
-                {
-                    closeArray[j] = (double)list[i - bbLength + j].Close;
-                }
-                double movingAverage = closeArray.Average();
-                for (int j = 0; j < bbLength; j++)
-                {
-                    sd2Array[j] = Math.Pow(closeArray[j] - movingAverage, 2);
-                }
-                double standardDeviation = Math.Pow(sd2Array.Average(), 0.5d);
-                list[i].BB_SMA = movingAverage;
-                list[i].BB_SD = standardDeviation;
-                list[i].BB_Value = Math.Max(((double)list[i].High - movingAverage) / standardDeviation, (movingAverage - (double)list[i].Low) / standardDeviation);
-                if (standardDeviation > movingAverage * hold && list[i - 1].BB_SD > list[i].BB_SMA * hold)
-                {
-                    if (list[i].BB_Value >= 6) list[i].BB_Level = 6;
-                    else if (list[i].BB_Value >= 4) list[i].BB_Level = 4;
-                }
-                MainDao.UpdateBB(list[i], bbLength, binSize);
+                TradeBinModel m = list[i];
+                m.RSI = rsiArray[i];
+                MainDao.UpdateRSI(m, "1m", rsiLength);
                 if (i % 100 == 0)
-                    Console.WriteLine($"{i} / {count}    {list[i].Timestamp}\t\t{movingAverage:F1}\t\t{standardDeviation:F1}\t{list[i].BB_Value:F1}\t{list[i].BB_Level}");
+                    Console.WriteLine($"{i} / {count}    {list[i].Timestamp}");
             }
+            return;
         }
 
-        static void Test1(string binSize = "1m", int bbLength = 30, int bbMultiplier = 2, double hold = 0.04)
-        {
-            Logger2.logFilename = DateTime.Now.ToString("yyyy-MM-dd  HH.mm.ss");
-            DateTime startTime = new DateTime(2021, 10, 1, 0, 0, 0, DateTimeKind.Utc);
-            List<TradeBinModel> list = MainDao.SelectAll("1m", 30);
-            int count = list.Count;
-            Logger2.WriteLine($"{count} loaded.");
-            for (int i = bbLength; i < count; i++)
-            {
-                double[] closeArray = new double[bbLength];
-                double[] sd2Array = new double[bbLength];
-                for (int j = 0; j < bbLength; j++)
-                {
-                    closeArray[j] = (double)list[i - bbLength + j].Close;
-                }
-                double movingAverage = closeArray.Average();
-                for (int j = 0; j < bbLength; j++)
-                {
-                    sd2Array[j] = Math.Pow(closeArray[j] - movingAverage, 2);
-                }
-                double standardDeviation = Math.Pow(sd2Array.Average(), 0.5d);
-                list[i].BB_SMA = movingAverage;
-                list[i].BB_SD = standardDeviation;
-            }
-
-            for (int bbw = 30; bbw < 200; bbw++)
-            {
-                Logger2.WriteLine($"\n--------    bbw = {bbw}    --------");
-                for (double x = 2.0d; x < 10.0d; x += 0.5d)
-                {
-                    int upperSucceed = 0, upperFailed = 0, lowerSucceed = 0, lowerFailed = 0;
-                    for (int i = bbLength + 2; i < count - 1; i++)
-                    {
-                        if (list[i].Timestamp < startTime) continue;
-                        double prevBand = list[i - 1].BB_SD * bbMultiplier * 2;
-                        int prevBBW = (int)(prevBand / list[i - 1].BB_SMA * 10000);
-                        if (prevBBW != bbw) continue;
-                        double sdx = Math.Max(Math.Round(10 * Math.Sqrt(list[i - 1].BB_SD / list[i - 2].BB_SD)) / 10, 1);
-                        double prevUpper = list[i - 1].BB_SMA + list[i - 1].BB_SD * x * sdx;
-                        double prevLower = list[i - 1].BB_SMA - list[i - 1].BB_SD * x * sdx;
-                        double upper = list[i].BB_SMA + list[i].BB_SD * x;
-                        double lower = list[i].BB_SMA - list[i].BB_SD * x;
-                        if ((double)list[i - 1].High < prevUpper && (double)list[i].High > upper)
-                        {
-                            double stop = upper + list[i].BB_SD * 2;
-                            double close = upper - list[i].BB_SD * x * .2;
-                            if ((double)list[i].High > stop) upperFailed++;
-                            else if ((double)list[i].Close < close) upperSucceed++;
-                            else
-                                for (int j = i + 1; j < count - 1; j++)
-                                {
-                                    if ((double)list[j].High > stop)
-                                    {
-                                        upperFailed++;
-                                        break;
-                                    }
-                                    else if ((double)list[j].Low < close)
-                                    {
-                                        upperSucceed++;
-                                        break;
-                                    }
-                                }
-                            //else if ((double)list[i + 1].High > stop) upperFailed++;
-                            //else if ((double)list[i + 1].Low < close) upperSucceed++;
-                            //else upperFailed++;
-                        }
-                        else if ((double)list[i - 1].Low > prevLower && (double)list[i].Low < lower)
-                        {
-                            double stop = lower - list[i].BB_SD * 2;
-                            double close = lower + list[i].BB_SD * x * .2;
-                            if ((double)list[i].Low < stop) lowerFailed++;
-                            else if ((double)list[i].Close > close) lowerSucceed++;
-                            else
-                                for (int j = i + 1; j < count - 1; j++)
-                                {
-                                    if ((double)list[j].Low < stop)
-                                    {
-                                        lowerFailed++;
-                                        break;
-                                    }
-                                    else if ((double)list[j].High > close)
-                                    {
-                                        lowerSucceed++;
-                                        break;
-                                    }
-                                }
-                            //else if ((double)list[i + 1].Low < stop) lowerFailed++;
-                            //else if ((double)list[i + 1].High > close) lowerSucceed++;
-                            //else lowerFailed++;
-                        }
-                    }
-                    double upperScore, lowerScore;
-                    if (upperFailed == 0)
-                        upperScore = upperSucceed;
-                    else
-                        upperScore = (double)upperSucceed / upperFailed;
-                    if (lowerFailed == 0)
-                        lowerScore = lowerSucceed;
-                    else
-                        lowerScore = (double)lowerSucceed / lowerFailed;
-                    if (upperSucceed != 0 || upperFailed != 0 || lowerSucceed != 0 || lowerFailed != 0)
-                        Logger2.WriteLine($"{x:F1} \t upperSucceed = {upperSucceed} \t upperFailed = {upperFailed} \t {upperScore:F1} \t lowerSucceed = {lowerSucceed} \t lowerFailed = {lowerFailed} \t {lowerScore:F1}");
-                }
-            }
-
-            //if (i % 100 == 0)
-            //    Console.WriteLine($"{i} / {count}    {list[i].Timestamp}\t\t{movingAverage:F1}\t\t{standardDeviation:F1}\t{list[i].BB_Value:F1}\t{list[i].BB_Level}");
-        }
-
-        static void TestHCS(List<TradeBinModel> list, int buyOrSell)
+        static decimal Test(List<TradeBinModel> listFull, int buyOrSell, int smaLength, DateTime startTime, DateTime? endTime = null)
         {
             const decimal lossX = 1.2m;
+            List<TradeBinModel> list = new List<TradeBinModel>(listFull);
+            {
+                int countAll = list.Count;
+                for (int i = smaLength; i < countAll; i++)
+                {
+                    decimal[] closeArray = new decimal[smaLength];
+                    for (int j = 0; j < smaLength; j++)
+                        closeArray[j] = list[i - smaLength + j].Close;
+                    list[i].SMA_M = closeArray.Average();
+                }
+                list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
+            }
             int count = list.Count;
             int totalDays = count / 60 / 24;
-            Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  buyOrSell = {buyOrSell}   ({list[0].Date} ~ {totalDays:N0} days)");
+            Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  buyOrSell = {buyOrSell}   smaLength = {smaLength}    ({list[0].Date} ~ {totalDays:N0} days)");
             logger.WriteLine("\n" + logger.LogFilename + "\n");
             logger.WriteLine($"{count} loaded. ({totalDays:N0} days)");
             Console.Title = logger.LogFilename;
 
             List<Dictionary<string, decimal>> topList = new List<Dictionary<string, decimal>>();
 
-            for (decimal heightX = 0.0200m; heightX <= 0.0350m; heightX += 0.0001m)
+            for (decimal heightX = 0.00m; heightX <= 1.50m; heightX += 0.01m)
             //decimal heightX = 0.0246m;
             {
                 logger.WriteLine($"\n\n----    heightX = {heightX}    ----\n");
-                for (decimal closeX = 0.75m; closeX <= 1.5m; closeX += 0.05m)
+                for (decimal closeX = 0.0005m; closeX <= 0.0250m; closeX += 0.0005m)
                 //for (decimal closeX = 0.9m; closeX <= 1.1m; closeX += 0.01m)
                 {
-                    for (decimal stopX = 2m; stopX <= 8; stopX += 0.5m)
+                    for (decimal stopX = 0.0005m; stopX <= 0.0250m; stopX += 0.0005m)
                     //for (decimal stopX = 2.5m; stopX <= 3.5m; stopX += 0.1m)
                     {
                         int succeedCount = 0, failedCount = 0;
                         decimal positionCloseHeight = 0, positionStopHeight = 0, closePrice = 0, stopPrice = 0;
                         decimal totalProfit = 0;
-                        for (int i = 0; i < count - 1; i++)
+                        for (int i = 1; i < count - 1; i++)
                         {
-                            decimal sma = (decimal)list[i].BB_SMA;
-                            decimal height = sma * heightX;
-                            decimal closeHeight = height * closeX;
-                            decimal stopHeight = closeHeight * stopX;
+                            decimal sma = list[i - 1].SMA_M;
+                            decimal rsi = list[i - 1].RSI_M;
                             if (positionCloseHeight == 0)
                             {
                                 if (buyOrSell == 1)
                                 {
+                                    decimal height = sma * heightX / (100 - rsi);
+                                    decimal closeHeight = sma * closeX;
+                                    decimal stopHeight = sma * stopX;
                                     if (list[i].Open > sma - height && list[i].Low < sma - height)
                                     {
                                         if (list[i].Low < sma - height - stopHeight)
@@ -481,6 +259,9 @@ namespace Valloon.Trading.Backtest
                                 }
                                 else
                                 {
+                                    decimal height = sma * heightX / rsi;
+                                    decimal closeHeight = sma * closeX;
+                                    decimal stopHeight = sma * stopX;
                                     if (list[i].Open < sma + height && list[i].High > sma + height)
                                     {
                                         if (list[i].High > sma + height + stopHeight)
@@ -551,7 +332,7 @@ namespace Valloon.Trading.Backtest
                         else
                             score = (decimal)succeedCount / failedCount;
                         decimal avgProfit = totalProfit / totalDays;
-                        if (avgProfit > 20)
+                        if (avgProfit > 0)
                         {
                             Dictionary<string, decimal> dic = new Dictionary<string, decimal>
                             {
@@ -587,13 +368,20 @@ namespace Valloon.Trading.Backtest
                             {
                                 topList.Add(dic);
                             }
-                            logger.WriteLine($"{heightX:F4} \t {closeX:F3} \t {stopX:F1} \t succeed = {succeedCount} \t failed = {failedCount} * {stopX} \t score = {score:F2} \t totalProfit = {totalProfit:N0} \t avgProfit = {avgProfit:F2}");
+                            logger.WriteLine($"{heightX:F4}    {closeX:F4}    {stopX:F4} \t succeed = {succeedCount} \t failed = {failedCount} \t score = {score:F2} \t total = {totalProfit:N0} \t avg = {avgProfit:F2}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{heightX:F4}    {closeX:F4}    {stopX:F4} \t succeed = {succeedCount} \t failed = {failedCount} \t score = {score:F2} \t total = {totalProfit:N0} \t avg = {avgProfit:F2}");
                         }
                     }
                 }
             }
             logger.WriteLine(JArray.FromObject(topList).ToString());
             logger.WriteLine();
+            if (topList.Count > 0)
+                return topList[topList.Count - 1]["avgProfit"];
+            return 0;
         }
 
         static void WriteSMA(string binSize, int length)

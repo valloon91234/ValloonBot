@@ -6,8 +6,8 @@ using System.Net;
 using System.Text;
 
 /**
- * @author Valloon Project
- * @version 1.0 @2020-03-03
+ * @author Valloon Present
+ * @version 2020-03-03
  */
 namespace Valloon.Trading
 {

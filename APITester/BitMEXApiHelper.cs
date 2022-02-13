@@ -17,7 +17,7 @@ using System.Text.RegularExpressions;
  * @version 1.1 @2020-05-08
  * @version 1.2 @2020-05-24
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     class BitMEXApiHelper
     {

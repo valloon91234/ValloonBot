@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     static class Program
     {

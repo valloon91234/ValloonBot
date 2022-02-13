@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Valloon.BitMEX.Properties {
+namespace Valloon.Trading.Properties {
     using System;
     
     

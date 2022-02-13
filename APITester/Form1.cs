@@ -1,4 +1,5 @@
 ﻿using IO.Swagger.Model;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     public partial class Form1 : Form
     {
@@ -141,18 +142,69 @@ namespace Valloon.BitMEX
 
         private void buttonLimitBuy_Click(object sender, EventArgs e)
         {
+            string execInst = null;
+            if (checkBox_ReduceOnly.Checked) execInst = "ReduceOnly";
             var apiHelper = GetApiHelper();
             int price = Int32.Parse(textBoxPrice.Text);
             int qty = Int32.Parse(textBoxQty.Text);
-            textBox_Result.Text = apiHelper.OrderNewLimit("Buy", price, qty).ToString();
+            textBox_Result.Text = apiHelper.OrderNew("Buy", qty, price, null, "Limit", execInst).ToString();
         }
 
         private void buttonLimitSell_Click(object sender, EventArgs e)
         {
+            string execInst = null;
+            if (checkBox_ReduceOnly.Checked) execInst = "ReduceOnly";
             var apiHelper = GetApiHelper();
             int price = Int32.Parse(textBoxPrice.Text);
             int qty = Int32.Parse(textBoxQty.Text);
-            textBox_Result.Text = apiHelper.OrderNewLimit("Sell", price, qty).ToString();
+            textBox_Result.Text = apiHelper.OrderNew("Sell", qty, price, null, "Limit", execInst).ToString();
+        }
+
+        private void button_CancelAllOrders_Click(object sender, EventArgs e)
+        {
+            var apiHelper = GetApiHelper();
+            textBox_Result.Text = JArray.FromObject(apiHelper.CancelAllOrders()).ToString(Formatting.Indented);
+        }
+
+        private void button_ViewAll_Click(object sender, EventArgs e)
+        {
+            var apiHelper = GetApiHelper();
+            textBox_Result.Text = JArray.FromObject(apiHelper.GetActiveOrders()).ToString(Formatting.Indented);
+
+        }
+
+        private void button_ClosePosition_Click(object sender, EventArgs e)
+        {
+            var apiHelper = GetApiHelper();
+            Position position = apiHelper.GetPosition();
+            int positionQty = 0;
+            if (position != null) positionQty = position.CurrentQty.Value;
+            if (positionQty > 0)
+            {
+                Order newOrder = apiHelper.OrderNew(new Order
+                {
+                    Symbol = BitMEXApiHelper.SYMBOL,
+                    Side = "Sell",
+                    OrderQty = positionQty,
+                    OrdType = "Market",
+                    ExecInst = "ReduceOnly",
+                    Text = $"<BOT><MARKET-CLOSE></BOT>",
+                });
+                textBox_Result.Text = JObject.FromObject(newOrder).ToString(Formatting.Indented);
+            }
+            else if (positionQty < 0)
+            {
+                Order newOrder = apiHelper.OrderNew(new Order
+                {
+                    Symbol = BitMEXApiHelper.SYMBOL,
+                    Side = "Buy",
+                    OrderQty = -positionQty,
+                    OrdType = "Market",
+                    ExecInst = "ReduceOnly",
+                    Text = $"<BOT><MARKET-CLOSE></BOT>",
+                });
+                textBox_Result.Text = JObject.FromObject(newOrder).ToString(Formatting.Indented);
+            }
         }
     }
 }

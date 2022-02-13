@@ -1,4 +1,4 @@
-﻿namespace Valloon.BitMEX
+﻿namespace Valloon.Trading
 {
     partial class Form1
     {
@@ -29,10 +29,17 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.checkBox_ReduceOnly = new System.Windows.Forms.CheckBox();
+            this.textBoxQty = new System.Windows.Forms.TextBox();
+            this.textBoxPrice = new System.Windows.Forms.TextBox();
             this.textBox_ApiSecret = new System.Windows.Forms.TextBox();
             this.textBox_ApiKey = new System.Windows.Forms.TextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.textBox_Result = new System.Windows.Forms.TextBox();
+            this.button_ViewAll = new System.Windows.Forms.Button();
+            this.button_CancelAllOrders = new System.Windows.Forms.Button();
+            this.buttonLimitSell = new System.Windows.Forms.Button();
+            this.buttonLimitBuy = new System.Windows.Forms.Button();
             this.button_User = new System.Windows.Forms.Button();
             this.button_Chat7 = new System.Windows.Forms.Button();
             this.button_Chat6 = new System.Windows.Forms.Button();
@@ -42,10 +49,7 @@
             this.button_Wallet = new System.Windows.Forms.Button();
             this.button_ApiKeyAll = new System.Windows.Forms.Button();
             this.button_ApiKey = new System.Windows.Forms.Button();
-            this.textBoxPrice = new System.Windows.Forms.TextBox();
-            this.textBoxQty = new System.Windows.Forms.TextBox();
-            this.buttonLimitBuy = new System.Windows.Forms.Button();
-            this.buttonLimitSell = new System.Windows.Forms.Button();
+            this.button_ClosePosition = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -67,6 +71,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.checkBox_ReduceOnly);
             this.splitContainer1.Panel1.Controls.Add(this.textBoxQty);
             this.splitContainer1.Panel1.Controls.Add(this.textBoxPrice);
             this.splitContainer1.Panel1.Controls.Add(this.textBox_ApiSecret);
@@ -78,6 +83,33 @@
             this.splitContainer1.Size = new System.Drawing.Size(1033, 577);
             this.splitContainer1.SplitterDistance = 34;
             this.splitContainer1.TabIndex = 3;
+            // 
+            // checkBox_ReduceOnly
+            // 
+            this.checkBox_ReduceOnly.AutoSize = true;
+            this.checkBox_ReduceOnly.ForeColor = System.Drawing.Color.White;
+            this.checkBox_ReduceOnly.Location = new System.Drawing.Point(931, 10);
+            this.checkBox_ReduceOnly.Name = "checkBox_ReduceOnly";
+            this.checkBox_ReduceOnly.Size = new System.Drawing.Size(107, 22);
+            this.checkBox_ReduceOnly.TabIndex = 6;
+            this.checkBox_ReduceOnly.Text = "ReduceOnly";
+            this.checkBox_ReduceOnly.UseVisualStyleBackColor = true;
+            // 
+            // textBoxQty
+            // 
+            this.textBoxQty.Location = new System.Drawing.Point(803, 12);
+            this.textBoxQty.Name = "textBoxQty";
+            this.textBoxQty.Size = new System.Drawing.Size(119, 25);
+            this.textBoxQty.TabIndex = 5;
+            this.textBoxQty.Text = "200";
+            // 
+            // textBoxPrice
+            // 
+            this.textBoxPrice.Location = new System.Drawing.Point(678, 12);
+            this.textBoxPrice.Name = "textBoxPrice";
+            this.textBoxPrice.Size = new System.Drawing.Size(119, 25);
+            this.textBoxPrice.TabIndex = 4;
+            this.textBoxPrice.Text = "40000";
             // 
             // textBox_ApiSecret
             // 
@@ -109,6 +141,9 @@
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.button_ClosePosition);
+            this.splitContainer2.Panel2.Controls.Add(this.button_ViewAll);
+            this.splitContainer2.Panel2.Controls.Add(this.button_CancelAllOrders);
             this.splitContainer2.Panel2.Controls.Add(this.buttonLimitSell);
             this.splitContainer2.Panel2.Controls.Add(this.buttonLimitBuy);
             this.splitContainer2.Panel2.Controls.Add(this.button_User);
@@ -134,6 +169,46 @@
             this.textBox_Result.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_Result.Size = new System.Drawing.Size(658, 519);
             this.textBox_Result.TabIndex = 3;
+            // 
+            // button_ViewAll
+            // 
+            this.button_ViewAll.Location = new System.Drawing.Point(128, 177);
+            this.button_ViewAll.Name = "button_ViewAll";
+            this.button_ViewAll.Size = new System.Drawing.Size(119, 37);
+            this.button_ViewAll.TabIndex = 12;
+            this.button_ViewAll.Text = "View All";
+            this.button_ViewAll.UseVisualStyleBackColor = true;
+            this.button_ViewAll.Click += new System.EventHandler(this.button_ViewAll_Click);
+            // 
+            // button_CancelAllOrders
+            // 
+            this.button_CancelAllOrders.Location = new System.Drawing.Point(128, 107);
+            this.button_CancelAllOrders.Name = "button_CancelAllOrders";
+            this.button_CancelAllOrders.Size = new System.Drawing.Size(119, 37);
+            this.button_CancelAllOrders.TabIndex = 11;
+            this.button_CancelAllOrders.Text = "Clear Order";
+            this.button_CancelAllOrders.UseVisualStyleBackColor = true;
+            this.button_CancelAllOrders.Click += new System.EventHandler(this.button_CancelAllOrders_Click);
+            // 
+            // buttonLimitSell
+            // 
+            this.buttonLimitSell.Location = new System.Drawing.Point(128, 53);
+            this.buttonLimitSell.Name = "buttonLimitSell";
+            this.buttonLimitSell.Size = new System.Drawing.Size(119, 37);
+            this.buttonLimitSell.TabIndex = 10;
+            this.buttonLimitSell.Text = "Limit Sell";
+            this.buttonLimitSell.UseVisualStyleBackColor = true;
+            this.buttonLimitSell.Click += new System.EventHandler(this.buttonLimitSell_Click);
+            // 
+            // buttonLimitBuy
+            // 
+            this.buttonLimitBuy.Location = new System.Drawing.Point(128, 10);
+            this.buttonLimitBuy.Name = "buttonLimitBuy";
+            this.buttonLimitBuy.Size = new System.Drawing.Size(119, 37);
+            this.buttonLimitBuy.TabIndex = 9;
+            this.buttonLimitBuy.Text = "Limit Buy";
+            this.buttonLimitBuy.UseVisualStyleBackColor = true;
+            this.buttonLimitBuy.Click += new System.EventHandler(this.buttonLimitBuy_Click);
             // 
             // button_User
             // 
@@ -225,41 +300,15 @@
             this.button_ApiKey.UseVisualStyleBackColor = true;
             this.button_ApiKey.Click += new System.EventHandler(this.button_ApiKey_Click);
             // 
-            // textBoxPrice
+            // button_ClosePosition
             // 
-            this.textBoxPrice.Location = new System.Drawing.Point(678, 12);
-            this.textBoxPrice.Name = "textBoxPrice";
-            this.textBoxPrice.Size = new System.Drawing.Size(119, 25);
-            this.textBoxPrice.TabIndex = 4;
-            this.textBoxPrice.Text = "40000";
-            // 
-            // textBoxQty
-            // 
-            this.textBoxQty.Location = new System.Drawing.Point(803, 12);
-            this.textBoxQty.Name = "textBoxQty";
-            this.textBoxQty.Size = new System.Drawing.Size(119, 25);
-            this.textBoxQty.TabIndex = 5;
-            this.textBoxQty.Text = "200";
-            // 
-            // buttonLimitBuy
-            // 
-            this.buttonLimitBuy.Location = new System.Drawing.Point(128, 10);
-            this.buttonLimitBuy.Name = "buttonLimitBuy";
-            this.buttonLimitBuy.Size = new System.Drawing.Size(119, 37);
-            this.buttonLimitBuy.TabIndex = 9;
-            this.buttonLimitBuy.Text = "Limit Buy";
-            this.buttonLimitBuy.UseVisualStyleBackColor = true;
-            this.buttonLimitBuy.Click += new System.EventHandler(this.buttonLimitBuy_Click);
-            // 
-            // buttonLimitSell
-            // 
-            this.buttonLimitSell.Location = new System.Drawing.Point(128, 53);
-            this.buttonLimitSell.Name = "buttonLimitSell";
-            this.buttonLimitSell.Size = new System.Drawing.Size(119, 37);
-            this.buttonLimitSell.TabIndex = 10;
-            this.buttonLimitSell.Text = "Limit Sell";
-            this.buttonLimitSell.UseVisualStyleBackColor = true;
-            this.buttonLimitSell.Click += new System.EventHandler(this.buttonLimitSell_Click);
+            this.button_ClosePosition.Location = new System.Drawing.Point(128, 230);
+            this.button_ClosePosition.Name = "button_ClosePosition";
+            this.button_ClosePosition.Size = new System.Drawing.Size(155, 37);
+            this.button_ClosePosition.TabIndex = 13;
+            this.button_ClosePosition.Text = "Close Position";
+            this.button_ClosePosition.UseVisualStyleBackColor = true;
+            this.button_ClosePosition.Click += new System.EventHandler(this.button_ClosePosition_Click);
             // 
             // Form1
             // 
@@ -306,6 +355,10 @@
         private System.Windows.Forms.TextBox textBoxPrice;
         private System.Windows.Forms.Button buttonLimitSell;
         private System.Windows.Forms.Button buttonLimitBuy;
+        private System.Windows.Forms.CheckBox checkBox_ReduceOnly;
+        private System.Windows.Forms.Button button_CancelAllOrders;
+        private System.Windows.Forms.Button button_ViewAll;
+        private System.Windows.Forms.Button button_ClosePosition;
     }
 }
 

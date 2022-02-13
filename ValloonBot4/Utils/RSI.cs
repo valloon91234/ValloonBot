@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Valloon.BitMEX.Utils
+namespace Valloon.Trading.Utils
 {
     /**
      * https://nullbeans.com/how-to-calculate-the-relative-strength-index-rsi/

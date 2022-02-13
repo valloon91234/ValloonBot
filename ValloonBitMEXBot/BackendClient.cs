@@ -7,14 +7,14 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
-using Valloon.BitMEX.Utils;
+using Valloon.Trading.Utils;
 using Valloon.Utils;
 
 /**
  * @author Valloon Project
  * @version 1.0 @2020-03-03
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     static class BackendClient
     {

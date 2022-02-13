@@ -40,7 +40,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>List&lt;Instrument&gt;</returns>
-        List<Instrument> InstrumentGet (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
+        List<Instrument> InstrumentGet(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
 
         /// <summary>
         /// Get instruments.
@@ -58,7 +58,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>ApiResponse of List&lt;Instrument&gt;</returns>
-        ApiResponse<List<Instrument>> InstrumentGetWithHttpInfo (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
+        ApiResponse<List<Instrument>> InstrumentGetWithHttpInfo(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
         /// <summary>
         /// Get all active instruments and instruments that have expired in &lt;24hrs.
         /// </summary>
@@ -67,7 +67,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>List&lt;Instrument&gt;</returns>
-        List<Instrument> InstrumentGetActive ();
+        List<Instrument> InstrumentGetActive();
 
         /// <summary>
         /// Get all active instruments and instruments that have expired in &lt;24hrs.
@@ -77,7 +77,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of List&lt;Instrument&gt;</returns>
-        ApiResponse<List<Instrument>> InstrumentGetActiveWithHttpInfo ();
+        ApiResponse<List<Instrument>> InstrumentGetActiveWithHttpInfo();
         /// <summary>
         /// Helper method. Gets all active instruments and all indices. This is a join of the result of /indices and /active.
         /// </summary>
@@ -86,7 +86,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>List&lt;Instrument&gt;</returns>
-        List<Instrument> InstrumentGetActiveAndIndices ();
+        List<Instrument> InstrumentGetActiveAndIndices();
 
         /// <summary>
         /// Helper method. Gets all active instruments and all indices. This is a join of the result of /indices and /active.
@@ -96,7 +96,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of List&lt;Instrument&gt;</returns>
-        ApiResponse<List<Instrument>> InstrumentGetActiveAndIndicesWithHttpInfo ();
+        ApiResponse<List<Instrument>> InstrumentGetActiveAndIndicesWithHttpInfo();
         /// <summary>
         /// Return all active contract series and interval pairs.
         /// </summary>
@@ -105,7 +105,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>InstrumentInterval</returns>
-        InstrumentInterval InstrumentGetActiveIntervals ();
+        InstrumentInterval InstrumentGetActiveIntervals();
 
         /// <summary>
         /// Return all active contract series and interval pairs.
@@ -115,7 +115,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of InstrumentInterval</returns>
-        ApiResponse<InstrumentInterval> InstrumentGetActiveIntervalsWithHttpInfo ();
+        ApiResponse<InstrumentInterval> InstrumentGetActiveIntervalsWithHttpInfo();
         /// <summary>
         /// Show constituent parts of an index.
         /// </summary>
@@ -132,7 +132,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>List&lt;IndexComposite&gt;</returns>
-        List<IndexComposite> InstrumentGetCompositeIndex (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
+        List<IndexComposite> InstrumentGetCompositeIndex(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
 
         /// <summary>
         /// Show constituent parts of an index.
@@ -150,7 +150,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>ApiResponse of List&lt;IndexComposite&gt;</returns>
-        ApiResponse<List<IndexComposite>> InstrumentGetCompositeIndexWithHttpInfo (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
+        ApiResponse<List<IndexComposite>> InstrumentGetCompositeIndexWithHttpInfo(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
         /// <summary>
         /// Get all price indices.
         /// </summary>
@@ -159,7 +159,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>List&lt;Instrument&gt;</returns>
-        List<Instrument> InstrumentGetIndices ();
+        List<Instrument> InstrumentGetIndices();
 
         /// <summary>
         /// Get all price indices.
@@ -169,7 +169,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of List&lt;Instrument&gt;</returns>
-        ApiResponse<List<Instrument>> InstrumentGetIndicesWithHttpInfo ();
+        ApiResponse<List<Instrument>> InstrumentGetIndicesWithHttpInfo();
         #endregion Synchronous Operations
         #region Asynchronous Operations
         /// <summary>
@@ -188,7 +188,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>Task of List&lt;Instrument&gt;</returns>
-        System.Threading.Tasks.Task<List<Instrument>> InstrumentGetAsync (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
+        System.Threading.Tasks.Task<List<Instrument>> InstrumentGetAsync(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
 
         /// <summary>
         /// Get instruments.
@@ -206,7 +206,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>Task of ApiResponse (List&lt;Instrument&gt;)</returns>
-        System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetAsyncWithHttpInfo (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
+        System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetAsyncWithHttpInfo(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
         /// <summary>
         /// Get all active instruments and instruments that have expired in &lt;24hrs.
         /// </summary>
@@ -215,7 +215,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of List&lt;Instrument&gt;</returns>
-        System.Threading.Tasks.Task<List<Instrument>> InstrumentGetActiveAsync ();
+        System.Threading.Tasks.Task<List<Instrument>> InstrumentGetActiveAsync();
 
         /// <summary>
         /// Get all active instruments and instruments that have expired in &lt;24hrs.
@@ -225,7 +225,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of ApiResponse (List&lt;Instrument&gt;)</returns>
-        System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetActiveAsyncWithHttpInfo ();
+        System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetActiveAsyncWithHttpInfo();
         /// <summary>
         /// Helper method. Gets all active instruments and all indices. This is a join of the result of /indices and /active.
         /// </summary>
@@ -234,7 +234,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of List&lt;Instrument&gt;</returns>
-        System.Threading.Tasks.Task<List<Instrument>> InstrumentGetActiveAndIndicesAsync ();
+        System.Threading.Tasks.Task<List<Instrument>> InstrumentGetActiveAndIndicesAsync();
 
         /// <summary>
         /// Helper method. Gets all active instruments and all indices. This is a join of the result of /indices and /active.
@@ -244,7 +244,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of ApiResponse (List&lt;Instrument&gt;)</returns>
-        System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetActiveAndIndicesAsyncWithHttpInfo ();
+        System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetActiveAndIndicesAsyncWithHttpInfo();
         /// <summary>
         /// Return all active contract series and interval pairs.
         /// </summary>
@@ -253,7 +253,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of InstrumentInterval</returns>
-        System.Threading.Tasks.Task<InstrumentInterval> InstrumentGetActiveIntervalsAsync ();
+        System.Threading.Tasks.Task<InstrumentInterval> InstrumentGetActiveIntervalsAsync();
 
         /// <summary>
         /// Return all active contract series and interval pairs.
@@ -263,7 +263,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of ApiResponse (InstrumentInterval)</returns>
-        System.Threading.Tasks.Task<ApiResponse<InstrumentInterval>> InstrumentGetActiveIntervalsAsyncWithHttpInfo ();
+        System.Threading.Tasks.Task<ApiResponse<InstrumentInterval>> InstrumentGetActiveIntervalsAsyncWithHttpInfo();
         /// <summary>
         /// Show constituent parts of an index.
         /// </summary>
@@ -280,7 +280,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>Task of List&lt;IndexComposite&gt;</returns>
-        System.Threading.Tasks.Task<List<IndexComposite>> InstrumentGetCompositeIndexAsync (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
+        System.Threading.Tasks.Task<List<IndexComposite>> InstrumentGetCompositeIndexAsync(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
 
         /// <summary>
         /// Show constituent parts of an index.
@@ -298,7 +298,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>Task of ApiResponse (List&lt;IndexComposite&gt;)</returns>
-        System.Threading.Tasks.Task<ApiResponse<List<IndexComposite>>> InstrumentGetCompositeIndexAsyncWithHttpInfo (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
+        System.Threading.Tasks.Task<ApiResponse<List<IndexComposite>>> InstrumentGetCompositeIndexAsyncWithHttpInfo(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null);
         /// <summary>
         /// Get all price indices.
         /// </summary>
@@ -307,7 +307,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of List&lt;Instrument&gt;</returns>
-        System.Threading.Tasks.Task<List<Instrument>> InstrumentGetIndicesAsync ();
+        System.Threading.Tasks.Task<List<Instrument>> InstrumentGetIndicesAsync();
 
         /// <summary>
         /// Get all price indices.
@@ -317,7 +317,7 @@ namespace IO.Swagger.Api
         /// </remarks>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of ApiResponse (List&lt;Instrument&gt;)</returns>
-        System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetIndicesAsyncWithHttpInfo ();
+        System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetIndicesAsyncWithHttpInfo();
         #endregion Asynchronous Operations
     }
 
@@ -378,7 +378,7 @@ namespace IO.Swagger.Api
         /// Gets or sets the configuration object
         /// </summary>
         /// <value>An instance of the Configuration</value>
-        public IO.Swagger.Client.Configuration Configuration {get; set;}
+        public IO.Swagger.Client.Configuration Configuration { get; set; }
 
         /// <summary>
         /// Provides a factory method hook for the creation of exceptions.
@@ -431,10 +431,10 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>List&lt;Instrument&gt;</returns>
-        public List<Instrument> InstrumentGet (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public List<Instrument> InstrumentGet(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
-             ApiResponse<List<Instrument>> localVarResponse = InstrumentGetWithHttpInfo(symbol, filter, columns, count, start, reverse, startTime, endTime);
-             return localVarResponse.Data;
+            ApiResponse<List<Instrument>> localVarResponse = InstrumentGetWithHttpInfo(symbol, filter, columns, count, start, reverse, startTime, endTime);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -450,7 +450,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>ApiResponse of List&lt;Instrument&gt;</returns>
-        public ApiResponse< List<Instrument> > InstrumentGetWithHttpInfo (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public ApiResponse<List<Instrument>> InstrumentGetWithHttpInfo(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
 
             var localVarPath = "/instrument";
@@ -463,7 +463,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -491,11 +491,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) this.Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)this.Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -505,7 +505,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<Instrument>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<Instrument>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
+                (List<Instrument>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
         }
 
         /// <summary>
@@ -521,10 +521,10 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>Task of List&lt;Instrument&gt;</returns>
-        public async System.Threading.Tasks.Task<List<Instrument>> InstrumentGetAsync (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public async System.Threading.Tasks.Task<List<Instrument>> InstrumentGetAsync(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
-             ApiResponse<List<Instrument>> localVarResponse = await InstrumentGetAsyncWithHttpInfo(symbol, filter, columns, count, start, reverse, startTime, endTime);
-             return localVarResponse.Data;
+            ApiResponse<List<Instrument>> localVarResponse = await InstrumentGetAsyncWithHttpInfo(symbol, filter, columns, count, start, reverse, startTime, endTime);
+            return localVarResponse.Data;
 
         }
 
@@ -541,7 +541,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>Task of ApiResponse (List&lt;Instrument&gt;)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetAsyncWithHttpInfo (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public async System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetAsyncWithHttpInfo(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
 
             var localVarPath = "/instrument";
@@ -554,7 +554,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -582,11 +582,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await this.Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await this.Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -596,7 +596,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<Instrument>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<Instrument>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
+                (List<Instrument>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
         }
 
         /// <summary>
@@ -604,10 +604,10 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>List&lt;Instrument&gt;</returns>
-        public List<Instrument> InstrumentGetActive ()
+        public List<Instrument> InstrumentGetActive()
         {
-             ApiResponse<List<Instrument>> localVarResponse = InstrumentGetActiveWithHttpInfo();
-             return localVarResponse.Data;
+            ApiResponse<List<Instrument>> localVarResponse = InstrumentGetActiveWithHttpInfo();
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -615,7 +615,7 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of List&lt;Instrument&gt;</returns>
-        public ApiResponse< List<Instrument> > InstrumentGetActiveWithHttpInfo ()
+        public ApiResponse<List<Instrument>> InstrumentGetActiveWithHttpInfo()
         {
 
             var localVarPath = "/instrument/active";
@@ -628,7 +628,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -648,11 +648,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) this.Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)this.Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -662,7 +662,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<Instrument>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<Instrument>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
+                (List<Instrument>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
         }
 
         /// <summary>
@@ -670,10 +670,10 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of List&lt;Instrument&gt;</returns>
-        public async System.Threading.Tasks.Task<List<Instrument>> InstrumentGetActiveAsync ()
+        public async System.Threading.Tasks.Task<List<Instrument>> InstrumentGetActiveAsync()
         {
-             ApiResponse<List<Instrument>> localVarResponse = await InstrumentGetActiveAsyncWithHttpInfo();
-             return localVarResponse.Data;
+            ApiResponse<List<Instrument>> localVarResponse = await InstrumentGetActiveAsyncWithHttpInfo();
+            return localVarResponse.Data;
 
         }
 
@@ -682,7 +682,7 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of ApiResponse (List&lt;Instrument&gt;)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetActiveAsyncWithHttpInfo ()
+        public async System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetActiveAsyncWithHttpInfo()
         {
 
             var localVarPath = "/instrument/active";
@@ -695,7 +695,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -715,11 +715,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await this.Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await this.Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -729,7 +729,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<Instrument>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<Instrument>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
+                (List<Instrument>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
         }
 
         /// <summary>
@@ -737,10 +737,10 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>List&lt;Instrument&gt;</returns>
-        public List<Instrument> InstrumentGetActiveAndIndices ()
+        public List<Instrument> InstrumentGetActiveAndIndices()
         {
-             ApiResponse<List<Instrument>> localVarResponse = InstrumentGetActiveAndIndicesWithHttpInfo();
-             return localVarResponse.Data;
+            ApiResponse<List<Instrument>> localVarResponse = InstrumentGetActiveAndIndicesWithHttpInfo();
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -748,7 +748,7 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of List&lt;Instrument&gt;</returns>
-        public ApiResponse< List<Instrument> > InstrumentGetActiveAndIndicesWithHttpInfo ()
+        public ApiResponse<List<Instrument>> InstrumentGetActiveAndIndicesWithHttpInfo()
         {
 
             var localVarPath = "/instrument/activeAndIndices";
@@ -761,7 +761,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -781,11 +781,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) this.Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)this.Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -795,7 +795,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<Instrument>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<Instrument>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
+                (List<Instrument>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
         }
 
         /// <summary>
@@ -803,10 +803,10 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of List&lt;Instrument&gt;</returns>
-        public async System.Threading.Tasks.Task<List<Instrument>> InstrumentGetActiveAndIndicesAsync ()
+        public async System.Threading.Tasks.Task<List<Instrument>> InstrumentGetActiveAndIndicesAsync()
         {
-             ApiResponse<List<Instrument>> localVarResponse = await InstrumentGetActiveAndIndicesAsyncWithHttpInfo();
-             return localVarResponse.Data;
+            ApiResponse<List<Instrument>> localVarResponse = await InstrumentGetActiveAndIndicesAsyncWithHttpInfo();
+            return localVarResponse.Data;
 
         }
 
@@ -815,7 +815,7 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of ApiResponse (List&lt;Instrument&gt;)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetActiveAndIndicesAsyncWithHttpInfo ()
+        public async System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetActiveAndIndicesAsyncWithHttpInfo()
         {
 
             var localVarPath = "/instrument/activeAndIndices";
@@ -828,7 +828,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -848,11 +848,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await this.Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await this.Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -862,7 +862,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<Instrument>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<Instrument>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
+                (List<Instrument>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
         }
 
         /// <summary>
@@ -870,10 +870,10 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>InstrumentInterval</returns>
-        public InstrumentInterval InstrumentGetActiveIntervals ()
+        public InstrumentInterval InstrumentGetActiveIntervals()
         {
-             ApiResponse<InstrumentInterval> localVarResponse = InstrumentGetActiveIntervalsWithHttpInfo();
-             return localVarResponse.Data;
+            ApiResponse<InstrumentInterval> localVarResponse = InstrumentGetActiveIntervalsWithHttpInfo();
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -881,7 +881,7 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of InstrumentInterval</returns>
-        public ApiResponse< InstrumentInterval > InstrumentGetActiveIntervalsWithHttpInfo ()
+        public ApiResponse<InstrumentInterval> InstrumentGetActiveIntervalsWithHttpInfo()
         {
 
             var localVarPath = "/instrument/activeIntervals";
@@ -894,7 +894,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -914,11 +914,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) this.Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)this.Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -928,7 +928,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<InstrumentInterval>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (InstrumentInterval) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(InstrumentInterval)));
+                (InstrumentInterval)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(InstrumentInterval)));
         }
 
         /// <summary>
@@ -936,10 +936,10 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of InstrumentInterval</returns>
-        public async System.Threading.Tasks.Task<InstrumentInterval> InstrumentGetActiveIntervalsAsync ()
+        public async System.Threading.Tasks.Task<InstrumentInterval> InstrumentGetActiveIntervalsAsync()
         {
-             ApiResponse<InstrumentInterval> localVarResponse = await InstrumentGetActiveIntervalsAsyncWithHttpInfo();
-             return localVarResponse.Data;
+            ApiResponse<InstrumentInterval> localVarResponse = await InstrumentGetActiveIntervalsAsyncWithHttpInfo();
+            return localVarResponse.Data;
 
         }
 
@@ -948,7 +948,7 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of ApiResponse (InstrumentInterval)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<InstrumentInterval>> InstrumentGetActiveIntervalsAsyncWithHttpInfo ()
+        public async System.Threading.Tasks.Task<ApiResponse<InstrumentInterval>> InstrumentGetActiveIntervalsAsyncWithHttpInfo()
         {
 
             var localVarPath = "/instrument/activeIntervals";
@@ -961,7 +961,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -981,11 +981,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await this.Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await this.Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -995,7 +995,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<InstrumentInterval>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (InstrumentInterval) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(InstrumentInterval)));
+                (InstrumentInterval)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(InstrumentInterval)));
         }
 
         /// <summary>
@@ -1011,10 +1011,10 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>List&lt;IndexComposite&gt;</returns>
-        public List<IndexComposite> InstrumentGetCompositeIndex (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public List<IndexComposite> InstrumentGetCompositeIndex(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
-             ApiResponse<List<IndexComposite>> localVarResponse = InstrumentGetCompositeIndexWithHttpInfo(symbol, filter, columns, count, start, reverse, startTime, endTime);
-             return localVarResponse.Data;
+            ApiResponse<List<IndexComposite>> localVarResponse = InstrumentGetCompositeIndexWithHttpInfo(symbol, filter, columns, count, start, reverse, startTime, endTime);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1030,7 +1030,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>ApiResponse of List&lt;IndexComposite&gt;</returns>
-        public ApiResponse< List<IndexComposite> > InstrumentGetCompositeIndexWithHttpInfo (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public ApiResponse<List<IndexComposite>> InstrumentGetCompositeIndexWithHttpInfo(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
 
             var localVarPath = "/instrument/compositeIndex";
@@ -1043,7 +1043,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -1071,11 +1071,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) this.Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)this.Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -1085,7 +1085,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<IndexComposite>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<IndexComposite>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<IndexComposite>)));
+                (List<IndexComposite>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<IndexComposite>)));
         }
 
         /// <summary>
@@ -1101,10 +1101,10 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>Task of List&lt;IndexComposite&gt;</returns>
-        public async System.Threading.Tasks.Task<List<IndexComposite>> InstrumentGetCompositeIndexAsync (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public async System.Threading.Tasks.Task<List<IndexComposite>> InstrumentGetCompositeIndexAsync(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
-             ApiResponse<List<IndexComposite>> localVarResponse = await InstrumentGetCompositeIndexAsyncWithHttpInfo(symbol, filter, columns, count, start, reverse, startTime, endTime);
-             return localVarResponse.Data;
+            ApiResponse<List<IndexComposite>> localVarResponse = await InstrumentGetCompositeIndexAsyncWithHttpInfo(symbol, filter, columns, count, start, reverse, startTime, endTime);
+            return localVarResponse.Data;
 
         }
 
@@ -1121,7 +1121,7 @@ namespace IO.Swagger.Api
         /// <param name="startTime">Starting date filter for results. (optional)</param>
         /// <param name="endTime">Ending date filter for results. (optional)</param>
         /// <returns>Task of ApiResponse (List&lt;IndexComposite&gt;)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<List<IndexComposite>>> InstrumentGetCompositeIndexAsyncWithHttpInfo (string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public async System.Threading.Tasks.Task<ApiResponse<List<IndexComposite>>> InstrumentGetCompositeIndexAsyncWithHttpInfo(string symbol = null, string filter = null, string columns = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
 
             var localVarPath = "/instrument/compositeIndex";
@@ -1134,7 +1134,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -1162,11 +1162,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await this.Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await this.Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -1176,7 +1176,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<IndexComposite>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<IndexComposite>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<IndexComposite>)));
+                (List<IndexComposite>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<IndexComposite>)));
         }
 
         /// <summary>
@@ -1184,10 +1184,10 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>List&lt;Instrument&gt;</returns>
-        public List<Instrument> InstrumentGetIndices ()
+        public List<Instrument> InstrumentGetIndices()
         {
-             ApiResponse<List<Instrument>> localVarResponse = InstrumentGetIndicesWithHttpInfo();
-             return localVarResponse.Data;
+            ApiResponse<List<Instrument>> localVarResponse = InstrumentGetIndicesWithHttpInfo();
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1195,7 +1195,7 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of List&lt;Instrument&gt;</returns>
-        public ApiResponse< List<Instrument> > InstrumentGetIndicesWithHttpInfo ()
+        public ApiResponse<List<Instrument>> InstrumentGetIndicesWithHttpInfo()
         {
 
             var localVarPath = "/instrument/indices";
@@ -1208,7 +1208,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -1228,11 +1228,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) this.Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)this.Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -1242,7 +1242,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<Instrument>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<Instrument>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
+                (List<Instrument>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
         }
 
         /// <summary>
@@ -1250,10 +1250,10 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of List&lt;Instrument&gt;</returns>
-        public async System.Threading.Tasks.Task<List<Instrument>> InstrumentGetIndicesAsync ()
+        public async System.Threading.Tasks.Task<List<Instrument>> InstrumentGetIndicesAsync()
         {
-             ApiResponse<List<Instrument>> localVarResponse = await InstrumentGetIndicesAsyncWithHttpInfo();
-             return localVarResponse.Data;
+            ApiResponse<List<Instrument>> localVarResponse = await InstrumentGetIndicesAsyncWithHttpInfo();
+            return localVarResponse.Data;
 
         }
 
@@ -1262,7 +1262,7 @@ namespace IO.Swagger.Api
         /// </summary>
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>Task of ApiResponse (List&lt;Instrument&gt;)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetIndicesAsyncWithHttpInfo ()
+        public async System.Threading.Tasks.Task<ApiResponse<List<Instrument>>> InstrumentGetIndicesAsyncWithHttpInfo()
         {
 
             var localVarPath = "/instrument/indices";
@@ -1275,7 +1275,7 @@ namespace IO.Swagger.Api
 
             // to determine the Content-Type header
             String[] localVarHttpContentTypes = new String[] {
-                "application/json", 
+                "application/json",
                 "application/x-www-form-urlencoded"
             };
             String localVarHttpContentType = this.Configuration.ApiClient.SelectHeaderContentType(localVarHttpContentTypes);
@@ -1295,11 +1295,11 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await this.Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await this.Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (ExceptionFactory != null)
             {
@@ -1309,7 +1309,7 @@ namespace IO.Swagger.Api
 
             return new ApiResponse<List<Instrument>>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (List<Instrument>) this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
+                (List<Instrument>)this.Configuration.ApiClient.Deserialize(localVarResponse, typeof(List<Instrument>)));
         }
 
     }

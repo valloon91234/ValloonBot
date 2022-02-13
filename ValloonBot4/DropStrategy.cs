@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
  * @version 4.0
  * @2022-01-20
  */
-namespace Valloon.BitMEX
+namespace Valloon.Trading
 {
     public class DropStrategy
     {

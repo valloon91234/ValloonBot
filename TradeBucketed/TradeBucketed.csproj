@@ -54,10 +54,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Logger.cs" />
     <Compile Include="Logger2.cs" />
-    <Compile Include="TradeBinBB.cs" />
-    <Compile Include="BitMEXApiHelper.cs" />
+    <Compile Include="XbtDao.cs" />
+    <Compile Include="Xbt.cs" />
+    <Compile Include="Sol.cs" />
+    <Compile Include="XbtBin.cs" />
+    <Compile Include="SolDao.cs" />
+    <Compile Include="Shovel2.cs" />
+    <Compile Include="SolBin.cs" />
+    <Compile Include="TradeBinModel.cs" />
+    <Compile Include="BitMEXApiHelper0.cs" />
     <Compile Include="MainDao.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -70,6 +76,10 @@
     <ProjectReference Include="..\IO.Swagger\IO.Swagger.csproj">
       <Project>{53BA509F-35AC-49F3-8B62-0949A7EA59F9}</Project>
       <Name>IO.Swagger</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ValloonTrader\ValloonTrader.csproj">
+      <Project>{4d7245f7-bc3c-4f2d-ad19-beaa912a3149}</Project>
+      <Name>ValloonTrader</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
