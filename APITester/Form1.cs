@@ -205,6 +205,10 @@ namespace Valloon.Trading
                 });
                 textBox_Result.Text = JObject.FromObject(newOrder).ToString(Formatting.Indented);
             }
+            else
+            {
+                textBox_Result.Text = "No position.";
+            }
         }
     }
 }

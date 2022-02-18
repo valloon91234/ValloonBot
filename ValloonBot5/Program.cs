@@ -77,7 +77,7 @@ namespace Valloon.Trading
         {
             QuickEditMode(false);
             //Console.BufferHeight = Int16.MaxValue - 1;
-            MoveWindow(GetConsoleWindow(), 24, 0, 1080, 360, true);
+            MoveWindow(GetConsoleWindow(), 24, 0, 1080, 320, true);
             CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;

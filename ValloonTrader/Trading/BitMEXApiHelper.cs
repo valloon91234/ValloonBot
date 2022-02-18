@@ -94,7 +94,7 @@ namespace Valloon.Trading
             }
             set
             {
-                _serverTimeDiff = (value - DateTime.UtcNow).Ticks;
+                _serverTimeDiff = (value - DateTime.Now).Ticks;
             }
         }
 
@@ -138,9 +138,8 @@ namespace Valloon.Trading
         {
             RequestCount++;
             ApiResponse<List<Instrument>> localVarResponse = InstrumentApiInstance.InstrumentGetWithHttpInfo(symbol, null, null, 1, null, true);
-            Instrument item = localVarResponse.Data[0];
             ServerTime = DateTime.Parse(localVarResponse.Headers["Date"]);
-            return item;
+            return localVarResponse.Data[0];
         }
 
         public List<TradeBin> GetRencentBinList(string symbol, string binSize, int count, bool? partial = null)
@@ -162,7 +161,9 @@ namespace Valloon.Trading
                 ["currency"] = currency
             };
             CreateSignature("GET", "/user/margin", BuildQueryData(param));
-            return UserApiInstance.UserGetMargin(CURRENCY_XBt);
+            ApiResponse<Margin> localVarResponse = UserApiInstance.UserGetMarginWithHttpInfo(CURRENCY_XBt);
+            ServerTime = DateTime.Parse(localVarResponse.Headers["Date"]);
+            return localVarResponse.Data;
         }
 
         public List<Order> GetOrders(string symbol, string filter = null)

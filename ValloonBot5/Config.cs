@@ -8,53 +8,6 @@ using System.IO;
  */
 namespace Valloon.Trading
 {
-    public class ShotConfig
-    {
-        [JsonIgnore]
-        //[JsonProperty("rsi_length")]
-        public int RSILength { get; set; } = 14;
-
-        [JsonProperty("buy_or_sell")]
-        public int BuyOrSell { get; set; }
-
-        [JsonProperty("upper_limit")]
-        public decimal UpperLimit { get; set; }
-
-        [JsonProperty("upper_min_diff")]
-        public decimal UpperMinDiff { get; set; }
-
-        [JsonProperty("upper_max_diff")]
-        public decimal UpperMaxDiff { get; set; }
-
-        [JsonProperty("upper_close")]
-        public decimal UpperClose { get; set; }
-
-        [JsonProperty("upper_stop")]
-        public decimal UpperStop { get; set; }
-
-        [JsonProperty("upper_stop_2")]
-        public decimal UpperStop2 { get; set; }
-
-        [JsonProperty("lower_limit")]
-        public decimal LowerLimit { get; set; }
-
-        [JsonProperty("lower_min_diff")]
-        public decimal LowerMinDiff { get; set; }
-
-        [JsonProperty("lower_max_diff")]
-        public decimal LowerMaxDiff { get; set; }
-
-        [JsonProperty("lower_close")]
-        public decimal LowerClose { get; set; }
-
-        [JsonProperty("lower_stop")]
-        public decimal LowerStop { get; set; }
-
-        [JsonProperty("lower_stop_2")]
-        public decimal LowerStop2 { get; set; }
-
-    }
-
     public class Config
     {
         private static readonly string FILENAME = "config.json";
@@ -74,14 +27,8 @@ namespace Valloon.Trading
         [JsonProperty("testnet_mode")]
         public bool TestnetMode { get; set; }
 
-        [JsonProperty("upper_qty")]
-        public decimal UpperQtyX { get; set; } = 1;
-
-        [JsonProperty("lower_qty")]
-        public decimal LowerQtyX { get; set; } = 1;
-
-        [JsonProperty("shot")]
-        public ShotConfig Shot { get; set; }
+        [JsonProperty("qty")]
+        public decimal QtyX { get; set; } = 1;
 
         [JsonProperty("exit")]
         public int Exit { get; set; }

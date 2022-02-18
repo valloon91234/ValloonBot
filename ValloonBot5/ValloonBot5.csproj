@@ -66,6 +66,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="SolShot.txt" />
     <Content Include="valloon.ico" />
   </ItemGroup>
   <ItemGroup>
