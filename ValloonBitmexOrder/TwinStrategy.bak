@@ -1,0 +1,202 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+/**
+ * @author Valloon Project
+ * @version 1.0 @2020-03-03
+ */
+namespace Valloon.BitMEX
+{
+    public class TwinStrategy
+    {
+        public static void Run()
+        {
+            int loopCount = 0;
+            while (true)
+            {
+                try
+                {
+                    Config config = Config.Load(out bool clearOrder);
+                    if (clearOrder) loopCount = 0;
+                    {
+                        BitMEXApiHelper apiHelper = new BitMEXApiHelper(config.ApiKey1, config.ApiSecret1, config.TestnetMode);
+                        int volume = apiHelper.GetRecentVolume();
+                        Instrument instrument = apiHelper.GetInstrument();
+                        decimal lastPrice = instrument.LastPrice.Value;
+                        decimal markPrice = instrument.MarkPrice.Value;
+                        {
+                            string timeText = DateTime.UtcNow.ToString("yyyy-MM-dd  HH:mm:ss");
+                            Console.Title = $"$ {lastPrice:F0}  /  $ {volume:N0}  |  {GlobalParam.APP_NAME}  v{GlobalParam.APP_VERSION}";
+                            Logger.WriteLine($"[{timeText}  ({++loopCount})]    $ {lastPrice:F1}  /  $ {markPrice:F1}  /  $ {volume:N0}", ConsoleColor.DarkGray);
+                        }
+                        Margin margin = apiHelper.GetMargin();
+                        List<Order> activeOrders = apiHelper.GetActiveOrdersAll();
+                        int activeOrdersCount = activeOrders.Count;
+                        Position position = apiHelper.GetPosition();
+                        decimal walletBalance = margin.WalletBalance.Value / 100000000m;
+                        decimal unavailableMarginPercent = 100m * (margin.WalletBalance.Value - margin.AvailableMargin.Value) / margin.WalletBalance.Value;
+                        if (position == null || position.CurrentQty.Value == 0)
+                        {
+                            Logger.WriteLine($"    <{config.Username1}>    {walletBalance:N8} XBT    {activeOrdersCount} orders ({unavailableMarginPercent:N2} %)    No position");
+                            List<string> cancelOrderList = new List<string>();
+                            foreach (Order order in activeOrders)
+                            {
+                                if (order.ExecInst == "Close") cancelOrderList.Add(order.OrderID);
+                            }
+                            if (cancelOrderList.Count > 0) apiHelper.CancelOrders(cancelOrderList);
+                        }
+                        else
+                        {
+                            position = PlaceOrder(config, apiHelper, activeOrders, position, out int limitProfitPrice, out int stopProfitPrice, out int stopMarketPrice);
+                            decimal unrealisedPercent1 = 100m * position.UnrealisedPnl.Value / margin.WalletBalance.Value;
+                            Logger.WriteLine($"    <{config.Username1}>    {walletBalance:N8} XBT    {activeOrdersCount} orders ({unavailableMarginPercent:N2} %)    1 position");
+                            Logger.WriteLine($"    qty = {position.CurrentQty.Value}    entry = {position.AvgEntryPrice.Value:F1}    limit = {limitProfitPrice:F1}    take = {stopProfitPrice:F1}    stop = {stopMarketPrice:F1}    liq = {position.LiquidationPrice.Value:F1}    {unrealisedPercent1:N2} %", ConsoleColor.Green);
+                        }
+                    }
+                    {
+                        BitMEXApiHelper apiHelper = new BitMEXApiHelper(config.ApiKey2, config.ApiSecret2, config.TestnetMode);
+                        Margin margin = apiHelper.GetMargin();
+                        List<Order> activeOrders = apiHelper.GetActiveOrdersAll();
+                        int activeOrdersCount = activeOrders.Count;
+                        Position position = apiHelper.GetPosition();
+                        decimal walletBalance = margin.WalletBalance.Value / 100000000m;
+                        decimal unavailableMarginPercent = 100m * (margin.WalletBalance.Value - margin.AvailableMargin.Value) / margin.WalletBalance.Value;
+                        if (position == null || position.CurrentQty.Value == 0)
+                        {
+                            Logger.WriteLine($"    <{config.Username2}>    {walletBalance:N8} XBT    {activeOrdersCount} orders ({unavailableMarginPercent:N2} %)    No position");
+                            List<string> cancelOrderList = new List<string>();
+                            foreach (Order order in activeOrders)
+                            {
+                                if (order.ExecInst == "Close") cancelOrderList.Add(order.OrderID);
+                            }
+                            if (cancelOrderList.Count > 0) apiHelper.CancelOrders(cancelOrderList);
+                        }
+                        else
+                        {
+                            position = PlaceOrder(config, apiHelper, activeOrders, position, out int limitProfitPrice, out int stopProfitPrice, out int stopMarketPrice);
+                            decimal unrealisedPercent1 = 100m * position.UnrealisedPnl.Value / margin.WalletBalance.Value;
+                            Logger.WriteLine($"    <{config.Username2}>    {walletBalance:N8} XBT    {activeOrdersCount} orders ({unavailableMarginPercent:N2} %)    1 position");
+                            Logger.WriteLine($"    qty = {position.CurrentQty.Value}    entry = {position.AvgEntryPrice.Value:F1}    limit = {limitProfitPrice:F1}    take = {stopProfitPrice:F1}    stop = {stopMarketPrice:F1}    liq = {position.LiquidationPrice.Value:F1}    {unrealisedPercent1:N2} %", ConsoleColor.Green);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (ex is WebException || ex is ApiException)
+                    {
+                        Logger.WriteLine("<Server Connection Error>  " + ex.Message, ConsoleColor.Red, false);
+                    }
+                    else
+                    {
+                        Logger.WriteLine(ex.Message, ConsoleColor.Red, false);
+                    }
+                    Logger.WriteFile(ex.ToString());
+                }
+                Thread.Sleep(5000);
+            }
+        }
+
+        private static Position PlaceOrder(Config config, BitMEXApiHelper apiHelper, List<Order> activeOrders, Position position, out int limitProfitPrice, out int stopProfitPrice, out int stopMarketPrice)
+        {
+            string side = null;
+            if (position.CurrentQty.Value < 0)
+            {
+                side = "Buy";
+            }
+            else if (position.CurrentQty.Value > 0)
+            {
+                side = "Sell";
+            }
+            bool isLimitProfitCorrect = false;
+            bool isStopProfitCorrect = false;
+            bool isStopLossCorrect = false;
+            limitProfitPrice = 0;
+            stopProfitPrice = 0;
+            stopMarketPrice = 0;
+            List<string> cancelOrderList = new List<string>();
+            foreach (Order order in activeOrders)
+            {
+                if (order.Side == side)
+                {
+                    if ((order.OrderQty == null || order.OrderQty.Value == Math.Abs(position.CurrentQty.Value)) && order.OrdType == "Limit" && order.ExecInst == "Close")
+                    {
+                        isLimitProfitCorrect = true;
+                        limitProfitPrice = (int)order.Price.Value;
+                    }
+                    else if ((order.OrderQty == null || order.OrderQty.Value == Math.Abs(position.CurrentQty.Value)) && order.OrdType == "MarketIfTouched" && order.ExecInst == "Close")
+                    {
+                        isStopProfitCorrect = true;
+                        stopProfitPrice = (int)order.StopPx.Value;
+                    }
+                    else if ((order.OrderQty == null || order.OrderQty.Value == Math.Abs(position.CurrentQty.Value)) && order.OrdType == "Stop" && order.ExecInst == "Close")
+                    {
+                        isStopLossCorrect = true;
+                        stopMarketPrice = (int)order.StopPx.Value;
+                    }
+                    else
+                    {
+                        cancelOrderList.Add(order.OrderID);
+                    }
+                }
+            }
+            if (cancelOrderList.Count > 0) apiHelper.CancelOrders(cancelOrderList);
+            if (!isLimitProfitCorrect || !isStopProfitCorrect || !isStopLossCorrect)
+            {
+                position = apiHelper.GetPosition();
+                if (position.AvgEntryPrice.Value == 0) throw new Exception("failed to get position price.");
+                if (position.CurrentQty.Value < 0)
+                {
+                    side = "Buy";
+                }
+                else if (position.CurrentQty.Value > 0)
+                {
+                    side = "Sell";
+                }
+                if (!isLimitProfitCorrect)
+                {
+                    if (position.CurrentQty.Value < 0)
+                    {
+                        limitProfitPrice = (int)Math.Ceiling(position.AvgEntryPrice.Value - config.LimitProfit);
+                    }
+                    else if (position.CurrentQty.Value > 0)
+                    {
+                        limitProfitPrice = (int)Math.Floor(position.AvgEntryPrice.Value + config.LimitProfit);
+                    }
+                    Order closeOrder = apiHelper.OrderNewLimitClose(side, limitProfitPrice);
+                    //Logger.WriteLine($"Close order for position has been created. (qty = {closeOrder.OrderQty}, close_price = {closeOrder.Price:N2})", ConsoleColor.Yellow);
+                }
+                if (!isStopProfitCorrect)
+                {
+                    if (position.CurrentQty.Value < 0)
+                    {
+                        stopProfitPrice = (int)Math.Ceiling(position.AvgEntryPrice.Value - config.StopProfit);
+                    }
+                    else if (position.CurrentQty.Value > 0)
+                    {
+                        stopProfitPrice = (int)Math.Floor(position.AvgEntryPrice.Value + config.StopProfit);
+                    }
+                    Order closeOrder = apiHelper.OrderNewTakeProfitMarketClose(side, stopProfitPrice);
+                    //Logger.WriteLine($"Close order for position has been created. (qty = {closeOrder.OrderQty}, close_price = {closeOrder.Price:N2})", ConsoleColor.Yellow);
+                }
+                if (!isStopLossCorrect)
+                {
+                    if (position.CurrentQty.Value < 0)
+                    {
+                        stopMarketPrice = (int)Math.Floor(position.AvgEntryPrice.Value + config.StopLoss);
+                    }
+                    else if (position.CurrentQty.Value > 0)
+                    {
+                        stopMarketPrice = (int)Math.Ceiling(position.AvgEntryPrice.Value - config.StopLoss);
+                    }
+                    Order stopMarketOrder = apiHelper.OrderNewStopMarketClose(side, stopMarketPrice);
+                    //Logger.WriteLine($"Stop loss has been created. (qty = {position.CurrentQty}, stop_price = {stopMarketOrder.StopPx})", ConsoleColor.Yellow);
+                }
+            }
+            return position;
+        }
+    }
+}
