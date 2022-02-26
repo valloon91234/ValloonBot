@@ -50,7 +50,12 @@
       "ProjectGuid": "1a650713-7171-4fa4-ac55-9b757967defc",
       "DisplayName": "ValloonBot2",
       "ColorIndex": 8
+    },
+    "1b513876-712c-4699-94a0-6f199ce38bd2": {
+      "ProjectGuid": "1b513876-712c-4699-94a0-6f199ce38bd2",
+      "DisplayName": "NeuralNetwork",
+      "ColorIndex": 9
     }
   },
-  "NextColorIndex": 9
+  "NextColorIndex": 10
 }

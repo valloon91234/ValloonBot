@@ -64,6 +64,12 @@ namespace Valloon.Trading.Backtest
                             Low = GetValue<int>(dr["low"]),
                             Close = GetValue<int>(dr["close"]),
                             Volume = GetValue<int>(dr["volume"]),
+                            CalcHigh = GetValue<int>(dr["calc_high"]),
+                            CalcLow = GetValue<int>(dr["calc_low"]),
+                            CalcClose = GetValue<int>(dr["calc_close"]),
+                            XHigh = GetValue<double>(dr["x_high"]),
+                            XLow = GetValue<double>(dr["x_low"]),
+                            XClose = GetValue<double>(dr["x_close"]),
                         };
                         list.Add(m);
                     }
@@ -89,6 +95,22 @@ namespace Valloon.Trading.Backtest
                 command.Parameters.Add("low", System.Data.DbType.Int32).Value = m.Low;
                 command.Parameters.Add("close", System.Data.DbType.Int32).Value = m.Close;
                 command.Parameters.Add("volume", System.Data.DbType.Int32).Value = m.Volume;
+                return command.ExecuteNonQuery();
+            }
+        }
+
+        public static int Update(SolBin m, string binSize)
+        {
+            using (var command = Connection.CreateCommand())
+            {
+                command.CommandText = $"UPDATE sol_{binSize} SET calc_high=@calc_high, calc_low=@calc_low, calc_close=@calc_close, x_high=@x_high, x_low=@x_low, x_close=@x_close WHERE timestamp=@timestamp";
+                command.Parameters.Add("timestamp", System.Data.DbType.String).Value = ToDateTimestring(m.Timestamp);
+                command.Parameters.Add("calc_high", System.Data.DbType.Int32).Value = m.CalcHigh;
+                command.Parameters.Add("calc_low", System.Data.DbType.Int32).Value = m.CalcLow;
+                command.Parameters.Add("calc_close", System.Data.DbType.Int32).Value = m.CalcClose;
+                command.Parameters.Add("x_high", System.Data.DbType.Double).Value = m.XHigh;
+                command.Parameters.Add("x_low", System.Data.DbType.Double).Value = m.XLow;
+                command.Parameters.Add("x_close", System.Data.DbType.Double).Value = m.XClose;
                 return command.ExecuteNonQuery();
             }
         }

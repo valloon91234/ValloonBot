@@ -16,58 +16,62 @@ using Newtonsoft.Json.Linq;
  */
 namespace Valloon.Trading
 {
-    public class ParamMap
-    {
-        public int BuyOrSell { get; set; }
-        public decimal MinRSI { get; set; }
-        public decimal MaxRSI { get; set; }
-        public decimal MinDiff { get; set; }
-        public decimal MaxDiff { get; set; }
-        public decimal CloseX { get; set; }
-        public decimal StopX { get; set; }
-        public decimal QtyX { get; set; }
-    }
-
     public class SolShotStrategy
     {
+        private class ParamMap
+        {
+            public int BuyOrSell { get; set; }
+            public decimal MinRSI { get; set; }
+            public decimal MaxRSI { get; set; }
+            public decimal MinDiff { get; set; }
+            public decimal MaxDiff { get; set; }
+            public decimal CloseX { get; set; }
+            public decimal StopX { get; set; }
+            public decimal QtyX { get; set; }
+        }
+
+        private static ParamMap[] GetParamMap(Logger logger = null)
+        {
+            string url = $"https://raw.githubusercontent.com/maksimg1002/_upload1002/main/solshot.txt";
+            string paramText = BackendClient.HttpGet(url);
+            string[] paramLines = paramText.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            List<ParamMap> paramMapList = new List<ParamMap>();
+            foreach (string paramLine in paramLines)
+            {
+                string[] paramValues = paramLine.Trim().Split(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                paramMapList.Add(new ParamMap
+                {
+                    BuyOrSell = Int32.Parse(paramValues[0]),
+                    MinRSI = decimal.Parse(paramValues[1]),
+                    MaxRSI = decimal.Parse(paramValues[2]),
+                    MinDiff = decimal.Parse(paramValues[3]),
+                    MaxDiff = decimal.Parse(paramValues[4]),
+                    CloseX = decimal.Parse(paramValues[5]),
+                    StopX = decimal.Parse(paramValues[6]),
+                    QtyX = decimal.Parse(paramValues[7]),
+                });
+            }
+            ParamMap[] array = paramMapList.ToArray();
+            if (logger != null)
+            {
+                logger.WriteLine($"\r\n[{BitMEXApiHelper.ServerTime:yyyy-MM-dd  HH:mm:ss}]  ParamMap loaded. ({paramLines.Length})", ConsoleColor.Green);
+                logger.WriteFile(paramText);
+                logger.WriteLine();
+            }
+            return array;
+        }
+
         public void Run(Config config = null)
         {
             const string SYMBOL = BitMEXApiHelper.SYMBOL_SOLUSD;
             const int RSILength = 14;
-
-            ParamMap[] paramMapArray;
-            {
-                string paramText;
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Valloon.BitMEX.SolShot.txt"))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    paramText = reader.ReadToEnd();
-                }
-                string[] paramLines = paramText.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                List<ParamMap> paramMapList = new List<ParamMap>();
-                foreach (string paramLine in paramLines)
-                {
-                    string[] paramValues = paramLine.Split(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
-                    paramMapList.Add(new ParamMap
-                    {
-                        BuyOrSell = Int32.Parse(paramValues[0]),
-                        MinRSI = decimal.Parse(paramValues[1]),
-                        MaxRSI = decimal.Parse(paramValues[2]),
-                        MinDiff = decimal.Parse(paramValues[3]),
-                        MaxDiff = decimal.Parse(paramValues[4]),
-                        CloseX = decimal.Parse(paramValues[5]),
-                        StopX = decimal.Parse(paramValues[6]),
-                        QtyX = decimal.Parse(paramValues[7]),
-                    });
-                }
-                paramMapArray = paramMapList.ToArray();
-            }
-
             int loopIndex = 0;
             DateTime? lastLoopTime = null;
             TradeBin lastCandle = null;
             decimal lastWalletBalance = 0;
             bool waitingPositionClosed = true;
+            ParamMap[] paramMapArray = null;
+            DateTime? lastParamMapTime = null;
             Logger logger = null;
             DateTime fileModifiedTime = File.GetLastWriteTimeUtc(Assembly.GetExecutingAssembly().Location);
             while (true)
@@ -87,7 +91,11 @@ namespace Valloon.Trading
                         logger.WriteLine(JObject.FromObject(config).ToString(Formatting.Indented));
                         logger.WriteLine();
                     }
-
+                    if (paramMapArray == null)
+                    {
+                        paramMapArray = GetParamMap(logger);
+                        lastParamMapTime = BitMEXApiHelper.ServerTime;
+                    }
                     Margin margin = apiHelper.GetMargin();
                     decimal walletBalance = margin.WalletBalance.Value / 100000000m;
                     List<Order> activeOrders = apiHelper.GetActiveOrders(SYMBOL);
@@ -175,7 +183,7 @@ namespace Valloon.Trading
                                                 OrdType = "Market",
                                                 Text = $"<BOT><MARKET></BOT>",
                                             });
-                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New market order has been created: qty = {qty}, price = {entryPrice}");
+                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New market buy order has been created: qty = {qty}, price = {entryPrice}");
                                             logger.WriteFile($"--- [ {rsiArray[rsiArrayLength - 3]}, {rsiArray[rsiArrayLength - 2]}, {rsiArray[rsiArrayLength - 1]} ]");
                                             logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
                                         }
@@ -201,7 +209,7 @@ namespace Valloon.Trading
                                             }
                                             positionQty = position.CurrentQty.Value;
                                             positionEntryPrice = position.AvgEntryPrice.Value;
-                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Position has been created (try = {tryCount}): qty = {positionQty}, entry = {positionEntryPrice}");
+                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Position has been created (try = {tryCount}): qty = {positionQty}, entry = {positionEntryPrice}, liq = {position.LiquidationPrice}");
                                         }
                                         {
                                             decimal closePrice = Math.Floor((entryPrice + entryPrice * paramMap.CloseX) * 100) / 100m;
@@ -248,7 +256,7 @@ namespace Valloon.Trading
                                                 OrdType = "Market",
                                                 Text = $"<BOT><MARKET></BOT>",
                                             });
-                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New market order has been created: qty = {qty}, price = {entryPrice}");
+                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New market sell order has been created: qty = {qty}, price = {entryPrice}");
                                             logger.WriteFile($"--- [ {rsiArray[rsiArrayLength - 3]}, {rsiArray[rsiArrayLength - 2]}, {rsiArray[rsiArrayLength - 1]} ]");
                                             logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
                                         }
@@ -274,7 +282,7 @@ namespace Valloon.Trading
                                             }
                                             positionQty = position.CurrentQty.Value;
                                             positionEntryPrice = position.AvgEntryPrice.Value;
-                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Position has been created (try = {tryCount}): qty = {positionQty}, entry = {positionEntryPrice}");
+                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Position has been created (try = {tryCount}): qty = {positionQty}, entry = {positionEntryPrice}, liq = {position.LiquidationPrice}");
                                         }
                                         {
                                             decimal closePrice = Math.Ceiling((entryPrice - entryPrice * paramMap.CloseX) * 100) / 100m;
@@ -336,7 +344,6 @@ namespace Valloon.Trading
                         {
                             bool closeExist = false;
                             bool stopExist = false;
-                            bool stop2Exist = false;
                             foreach (Order oldOrder in activeOrders)
                             {
                                 string text = oldOrder.Text;
@@ -345,10 +352,8 @@ namespace Valloon.Trading
                                     closeExist = true;
                                 else if (text.Contains("<STOP>"))
                                     stopExist = true;
-                                else if (text.Contains("<STOP2>"))
-                                    stop2Exist = true;
                             }
-                            if (!closeExist || !stopExist && !stop2Exist)
+                            if (!closeExist || !stopExist)
                             {
                                 if (waitingPositionClosed)
                                 {
@@ -383,11 +388,190 @@ namespace Valloon.Trading
                                     logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
                                 }
                             }
-                            else if (!stopExist)
+                            else if (BitMEXApiHelper.ServerTime.Minute % 5 == 0 && BitMEXApiHelper.ServerTime.Second < 5)
                             {
-                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Stop order does not exist.", ConsoleColor.Red);
+                                List<TradeBin> reversedBinList = new List<TradeBin>(binList);
+                                reversedBinList.Reverse();
+                                double[] rsiArray = RSI.CalculateRSIValues(reversedBinList.ToArray(), RSILength);
+                                int rsiArrayLength = rsiArray.Length - 1;
+#if !LICENSE_MODE
+                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  {rsiArray[rsiArrayLength - 3]:F2},  {rsiArray[rsiArrayLength - 2]:F2},  {rsiArray[rsiArrayLength - 1]:F2}", ConsoleColor.DarkGray);
+#endif
+                                foreach (ParamMap paramMap in paramMapArray)
+                                {
+                                    if (positionQty > 0 && paramMap.BuyOrSell == 1 && paramMap.QtyX > 0 && rsiArray[rsiArrayLength - 3] > rsiArray[rsiArrayLength - 2] && rsiArray[rsiArrayLength - 2] >= (double)paramMap.MinRSI && rsiArray[rsiArrayLength - 2] < (double)paramMap.MaxRSI && rsiArray[rsiArrayLength - 1] - rsiArray[rsiArrayLength - 2] >= (double)paramMap.MinDiff && (rsiArray[rsiArrayLength - 1] - rsiArray[rsiArrayLength - 2]) < (double)paramMap.MaxDiff)
+                                    {
+                                        if (Math.Abs(position.LiquidationPrice.Value - positionEntryPrice) > positionEntryPrice * 0.25m)
+                                        {
+                                            int qty = BitMEXApiHelper.FixQty((int)(margin.WalletBalance.Value * btcPrice * config.QtyX * paramMap.QtyX / 100000000));
+                                            decimal entryPrice = binList[1].Close.Value;
+                                            {
+                                                Order newOrder = apiHelper.OrderNew(new Order
+                                                {
+                                                    Symbol = SYMBOL,
+                                                    Side = "Buy",
+                                                    OrderQty = qty,
+                                                    OrdType = "Market",
+                                                    Text = $"<BOT><MARKET></BOT>",
+                                                });
+                                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New market buy order has been created: qty = {qty}, price = {entryPrice}");
+                                                logger.WriteFile($"--- [ {rsiArray[rsiArrayLength - 3]}, {rsiArray[rsiArrayLength - 2]}, {rsiArray[rsiArrayLength - 1]} ]");
+                                                logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                            }
+                                            {
+                                                int tryCount = 0;
+                                                bool positionCreated = false;
+                                                while (tryCount < 60)
+                                                {
+                                                    position = apiHelper.GetPosition(SYMBOL);
+                                                    if (position != null && position.CurrentQty.Value != 0)
+                                                    {
+                                                        positionCreated = true;
+                                                        break;
+                                                    }
+                                                    Thread.Sleep(tryCount < 20 ? 500 : 1000);
+                                                    tryCount++;
+                                                }
+                                                if (!positionCreated)
+                                                {
+                                                    logger.WriteLine($"    [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Position did not created: qty = {qty}", ConsoleColor.Red);
+                                                    Logger.WriteWait("", 60, ConsoleColor.DarkGray);
+                                                    continue;
+                                                }
+                                                positionQty = position.CurrentQty.Value;
+                                                positionEntryPrice = position.AvgEntryPrice.Value;
+                                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Position has been created (try = {tryCount}): qty = {positionQty}, entry = {positionEntryPrice}, liq = {position.LiquidationPrice}");
+                                            }
+                                            {
+                                                decimal closePrice = Math.Floor((entryPrice + entryPrice * paramMap.CloseX) * 100) / 100m;
+                                                Order newOrder = apiHelper.OrderNew(new Order
+                                                {
+                                                    Symbol = SYMBOL,
+                                                    Side = "Sell",
+                                                    OrderQty = qty,
+                                                    Price = closePrice,
+                                                    OrdType = "Limit",
+                                                    ExecInst = "ReduceOnly",
+                                                    Text = $"<BOT><CLOSE></BOT>",
+                                                });
+                                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New close order has been created: qty = {qty}, price = {closePrice}");
+                                                logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                            }
+                                            {
+                                                decimal stopPrice = Math.Ceiling((entryPrice - entryPrice * paramMap.StopX) * 100) / 100m;
+                                                Order newOrder = apiHelper.OrderNew(new Order
+                                                {
+                                                    Symbol = SYMBOL,
+                                                    Side = "Sell",
+                                                    OrderQty = qty,
+                                                    StopPx = stopPrice,
+                                                    OrdType = "Stop",
+                                                    ExecInst = "LastPrice,ReduceOnly",
+                                                    Text = $"<BOT><STOP></BOT>",
+                                                });
+                                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New stop order has been created: qty = {qty}, price = {stopPrice}");
+                                                logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Liq price is too near: {Math.Abs(position.LiquidationPrice.Value - positionEntryPrice)}");
+                                        }
+                                        goto positionCreated;
+                                    }
+                                    if (positionQty < 0 && paramMap.BuyOrSell == 2 && paramMap.QtyX > 0 && rsiArray[rsiArrayLength - 3] < rsiArray[rsiArrayLength - 2] && rsiArray[rsiArrayLength - 2] >= (double)paramMap.MinRSI && rsiArray[rsiArrayLength - 2] < (double)paramMap.MaxRSI && rsiArray[rsiArrayLength - 2] - rsiArray[rsiArrayLength - 1] >= (double)paramMap.MinDiff && (rsiArray[rsiArrayLength - 2] - rsiArray[rsiArrayLength - 1]) < (double)paramMap.MaxDiff)
+                                    {
+                                        if (Math.Abs(position.LiquidationPrice.Value - positionEntryPrice) > positionEntryPrice * 0.25m)
+                                        {
+                                            int qty = BitMEXApiHelper.FixQty((int)(margin.WalletBalance.Value * btcPrice * config.QtyX * paramMap.QtyX / 100000000));
+                                            decimal entryPrice = binList[1].Close.Value;
+                                            {
+                                                Order newOrder = apiHelper.OrderNew(new Order
+                                                {
+                                                    Symbol = SYMBOL,
+                                                    Side = "Sell",
+                                                    OrderQty = qty,
+                                                    OrdType = "Market",
+                                                    Text = $"<BOT><MARKET></BOT>",
+                                                });
+                                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New market sell order has been created: qty = {qty}, price = {entryPrice}");
+                                                logger.WriteFile($"--- [ {rsiArray[rsiArrayLength - 3]}, {rsiArray[rsiArrayLength - 2]}, {rsiArray[rsiArrayLength - 1]} ]");
+                                                logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                            }
+                                            {
+                                                int tryCount = 0;
+                                                bool positionCreated = false;
+                                                while (tryCount < 60)
+                                                {
+                                                    position = apiHelper.GetPosition(SYMBOL);
+                                                    if (position != null && position.CurrentQty.Value != 0)
+                                                    {
+                                                        positionCreated = true;
+                                                        break;
+                                                    }
+                                                    Thread.Sleep(tryCount < 20 ? 500 : 1000);
+                                                    tryCount++;
+                                                }
+                                                if (!positionCreated)
+                                                {
+                                                    logger.WriteLine($"    [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Position did not created: qty = {qty}", ConsoleColor.Red);
+                                                    Logger.WriteWait("", 60, ConsoleColor.DarkGray);
+                                                    continue;
+                                                }
+                                                positionQty = position.CurrentQty.Value;
+                                                positionEntryPrice = position.AvgEntryPrice.Value;
+                                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Position has been created (try = {tryCount}): qty = {positionQty}, entry = {positionEntryPrice}, liq = {position.LiquidationPrice}");
+                                            }
+                                            {
+                                                decimal closePrice = Math.Ceiling((entryPrice - entryPrice * paramMap.CloseX) * 100) / 100m;
+                                                Order newOrder = apiHelper.OrderNew(new Order
+                                                {
+                                                    Symbol = SYMBOL,
+                                                    Side = "Buy",
+                                                    OrderQty = qty,
+                                                    Price = closePrice,
+                                                    OrdType = "Limit",
+                                                    ExecInst = "ReduceOnly",
+                                                    Text = $"<BOT><CLOSE></BOT>",
+                                                });
+                                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New close order has been created: qty = {qty}, price = {closePrice}");
+                                                logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                            }
+                                            {
+                                                decimal stopPrice = Math.Floor((entryPrice + entryPrice * paramMap.StopX) * 100) / 100m;
+                                                Order newOrder = apiHelper.OrderNew(new Order
+                                                {
+                                                    Symbol = SYMBOL,
+                                                    Side = "Buy",
+                                                    OrderQty = qty,
+                                                    StopPx = stopPrice,
+                                                    OrdType = "Stop",
+                                                    ExecInst = "LastPrice,ReduceOnly",
+                                                    Text = $"<BOT><STOP></BOT>",
+                                                });
+                                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New stop order has been created: qty = {qty}, price = {stopPrice}");
+                                                logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Liq price is too near: {Math.Abs(position.LiquidationPrice.Value - positionEntryPrice)}");
+                                        }
+                                        goto positionCreated;
+                                    }
+                                }
+                            positionCreated:;
+                            }
+                            else
+                            {
+                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Too late.", ConsoleColor.DarkGray);
                             }
                         }
+                    }
+                    else if (lastParamMapTime == null || lastParamMapTime.Value.Hour != BitMEXApiHelper.ServerTime.Hour)
+                    {
+                        paramMapArray = GetParamMap(logger);
+                        lastParamMapTime = BitMEXApiHelper.ServerTime;
                     }
                     lastCandle = binList[0];
 
@@ -427,11 +611,12 @@ namespace Valloon.Trading
                 catch (Exception ex)
                 {
                     if (logger == null) logger = new Logger($"{BitMEXApiHelper.ServerTime:yyyy-MM-dd}");
-                    logger.WriteLine(ex.Message, ConsoleColor.Red, false);
+                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]    {ex.Message}", ConsoleColor.Red);
                     logger.WriteFile(ex.ToString());
                     logger.WriteFile($"LastPlain4Sign = {BitMEXApiHelper.LastPlain4Sign}");
-                    Thread.Sleep(5000);
+                    Thread.Sleep(30000);
                 }
+                lastLoopTime = DateTime.UtcNow;
             }
         }
     }

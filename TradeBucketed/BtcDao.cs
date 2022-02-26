@@ -1,12 +1,16 @@
-﻿using System;
+﻿using IO.Swagger.Model;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Valloon.Trading.Backtest
 {
-    public class SolDao
+    public class BtcDao
     {
         public const string DB_FILENAME = @"data.db";
         public const string DATETIME_FORMAT = @"yyyy-MM-dd HH:mm:ss";
@@ -15,7 +19,7 @@ namespace Valloon.Trading.Backtest
         public static SQLiteConnection Connection { get; }
         public static Boolean Encrypted;
 
-        static SolDao()
+        static BtcDao()
         {
             FileInfo fileInfo = new FileInfo(DB_FILENAME);
             if (!fileInfo.Exists) throw new FileNotFoundException("Can not find database file - " + DB_FILENAME);
@@ -43,26 +47,26 @@ namespace Valloon.Trading.Backtest
             return false;
         }
 
-        public static List<SolBin> SelectAll(string binSize)
+        public static List<BtcBin> SelectAll(string binSize)
         {
             using (SQLiteCommand command = Connection.CreateCommand())
             {
-                command.CommandText = $"SELECT * FROM sol_{binSize} ORDER BY timestamp";
+                command.CommandText = $"SELECT * FROM btc_{binSize} ORDER BY timestamp";
                 SQLiteDataReader dr = command.ExecuteReader();
-                List<SolBin> list = new List<SolBin>();
+                List<BtcBin> list = new List<BtcBin>();
                 while (dr.Read())
                 {
                     try
                     {
-                        SolBin m = new SolBin
+                        BtcBin m = new BtcBin
                         {
                             Timestamp = ParseDateTimeString(GetValue<string>(dr["timestamp"])),
                             Date = GetValue<string>(dr["date"]),
                             Time = GetValue<string>(dr["time"]),
-                            Open = GetValue<int>(dr["open"]),
-                            High = GetValue<int>(dr["high"]),
-                            Low = GetValue<int>(dr["low"]),
-                            Close = GetValue<int>(dr["close"]),
+                            Open = GetValue<float>(dr["open"]),
+                            High = GetValue<float>(dr["high"]),
+                            Low = GetValue<float>(dr["low"]),
+                            Close = GetValue<float>(dr["close"]),
                             Volume = GetValue<int>(dr["volume"]),
                         };
                         list.Add(m);
@@ -76,18 +80,18 @@ namespace Valloon.Trading.Backtest
             }
         }
 
-        public static int Insert(SolBin m, string binSize)
+        public static int Insert(BtcBin m, string binSize)
         {
             using (var command = Connection.CreateCommand())
             {
-                command.CommandText = $"INSERT INTO sol_{binSize}(timestamp,date,time,open,high,low,close,volume) VALUES(@timestamp,@date,@time,@open,@high,@low,@close,@volume)";
+                command.CommandText = $"INSERT INTO btc_{binSize}(timestamp,date,time,open,high,low,close,volume) VALUES(@timestamp,@date,@time,@open,@high,@low,@close,@volume)";
                 command.Parameters.Add("timestamp", System.Data.DbType.String).Value = ToDateTimestring(m.Timestamp);
                 command.Parameters.Add("date", System.Data.DbType.String).Value = m.Date;
                 command.Parameters.Add("time", System.Data.DbType.String).Value = m.Time;
-                command.Parameters.Add("open", System.Data.DbType.Int32).Value = m.Open;
-                command.Parameters.Add("high", System.Data.DbType.Int32).Value = m.High;
-                command.Parameters.Add("low", System.Data.DbType.Int32).Value = m.Low;
-                command.Parameters.Add("close", System.Data.DbType.Int32).Value = m.Close;
+                command.Parameters.Add("open", System.Data.DbType.Double).Value = m.Open;
+                command.Parameters.Add("high", System.Data.DbType.Double).Value = m.High;
+                command.Parameters.Add("low", System.Data.DbType.Double).Value = m.Low;
+                command.Parameters.Add("close", System.Data.DbType.Double).Value = m.Close;
                 command.Parameters.Add("volume", System.Data.DbType.Int32).Value = m.Volume;
                 return command.ExecuteNonQuery();
             }

@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F3BD020B-76BF-491A-8F09-B627B3BFDAC3}</ProjectGuid>
+    <ProjectGuid>{1B513876-712C-4699-94A0-6F199CE38BD2}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Valloon.BitMEX</RootNamespace>
-    <AssemblyName>TradeBucketed</AssemblyName>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NeuralNetwork</RootNamespace>
+    <AssemblyName>NeuralNetwork</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -24,7 +24,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,7 +33,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
@@ -46,40 +44,34 @@
     <Reference Include="System.Data.SQLite, Version=1.0.115.5, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\lib\net46\System.Data.SQLite.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Logger2.cs" />
-    <Compile Include="Btc_H.cs" />
-    <Compile Include="Sol_H.cs" />
-    <Compile Include="Sol5.cs" />
-    <Compile Include="BtcDao.cs" />
-    <Compile Include="Btc.cs" />
-    <Compile Include="Sol.cs" />
-    <Compile Include="BtcBin.cs" />
-    <Compile Include="SolDao.cs" />
-    <Compile Include="Shovel2.cs" />
-    <Compile Include="SolBin.cs" />
-    <Compile Include="TradeBinModel.cs" />
-    <Compile Include="BitMEXApiHelper0.cs" />
-    <Compile Include="MainDao.cs" />
+    <Compile Include="Helpers\ExportHelper.cs" />
+    <Compile Include="Helpers\HelperNetwork.cs" />
+    <Compile Include="Helpers\ImportHelper.cs" />
+    <Compile Include="NetworkModels\Dataset.cs" />
+    <Compile Include="NetworkModels\Network.cs" />
+    <Compile Include="NetworkModels\Neuron.cs" />
+    <Compile Include="NetworkModels\Sigmoid.cs" />
+    <Compile Include="NetworkModels\Synapse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BtcBin.cs" />
+    <Compile Include="SolBin.cs" />
+    <Compile Include="BtcDao.cs" />
+    <Compile Include="SolDao.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IO.Swagger\IO.Swagger.csproj">
-      <Project>{53BA509F-35AC-49F3-8B62-0949A7EA59F9}</Project>
-      <Name>IO.Swagger</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ValloonTrader\ValloonTrader.csproj">
       <Project>{4d7245f7-bc3c-4f2d-ad19-beaa912a3149}</Project>
       <Name>ValloonTrader</Name>
@@ -93,4 +85,11 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
   </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>

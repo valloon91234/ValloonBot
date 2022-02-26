@@ -8,12 +8,12 @@ using Valloon.Utils;
 
 namespace Valloon.Trading.Backtest
 {
-    static class Xbt
+    static class Btc
     {
         public static void Run()
         {
             {
-                DateTime startTime = new DateTime(2016, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                DateTime startTime = new DateTime(2017, 11, 1, 0, 0, 0, DateTimeKind.Utc);
                 DateTime endTime = DateTime.UtcNow;
                 Load("1h", startTime, endTime);
                 return;
@@ -23,7 +23,7 @@ namespace Valloon.Trading.Backtest
                 Logger logger1 = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  Xbt Buy = 1");
                 Logger logger2 = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  Xbt Sell = 2");
                 DateTime startTime = new DateTime(2021, 10, 1, 0, 0, 0, DateTimeKind.Utc);
-                List<XbtBin> list = XbtDao.SelectAll("1m");
+                List<BtcBin> list = BtcDao.SelectAll("1m");
                 //int[] lengthArray = { 5, 10, 15, 20, 25, 30, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 120, 150, 180, 240, 360, 420, 480, 520, 600, 660, 720, 780, 840, 900, 960 };
                 int[] lengthArray = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 120, 150, 180, 240, 360, 420, 480, 520, 600, 660, 720, 780, 840, 900, 960 };
                 foreach (int length in lengthArray)
@@ -79,9 +79,9 @@ namespace Valloon.Trading.Backtest
             //        }
             //    }
 
-            List<XbtBin> getList(DateTime startTime, DateTime? endTime = null)
+            List<BtcBin> getList(DateTime startTime, DateTime? endTime = null)
             {
-                List<XbtBin> list = XbtDao.SelectAll("1m");
+                List<BtcBin> list = BtcDao.SelectAll("1m");
                 {
                     int mLength = 660;
                     int countAll = list.Count;
@@ -109,7 +109,7 @@ namespace Valloon.Trading.Backtest
 
             void runHCS(DateTime startTime, DateTime? endTime = null)
             {
-                List<XbtBin> list = getList(startTime, endTime);
+                List<BtcBin> list = getList(startTime, endTime);
                 //TestHCS(list, 1);
                 //Test(list, 2);
             }
@@ -155,12 +155,14 @@ namespace Valloon.Trading.Backtest
                         break;
                     }
                     List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_XBTUSD, 1000, null, startTime, nextTime);
-                    foreach (TradeBin t in list)
+                    int count = list.Count;
+                    for (int i = 0; i < count - 1; i++)
                     {
+                        TradeBin t = list[i];
                         try
                         {
-                            XbtBin b = new XbtBin(t);
-                            XbtDao.Insert(b, binSize);
+                            BtcBin b = new BtcBin(t);
+                            BtcDao.Insert(b, binSize);
                         }
                         catch (Exception ex)
                         {
@@ -183,13 +185,13 @@ namespace Valloon.Trading.Backtest
 
         const float lossX = 1.5f;
 
-        static float Test(List<XbtBin> listFull, int smaLength, int buyOrSell, DateTime startTime, DateTime? endTime = null)
+        static float Test(List<BtcBin> listFull, int smaLength, int buyOrSell, DateTime startTime, DateTime? endTime = null)
         {
-            List<XbtBin> list;
+            List<BtcBin> list;
             if (listFull == null)
-                list = XbtDao.SelectAll("1m");
+                list = BtcDao.SelectAll("1m");
             else
-                list = new List<XbtBin>(listFull);
+                list = new List<BtcBin>(listFull);
             {
                 int countAll = list.Count;
                 for (int i = smaLength; i < countAll; i++)
@@ -381,12 +383,12 @@ namespace Valloon.Trading.Backtest
             return 0;
         }
 
-        static float TestBuyOrSell(List<XbtBin> list, int smaLength, int buyOrSell, float heightX, float closeX, float stopX, DateTime startTime, DateTime? endTime)
+        static float TestBuyOrSell(List<BtcBin> list, int smaLength, int buyOrSell, float heightX, float closeX, float stopX, DateTime startTime, DateTime? endTime)
         {
             int count;
             if (list == null)
             {
-                list = XbtDao.SelectAll("1m");
+                list = BtcDao.SelectAll("1m");
                 count = list.Count;
                 for (int i = smaLength; i < count; i++)
                 {

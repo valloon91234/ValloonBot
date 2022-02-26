@@ -19,7 +19,10 @@ namespace Valloon.Trading.Backtest
             Thread.CurrentThread.CurrentUICulture = culture;
 
             {
-                Sol.Run();
+                //Btc.Run();
+                //Btc_H.Run();
+                Sol5.Run();
+                //Sol_H.Run();
                 goto end;
             }
 
