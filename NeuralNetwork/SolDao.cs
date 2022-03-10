@@ -64,12 +64,12 @@ namespace Valloon.Trading.Backtest
                             Low = GetValue<int>(dr["low"]),
                             Close = GetValue<int>(dr["close"]),
                             Volume = GetValue<int>(dr["volume"]),
-                            CalcHigh = GetValue<int>(dr["calc_high"]),
-                            CalcLow = GetValue<int>(dr["calc_low"]),
-                            CalcClose = GetValue<int>(dr["calc_close"]),
-                            XHigh = GetValue<double>(dr["x_high"]),
-                            XLow = GetValue<double>(dr["x_low"]),
-                            XClose = GetValue<double>(dr["x_close"]),
+                            //CalcHigh = GetValue<int>(dr["calc_high"]),
+                            //CalcLow = GetValue<int>(dr["calc_low"]),
+                            //CalcClose = GetValue<int>(dr["calc_close"]),
+                            //XHigh = GetValue<double>(dr["x_high"]),
+                            //XLow = GetValue<double>(dr["x_low"]),
+                            //XClose = GetValue<double>(dr["x_close"]),
                         };
                         list.Add(m);
                     }

@@ -58,15 +58,16 @@ namespace Valloon.Trading
             }
         }
 
-        public static void WriteWait(string text, int seconds, ConsoleColor color = ConsoleColor.White)
+        public static void WriteWait(string text, int seconds, int intervalSeconds = 1, ConsoleColor color = ConsoleColor.DarkGray)
         {
             Console.ForegroundColor = color;
             Console.Write(text);
-            for (int i = 0; i < seconds; i++)
+            for (int i = 0; i < seconds; i += intervalSeconds)
             {
                 Console.Write('.');
-                Thread.Sleep(1000);
+                Thread.Sleep(intervalSeconds * 1000);
             }
+            Thread.Sleep((seconds % intervalSeconds) * 1000);
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
         }

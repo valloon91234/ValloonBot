@@ -81,7 +81,8 @@ namespace Valloon.Trading
             CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
-            new SolShotStrategy().Run();
+            //new ShovelStrategy().Run();
+            new BinaryStrategy().Run();
             //Config config = Config.Load(out _, true);
             //switch (config.Strategy)
             //{

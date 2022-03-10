@@ -54,8 +54,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Btc1.cs" />
+    <Compile Include="Btc1h.cs" />
     <Compile Include="Logger2.cs" />
     <Compile Include="Btc_H.cs" />
+    <Compile Include="Btc5.cs" />
     <Compile Include="Sol_H.cs" />
     <Compile Include="Sol5.cs" />
     <Compile Include="BtcDao.cs" />

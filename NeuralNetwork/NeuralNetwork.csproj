@@ -72,6 +72,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\IO.Swagger\IO.Swagger.csproj">
+      <Project>{53ba509f-35ac-49f3-8b62-0949a7ea59f9}</Project>
+      <Name>IO.Swagger</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ValloonTrader\ValloonTrader.csproj">
       <Project>{4d7245f7-bc3c-4f2d-ad19-beaa912a3149}</Project>
       <Name>ValloonTrader</Name>

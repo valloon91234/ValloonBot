@@ -148,9 +148,9 @@ namespace Valloon.Trading
             return TradeApiInstance.TradeGetBucketed(binSize, partial, symbol, null, null, count, null, true);
         }
 
-        public List<TradeBin> GetBinList(string binSize = null, bool? partial = null, string symbol = null, decimal? count = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
+        public List<TradeBin> GetBinList(string binSize = null, bool? partial = null, string symbol = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
-            return TradeApiInstance.TradeGetBucketed(binSize, partial, symbol, null, null, count, null, reverse, startTime, endTime);
+            return TradeApiInstance.TradeGetBucketed(binSize, partial, symbol, null, null, count, start, reverse, startTime, endTime);
         }
 
         public Margin GetMargin(string currency = CURRENCY_XBt)

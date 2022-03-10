@@ -27,8 +27,8 @@ namespace Valloon.Trading
         [JsonProperty("testnet_mode")]
         public bool TestnetMode { get; set; }
 
-        [JsonProperty("qty")]
-        public decimal QtyX { get; set; } = 1;
+        [JsonProperty("leverage")]
+        public decimal Leverage { get; set; } = 1;
 
         [JsonProperty("exit")]
         public int Exit { get; set; }
@@ -56,7 +56,7 @@ namespace Valloon.Trading
         [JsonIgnore]
         public const string APP_NAME = "ValloonBot";
         [JsonIgnore]
-        public const string APP_VERSION = "2022.02.10";
+        public const string APP_VERSION = "2022.03.06";
 
     }
 }

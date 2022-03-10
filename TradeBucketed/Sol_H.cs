@@ -28,9 +28,10 @@ namespace Valloon.Trading.Backtest
             {
                 DateTime startTime = new DateTime(2021, 10, 24, 0, 0, 0, DateTimeKind.Utc);
                 DateTime endTime = new DateTime(2022, 2, 15, 0, 0, 0, DateTimeKind.Utc);
-                JArray resultArray = BuildDataset(startTime, endTime);
+                JArray resultArray = BuildDataset2(startTime, endTime);
                 string resultText = resultArray.ToString(Formatting.Indented);
                 File.WriteAllText("Dataset.txt", resultText, Encoding.UTF8);
+                Console.WriteLine($"{resultArray.Count}");
                 return;
             }
 
@@ -65,7 +66,7 @@ namespace Valloon.Trading.Backtest
                         Console.WriteLine($"end: nextTime = {startTime:yyyy-MM-dd HH:mm:ss} > {endTime:yyyy-MM-dd HH:mm:ss}");
                         break;
                     }
-                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_SOLUSD, 1000, null, startTime, nextTime);
+                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_SOLUSD, 1000, null, null, startTime, nextTime);
                     int count = list.Count;
                     for (int i = 0; i < count - 1; i++)
                     {
@@ -140,6 +141,100 @@ namespace Valloon.Trading.Backtest
                 };
                 resultArray.Add(obj);
             }
+            return resultArray;
+        }
+
+        static JArray BuildDataset2(DateTime startTime, DateTime? endTime, int inputCount = 8)
+        {
+            const float closeX = 0.16f, stopX = 0.14f;
+            List<SolBin> list = SolDao.SelectAll("5m");
+            int count = list.Count;
+            Console.WriteLine($"Count = {count}");
+            const int rsiLength = 14;
+            {
+                List<TradeBin> binList = new List<TradeBin>();
+                foreach (SolBin m in list)
+                {
+                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                }
+                double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
+                for (int i = 0; i < count; i++)
+                {
+                    SolBin m = list[i];
+                    m.RSI = (float)rsiArray[i];
+                }
+                list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
+                count = list.Count;
+            }
+            JArray resultArray = new JArray();
+            int succeedCount = 0, failedCount = 0;
+            for (int i = inputCount; i < count; i++)
+            {
+                List<double> valueList = new List<double>();
+                for (int j = i - inputCount; j < i; j++)
+                {
+                    valueList.Add(list[j].RSI / 100);
+                }
+                int entryPrice = list[i].Open;
+                int closePrice, stopPrice;
+                int? targetValue = null;
+                if (list[i - 2].RSI >= 70 && list[i - 2].RSI >= list[i - 1].RSI - 0.5f)
+                {
+                    closePrice = (int)Math.Ceiling(entryPrice * (1 - closeX));
+                    stopPrice = (int)Math.Ceiling(entryPrice * (1 + stopX));
+                    for (int j = i; j < count; j++)
+                    {
+                        if (list[j].High > stopPrice)
+                        {
+                            targetValue = 0;
+                            failedCount++;
+                            break;
+                        }
+                        if (list[j].Low < closePrice)
+                        {
+                            targetValue = 1;
+                            succeedCount++;
+                            break;
+                        }
+                    }
+                }
+                //else
+                //if (list[i - 2].RSI <= 30 && list[i - 2].RSI < list[i - 1].RSI + 0.5f)
+                //{
+                //    closePrice = (int)Math.Ceiling(entryPrice * (1 + closeX));
+                //    stopPrice = (int)Math.Ceiling(entryPrice * (1 - stopX));
+                //    for (int j = i; j < count; j++)
+                //    {
+                //        if (list[j].Low < stopPrice)
+                //        {
+                //            targetValue = 0;
+                //            failedCount++;
+                //            break;
+                //        }
+                //        if (list[j].High > closePrice)
+                //        {
+                //            targetValue = 1;
+                //            succeedCount++;
+                //            break;
+                //        }
+                //    }
+                //}
+                else
+                {
+                    continue;
+                }
+                if (targetValue == null) break;
+                JArray values = JArray.FromObject(valueList);
+                //double target = targetValue == 0 ? 0.3 : 0.7;
+                JArray targets = JArray.FromObject(new double[] { targetValue.Value });
+                JObject obj = new JObject
+                {
+                    { "Values", values },
+                    { "Targets", targets },
+                };
+                resultArray.Add(obj);
+            }
+            Console.WriteLine($"succeed = {succeedCount} \t failed = {failedCount}");
             return resultArray;
         }
 

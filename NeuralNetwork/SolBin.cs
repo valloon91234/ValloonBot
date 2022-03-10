@@ -24,5 +24,7 @@ namespace Valloon.Trading.Backtest
         public double XLow { get; set; }
         public double XClose { get; set; }
 
+        public double RSI { get; set; }
+
     }
 }

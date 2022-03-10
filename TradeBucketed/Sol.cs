@@ -112,7 +112,7 @@ namespace Valloon.Trading.Backtest
                         Console.WriteLine($"end: nextTime = {startTime:yyyy-MM-dd HH:mm:ss} > {endTime:yyyy-MM-dd HH:mm:ss}");
                         break;
                     }
-                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_SOLUSD, 1000, null, startTime, nextTime);
+                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_SOLUSD, 1000, null, null, startTime, nextTime);
                     int count = list.Count;
                     for (int i = 0; i < count - 1; i++)
                     {

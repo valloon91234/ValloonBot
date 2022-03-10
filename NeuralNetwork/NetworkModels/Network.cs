@@ -157,7 +157,7 @@ namespace NeuralNetwork.NetworkModels
 
         public void AutoExportNetwork(double error)
         {
-            string networkFilename = $"Network - {HiddenLayers.Count} - {error}.txt";
+            string networkFilename = $"Network - {HiddenLayers.Count} - {error:F16}.txt";
             Console.Write($"> Exporting to \"{networkFilename}\" ... ");
             Console.Title = networkFilename;
             using (var file = File.CreateText(networkFilename))

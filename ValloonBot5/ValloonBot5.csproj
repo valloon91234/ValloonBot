@@ -56,7 +56,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackendClient.cs" />
-    <Compile Include="SolShotStrategy.cs" />
+    <Compile Include="BinaryStrategy.cs" />
+    <Compile Include="ShovelStrategy.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
