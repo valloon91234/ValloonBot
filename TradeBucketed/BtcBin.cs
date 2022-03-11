@@ -17,6 +17,7 @@ namespace Valloon.Trading.Backtest
         public float Low { get; set; }
         public float Close { get; set; }
         public int Volume { get; set; }
+        public float SD { get; set; }
         public float SMA { get; set; }
         public float RSI { get; set; }
 

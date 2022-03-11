@@ -82,7 +82,8 @@ namespace Valloon.Trading
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
             //new ShovelStrategy().Run();
-            new BinaryStrategy().Run();
+            //new BinaryStrategy().Run();
+            new GridStrategy().Run();
             //Config config = Config.Load(out _, true);
             //switch (config.Strategy)
             //{

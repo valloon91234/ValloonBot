@@ -76,7 +76,7 @@ namespace Valloon.Trading.Backtest
 
                     //SimulateSMA("1h", 1, 186, 25, 0.0125f, 0.025f, startTime);
 
-                    Test_5m();
+                    Test_1m();
                 }
 
                 {
@@ -309,6 +309,417 @@ namespace Valloon.Trading.Backtest
             }
         }
 
+        static void Test_1m()
+        {
+            DateTime? startTime = new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime? endTime = null;// new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            const int leverage = 5;
+
+            List<BtcBin> list = BtcDao.SelectAll("5m");
+            int count = list.Count;
+            const int rsiLength = 14;
+            {
+                List<TradeBin> binList = new List<TradeBin>();
+                foreach (BtcBin m in list)
+                {
+                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_XBTUSD, (decimal)m.Open, (decimal)m.High, (decimal)m.Low, (decimal)m.Close));
+                }
+                double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
+                for (int i = 0; i < count; i++)
+                {
+                    BtcBin m = list[i];
+                    m.RSI = (float)rsiArray[i];
+                }
+                list.RemoveAll(x => startTime != null && x.Timestamp < startTime.Value || endTime != null && x.Timestamp >= endTime.Value);
+                count = list.Count;
+            }
+
+            int totalDays = (int)(list[count - 1].Timestamp - list[0].Timestamp).TotalDays;
+            Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  ({list[0].Date} ~ {totalDays:N0} days)");
+            logger.WriteLine("\n" + logger.LogFilename + "\n");
+            logger.WriteLine($"{count} loaded. ({totalDays:N0} days)");
+            Console.Title = logger.LogFilename;
+
+            bool benchmark = false;
+            if (benchmark)
+            {
+                bool tryUpper = true;
+                if (tryUpper)
+                {
+                    //for (int bbLength = 5; bbLength <= 300; bbLength += 5)
+                    int bbLength = 7;
+                    {
+                        double lastProfit = 0, lastProfitRate = 0;
+                        for (int i = bbLength - 1; i < count; i++)
+                        {
+                            int candleCount = bbLength;
+                            float[] closeArray = new float[candleCount];
+                            float[] sd2Array = new float[candleCount];
+                            for (int j = 0; j < candleCount; j++)
+                            {
+                                closeArray[j] = list[i - candleCount + j + 1].Close;
+                            }
+                            float movingAverage = closeArray.Average();
+                            for (int j = 0; j < candleCount; j++)
+                            {
+                                sd2Array[j] = (float)Math.Pow(closeArray[j] - movingAverage, 2);
+                            }
+                            list[i].SD = (float)Math.Pow(sd2Array.Average(), 0.5d);
+                            list[i].SMA = movingAverage;
+                        }
+
+                        for (float maxBBW = .002f; maxBBW < .003; maxBBW += .0001f)
+                        //float maxBBW = 0.002f;
+                        {
+                            Console.Title = $"{totalDays} days    {lastProfit}    {bbLength}  /  {maxBBW}";
+                            //for (float rsi = 30; rsi > 10; rsi -= 1)
+                            float rsi = 25;
+                            {
+                                for (float limitX = .005f; limitX < .02; limitX += .0005f)
+                                {
+                                    for (float closeX = .005f; closeX < .02; closeX += .0005f)
+                                    {
+                                        for (float stopX = .005f; stopX < .02; stopX += .0005f)
+                                        {
+                                            int upperTry = 0, upperSucceed = 0, upperFailed = 0;
+                                            double upperProfit = 0;
+                                            double upperProfitRate = 1;
+                                            float positionEntryPrice = 0, positionClosePrice = 0, positionStopPrice = 0;
+                                            double maxLoss = 0;
+                                            for (int i = bbLength; i < count - 1; i++)
+                                            {
+                                                if (list[i - 1].SD / list[i - 1].SMA > maxBBW || list[i - 1].RSI < rsi) continue;
+                                                if (positionEntryPrice == 0)
+                                                {
+                                                    float limitPrice = list[i - 1].SMA * (1 + limitX);
+                                                    if (limitPrice < list[i].Open) continue;
+                                                    float closePrice = limitPrice * (1 - closeX);
+                                                    float stopPrice = limitPrice * (1 + stopX);
+                                                    if (limitPrice / closePrice < 1.0005) continue;
+                                                    if (list[i].High > stopPrice)
+                                                    {
+                                                        upperFailed++;
+                                                        upperProfit -= (stopX + 0.001) / stopX;
+                                                        double loss = (limitPrice / stopPrice - 1.001) * leverage;
+                                                        upperProfitRate *= 1 + loss;
+                                                        if (maxLoss > loss) maxLoss = loss;
+                                                        i += bbLength;
+                                                    }
+                                                    else if (list[i].High > limitPrice)
+                                                    {
+                                                        upperTry++;
+                                                        positionEntryPrice = limitPrice;
+                                                        positionClosePrice = closePrice;
+                                                        positionStopPrice = stopPrice;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (list[i].High > positionStopPrice)
+                                                    {
+                                                        upperFailed++;
+                                                        upperProfit -= (stopX + 0.001) / stopX;
+                                                        double loss = (positionEntryPrice / positionStopPrice - 1.001) * leverage;
+                                                        upperProfitRate *= 1 + loss;
+                                                        if (maxLoss > loss) maxLoss = loss;
+                                                        positionEntryPrice = 0;
+                                                        i += bbLength;
+                                                    }
+                                                    else if (list[i].Low < positionClosePrice)
+                                                    {
+                                                        upperSucceed++;
+                                                        upperProfit += (closeX - 0.0002) / closeX * ((closeX - 0.0002) / (stopX + 0.001));
+                                                        upperProfitRate *= 1 + (positionEntryPrice / positionClosePrice - 1.0002) * leverage;
+                                                        positionEntryPrice = 0;
+                                                    }
+                                                }
+                                            }
+
+                                            if (upperSucceed > 0 && (upperProfit > lastProfit || upperProfitRate > lastProfitRate))
+                                            {
+                                                logger.WriteLine($"{bbLength} / {maxBBW:F8} / {rsi:F4} / {limitX:F4} / {closeX:F4} / {stopX:F4} \t count = {upperTry} / {upperSucceed} / {upperFailed}    profit = {upperProfit:F4}  /  {upperProfitRate:F8}  /  {maxLoss:F8}");
+                                                if (upperProfit > lastProfit) lastProfit = upperProfit;
+                                                if (upperProfitRate > lastProfitRate) lastProfitRate = upperProfitRate;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int bbLength = 5; bbLength <= 300; bbLength += 5)
+                    //int bbLength = 7;
+                    {
+                        double lastProfit = 0, lastProfitRate = 0;
+                        for (int i = bbLength - 1; i < count; i++)
+                        {
+                            int candleCount = bbLength;
+                            float[] closeArray = new float[candleCount];
+                            float[] sd2Array = new float[candleCount];
+                            for (int j = 0; j < candleCount; j++)
+                            {
+                                closeArray[j] = list[i - candleCount + j + 1].Close;
+                            }
+                            float movingAverage = closeArray.Average();
+                            for (int j = 0; j < candleCount; j++)
+                            {
+                                sd2Array[j] = (float)Math.Pow(closeArray[j] - movingAverage, 2);
+                            }
+                            list[i].SD = (float)Math.Pow(sd2Array.Average(), 0.5d);
+                            list[i].SMA = movingAverage;
+                        }
+
+                        for (float maxBBW = .001f; maxBBW < .003; maxBBW += .0005f)
+                        {
+                            Console.Title = $"{totalDays} days    {lastProfit}    {bbLength}  /  {maxBBW}";
+                            for (float rsi = 70; rsi < 80; rsi += 1)
+                            {
+                                for (float limitX = .005f; limitX < .04; limitX += .001f)
+                                {
+                                    for (float closeX = .005f; closeX < .03; closeX += .001f)
+                                    {
+                                        for (float stopX = .005f; stopX < .03; stopX += .001f)
+                                        {
+                                            int lowerTry = 0, lowerSucceed = 0, lowerFailed = 0;
+                                            double lowerProfit = 0;
+                                            double lowerProfitRate = 1;
+                                            float positionEntryPrice = 0, positionClosePrice = 0, positionStopPrice = 0;
+                                            double maxLoss = 0;
+                                            for (int i = bbLength; i < count - 1; i++)
+                                            {
+                                                if (list[i - 1].SD / list[i - 1].SMA > maxBBW || list[i - 1].RSI > rsi) continue;
+                                                if (positionEntryPrice == 0)
+                                                {
+                                                    float limitPrice = list[i - 1].SMA * (1 - limitX);
+                                                    if (limitPrice > list[i].Open) continue;
+                                                    float closePrice = limitPrice * (1 + closeX);
+                                                    float stopPrice = limitPrice * (1 - stopX);
+                                                    if (closePrice / limitPrice < 1.0005) continue;
+                                                    if (list[i].Low < stopPrice)
+                                                    {
+                                                        lowerFailed++;
+                                                        lowerProfit -= (stopX + 0.001) / stopX;
+                                                        double loss = (stopX + 0.001) * leverage;
+                                                        lowerProfitRate *= 1 - loss;
+                                                        if (maxLoss < loss) maxLoss = loss;
+                                                    }
+                                                    else if (list[i].Low < limitPrice)
+                                                    {
+                                                        lowerTry++;
+                                                        positionEntryPrice = limitPrice;
+                                                        positionClosePrice = closePrice;
+                                                        positionStopPrice = stopPrice;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (list[i].Low < positionStopPrice)
+                                                    {
+                                                        lowerFailed++;
+                                                        lowerProfit -= (stopX + 0.001) / stopX;
+                                                        double loss = (stopX + 0.001) * leverage;
+                                                        lowerProfitRate *= 1 - loss;
+                                                        if (maxLoss < loss) maxLoss = loss;
+                                                        positionEntryPrice = 0;
+                                                    }
+                                                    else if (list[i].High > positionClosePrice)
+                                                    {
+                                                        lowerSucceed++;
+                                                        lowerProfit += (closeX - 0.0002) / closeX * ((closeX - 0.0002) / (stopX + 0.001));
+                                                        lowerProfitRate *= 1 + (closeX - 0.0002) * leverage;
+                                                        positionEntryPrice = 0;
+                                                    }
+                                                }
+                                            }
+
+                                            if (lowerProfit > 0 && (lowerProfit > lastProfit || lowerProfitRate > lastProfitRate))
+                                            {
+                                                logger.WriteLine($"{bbLength} / {maxBBW:F8} / {rsi:F4} / {limitX:F4} / {closeX:F4} / {stopX:F4} \t count = {lowerTry} / {lowerSucceed} / {lowerFailed}    profit = {lowerProfit:F4}  /  {lowerProfitRate:F8}  /  {maxLoss:F8}");
+                                                lastProfit = lowerProfit;
+                                                lastProfitRate = lowerProfitRate;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                logger.WriteLine($"end");
+                return;
+            }
+            else
+            {
+                bool tryUpper = true;
+                if (tryUpper)
+                {
+                    int bbLength = 7;
+                    float maxBBW = 0.0022f;
+                    float rsi = 25;
+                    float limitX = 0.0075f;
+                    float closeX = 0.0115f;
+                    float stopX = 0.013f;
+
+                    for (int i = bbLength - 1; i < count; i++)
+                    {
+                        int candleCount = bbLength;
+                        float[] closeArray = new float[candleCount];
+                        float[] sd2Array = new float[candleCount];
+                        for (int j = 0; j < candleCount; j++)
+                        {
+                            closeArray[j] = list[i - candleCount + j + 1].Close;
+                        }
+                        float movingAverage = closeArray.Average();
+                        for (int j = 0; j < candleCount; j++)
+                        {
+                            sd2Array[j] = (float)Math.Pow(closeArray[j] - movingAverage, 2);
+                        }
+                        list[i].SD = (float)Math.Pow(sd2Array.Average(), 0.5d);
+                        list[i].SMA = movingAverage;
+                    }
+                    int upperTry = 0, upperSucceed = 0, upperFailed = 0;
+                    double upperProfit = 0;
+                    double upperProfitRate = 1;
+                    float positionEntryPrice = 0, positionClosePrice = 0, positionStopPrice = 0;
+                    double maxLoss = 0;
+                    for (int i = bbLength; i < count - 1; i++)
+                    {
+                        if (list[i - 1].SD / list[i - 1].SMA > maxBBW || list[i - 1].RSI < rsi) continue;
+                        if (positionEntryPrice == 0)
+                        {
+                            float limitPrice = list[i - 1].SMA * (1 + limitX);
+                            if (limitPrice < list[i].Open) continue;
+                            float closePrice = limitPrice * (1 - closeX);
+                            float stopPrice = limitPrice * (1 + stopX);
+                            if (limitPrice / closePrice < 1.0005) continue;
+                            if (list[i].High > stopPrice)
+                            {
+                                upperFailed++;
+                                upperProfit -= (stopX + 0.001) / stopX;
+                                double loss = (limitPrice / stopPrice - 1.001) * leverage;
+                                upperProfitRate *= 1 + loss;
+                                if (maxLoss > loss) maxLoss = loss;
+                                i += bbLength;
+                            }
+                            else if (list[i].High > limitPrice)
+                            {
+                                upperTry++;
+                                positionEntryPrice = limitPrice;
+                                positionClosePrice = closePrice;
+                                positionStopPrice = stopPrice;
+                            }
+                        }
+                        else
+                        {
+                            if (list[i].High > positionStopPrice)
+                            {
+                                upperFailed++;
+                                upperProfit -= (stopX + 0.001) / stopX;
+                                double loss = (positionEntryPrice / positionStopPrice - 1.001) * leverage;
+                                upperProfitRate *= 1 + loss;
+                                if (maxLoss > loss) maxLoss = loss;
+                                positionEntryPrice = 0;
+                                i += bbLength;
+                            }
+                            else if (list[i].Low < positionClosePrice)
+                            {
+                                upperSucceed++;
+                                upperProfit += (closeX - 0.0002) / closeX * ((closeX - 0.0002) / (stopX + 0.001));
+                                upperProfitRate *= 1 + (positionEntryPrice / positionClosePrice - 1.0002) * leverage;
+                                positionEntryPrice = 0;
+                            }
+                        }
+                    }
+                    logger.WriteLine("\r\n");
+                    logger.WriteLine($"{bbLength} / {maxBBW:F8} / {rsi:F4} / {limitX:F4} / {closeX:F4} / {stopX:F4} \t count = {upperTry} / {upperSucceed} / {upperFailed}    profit = {upperProfit:F4}  /  {upperProfitRate:F8}  /  {maxLoss:F8}");
+                }
+                else
+                {
+                    int bbLength = 7;
+                    float maxBBW = 0.0022f;
+                    float rsi = 25;
+                    float limitX = 0.0075f;
+                    float closeX = 0.0115f;
+                    float stopX = 0.013f;
+
+                    for (int i = bbLength - 1; i < count; i++)
+                    {
+                        int candleCount = bbLength;
+                        float[] closeArray = new float[candleCount];
+                        float[] sd2Array = new float[candleCount];
+                        for (int j = 0; j < candleCount; j++)
+                        {
+                            closeArray[j] = list[i - candleCount + j + 1].Close;
+                        }
+                        float movingAverage = closeArray.Average();
+                        for (int j = 0; j < candleCount; j++)
+                        {
+                            sd2Array[j] = (float)Math.Pow(closeArray[j] - movingAverage, 2);
+                        }
+                        list[i].SD = (float)Math.Pow(sd2Array.Average(), 0.5d);
+                        list[i].SMA = movingAverage;
+                    }
+                    int lowerTry = 0, lowerSucceed = 0, lowerFailed = 0;
+                    double lowerProfit = 0;
+                    double lowerProfitRate = 1;
+                    float positionEntryPrice = 0, positionClosePrice = 0, positionStopPrice = 0;
+                    double maxLoss = 0;
+                    for (int i = bbLength; i < count - 1; i++)
+                    {
+                        if (list[i - 1].SD / list[i - 1].SMA > maxBBW || list[i - 1].RSI > rsi) continue;
+                        if (positionEntryPrice == 0)
+                        {
+                            float limitPrice = list[i - 1].SMA * (1 - limitX);
+                            if (limitPrice > list[i].Open) continue;
+                            float closePrice = limitPrice * (1 + closeX);
+                            float stopPrice = limitPrice * (1 - stopX);
+                            if (closePrice / limitPrice < 1.0005) continue;
+                            if (list[i].Low < stopPrice)
+                            {
+                                lowerFailed++;
+                                lowerProfit -= (stopX + 0.001) / stopX;
+                                double loss = (stopX + 0.001) * leverage;
+                                lowerProfitRate *= 1 - loss;
+                                if (maxLoss < loss) maxLoss = loss;
+                            }
+                            else if (list[i].Low < limitPrice)
+                            {
+                                lowerTry++;
+                                positionEntryPrice = limitPrice;
+                                positionClosePrice = closePrice;
+                                positionStopPrice = stopPrice;
+                            }
+                        }
+                        else
+                        {
+                            if (list[i].Low < positionStopPrice)
+                            {
+                                lowerFailed++;
+                                lowerProfit -= (stopX + 0.001) / stopX;
+                                double loss = (stopX + 0.001) * leverage;
+                                lowerProfitRate *= 1 - loss;
+                                if (maxLoss < loss) maxLoss = loss;
+                                positionEntryPrice = 0;
+                            }
+                            else if (list[i].High > positionClosePrice)
+                            {
+                                lowerSucceed++;
+                                lowerProfit += (closeX - 0.0002) / closeX * ((closeX - 0.0002) / (stopX + 0.001));
+                                lowerProfitRate *= 1 + (closeX - 0.0002) * leverage;
+                                positionEntryPrice = 0;
+                            }
+                        }
+                    }
+
+                    logger.WriteLine("\r\n");
+                    logger.WriteLine($"{bbLength} / {maxBBW:F8} / {rsi:F4} / {limitX:F4} / {closeX:F4} / {stopX:F4} \t count = {lowerTry} / {lowerSucceed} / {lowerFailed}    profit = {lowerProfit:F4}  /  {lowerProfitRate:F8}  /  {maxLoss:F8}");
+                }
+            }
+        }
+
         static void Test_5m()
         {
             DateTime startTime = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -332,9 +743,9 @@ namespace Valloon.Trading.Backtest
                 {
                     double lastProfit = 0;
                     //for (float x1 = 1.0015f; x1 > .5; x1 -= 0.0001f)
-                    for (float x0 = .9998f; x0 < 1.01; x0 += 0.0005f)
+                    for (float x0 = .9999f; x0 < 1.005; x0 += 0.0005f)
                     {
-                        for (float x1 = .9998f; x1 < 1.01; x1 += 0.0005f)
+                        for (float x1 = .9998f; x1 < 1.005; x1 += 0.0005f)
                         {
                             Console.Title = $"{lastProfit}    {x0}  /  {x1}";
                             for (float x2 = -1f; x2 < 2f; x2 += 0.05f)

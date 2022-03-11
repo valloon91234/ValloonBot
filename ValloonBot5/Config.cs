@@ -30,6 +30,15 @@ namespace Valloon.Trading
         [JsonProperty("leverage")]
         public decimal Leverage { get; set; } = 1;
 
+        [JsonProperty("qty")]
+        public int Qty { get; set; } = 100;
+
+        [JsonProperty("limit_height")]
+        public int LimitHeight { get; set; } = 100;
+
+        [JsonProperty("close_height")]
+        public int CloseHeight { get; set; } = 100;
+
         [JsonProperty("exit")]
         public int Exit { get; set; }
 

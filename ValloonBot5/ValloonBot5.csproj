@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackendClient.cs" />
+    <Compile Include="GridStrategy.cs" />
     <Compile Include="BinaryStrategy.cs" />
     <Compile Include="ShovelStrategy.cs" />
     <Compile Include="Config.cs" />
