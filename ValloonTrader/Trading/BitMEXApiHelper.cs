@@ -75,6 +75,9 @@ namespace Valloon.Trading
         public const string SYMBOL_XBTUSD = "XBTUSD";
         public const string SYMBOL_SOLUSD = "SOLUSD";
         public const string CURRENCY_XBt = "XBt";
+        public const string CURRENCY_USDt = "USDt";
+        public const string CURRENCY_BMEx = "BMEx";
+        public const string CURRENCY_ALL = "all";
 
         public readonly string API_KEY;
         public readonly string API_SECRET;
@@ -84,6 +87,8 @@ namespace Valloon.Trading
         private readonly UserApi UserApiInstance;
         private readonly OrderApi OrderApiInstance;
         private readonly PositionApi PositionApiInstance;
+        private readonly APIKeyApi APIKeyApiInstance;
+        private readonly ChatApi ChatApiInstance;
 
         private static long _serverTimeDiff;
         public static DateTime ServerTime
@@ -101,8 +106,6 @@ namespace Valloon.Trading
         public int RequestCount { get; set; }
         public static string LastPlain4Sign { get; set; }
 
-        private static long ServerTimeDiff = 0;
-
         public BitMEXApiHelper(string apiKey = null, string apiSecret = null, bool testnet = false)
         {
             ServicePointManager.Expect100Continue = true;
@@ -115,6 +118,8 @@ namespace Valloon.Trading
             UserApiInstance = new UserApi();
             OrderApiInstance = new OrderApi();
             PositionApiInstance = new PositionApi();
+            APIKeyApiInstance = new APIKeyApi();
+            ChatApiInstance = new ChatApi();
         }
 
         private string CreateSignature(string method, string function, string paramData = null, string postData = null)
@@ -153,7 +158,7 @@ namespace Valloon.Trading
             return TradeApiInstance.TradeGetBucketed(binSize, partial, symbol, null, null, count, start, reverse, startTime, endTime);
         }
 
-        public Margin GetMargin(string currency = CURRENCY_XBt)
+        public Margin GetMargin(string currency = CURRENCY_ALL)
         {
             RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
@@ -161,7 +166,7 @@ namespace Valloon.Trading
                 ["currency"] = currency
             };
             CreateSignature("GET", "/user/margin", BuildQueryData(param));
-            ApiResponse<Margin> localVarResponse = UserApiInstance.UserGetMarginWithHttpInfo(CURRENCY_XBt);
+            ApiResponse<Margin> localVarResponse = UserApiInstance.UserGetMarginWithHttpInfo(currency);
             ServerTime = DateTime.Parse(localVarResponse.Headers["Date"]);
             return localVarResponse.Data;
         }
@@ -207,6 +212,18 @@ namespace Valloon.Trading
             foreach (Order order in list)
             {
                 if ((order.OrdStatus == "New" || order.OrdStatus == "PartiallyFilled"))
+                    resultList.Add(order);
+            }
+            return resultList;
+        }
+
+        public List<Order> GetFilledOrders(string symbol)
+        {
+            List<Order> list = GetOrders(symbol, null);
+            List<Order> resultList = new List<Order>();
+            foreach (Order order in list)
+            {
+                if ((order.OrdStatus == "Filled" || order.OrdStatus == "PartiallyFilled"))
                     resultList.Add(order);
             }
             return resultList;
@@ -311,6 +328,14 @@ namespace Valloon.Trading
             return null;
         }
 
+        public List<APIKey> GetApiKey(bool? reverse = null)
+        {
+            RequestCount++;
+            CreateSignature("GET", "/apiKey");
+            List<APIKey> list = APIKeyApiInstance.APIKeyGet(reverse);
+            return list;
+        }
+
         public User GetUser()
         {
             RequestCount++;
@@ -318,7 +343,7 @@ namespace Valloon.Trading
             return UserApiInstance.UserGet();
         }
 
-        public Wallet GetWallet(string currency = CURRENCY_XBt)
+        public Wallet GetWallet(string currency = CURRENCY_ALL)
         {
             RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
@@ -326,10 +351,10 @@ namespace Valloon.Trading
                 ["currency"] = currency
             };
             CreateSignature("GET", "/user/wallet", BuildQueryData(param));
-            return UserApiInstance.UserGetWallet(CURRENCY_XBt);
+            return UserApiInstance.UserGetWallet(currency);
         }
 
-        public List<Transaction> GetWalletHistory(string currency = CURRENCY_XBt, int count = 10)
+        public List<Transaction> GetWalletHistory(string currency = CURRENCY_ALL, int count = 100)
         {
             RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
@@ -338,7 +363,30 @@ namespace Valloon.Trading
                 ["count"] = count.ToString()
             };
             CreateSignature("GET", "/user/walletHistory", BuildQueryData(param));
-            return UserApiInstance.UserGetWalletHistory(CURRENCY_XBt, count);
+            return UserApiInstance.UserGetWalletHistory(currency, count);
+        }
+
+        public List<Transaction> GetWalletSummary(string currency = CURRENCY_ALL)
+        {
+            RequestCount++;
+            Dictionary<string, string> param = new Dictionary<string, string>
+            {
+                ["currency"] = currency,
+            };
+            CreateSignature("GET", "/user/walletSummary", BuildQueryData(param));
+            return UserApiInstance.UserGetWalletSummary(currency);
+        }
+
+        public Chat SendChat(string message, int channelID = 1)
+        {
+            RequestCount++;
+            Dictionary<string, string> param = new Dictionary<string, string>
+            {
+                ["message"] = message,
+                ["channelID"] = channelID.ToString()
+            };
+            CreateSignature("POST", "/chat", null, BuildQueryData(param));
+            return ChatApiInstance.ChatNew(message, channelID);
         }
 
     }

@@ -53,7 +53,7 @@ namespace NeuralNetwork
         private static void Run5()
         {
             Console.WriteLine("\tCreating Network...");
-            _numInputParameters = 73;
+            _numInputParameters = 3;
 
             _numHiddenLayers = GetInput("\tHidden Layer Count = ", 1, int.MaxValue) ?? 0;
             int hc = GetInput("\tHidden Layer's Neuron Count = ", 1, int.MaxValue) ?? 0;
@@ -66,7 +66,7 @@ namespace NeuralNetwork
             //_hiddenNeurons = new int[] { 192, 192, 192, 192 };
             //_numHiddenLayers = _hiddenNeurons.Length;
 
-            _numOutputParameters = 2;
+            _numOutputParameters = 1;
             _network = new Network(_numInputParameters, _hiddenNeurons, _numOutputParameters, .4, .9);
             Console.WriteLine("\t**Network Created!**");
             PrintNewLine();

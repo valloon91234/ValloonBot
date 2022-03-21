@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,10 +14,12 @@ namespace Valloon.Trading.Backtest
     static class Btc1h
     {
         const string binSize = "1h";
+        public static string ProcessName = Process.GetCurrentProcess().ProcessName;
 
         public static void Run()
         {
-            //Program.MoveWindow(24, 0, 1400, 120);
+            Program.MoveWindow(60, 0, 1400, 140);
+
 
             //{
             //    DateTime startTime = new DateTime(2022, 3, 9, 0, 0, 0, DateTimeKind.Utc);
@@ -27,72 +30,63 @@ namespace Valloon.Trading.Backtest
             //}
 
             {
-                DateTime startTime = new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
+                DateTime startTime = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc);
+                DateTime? endTime = new DateTime(2022, 4, 1, 0, 0, 0, DateTimeKind.Utc);
+
                 {
-                    Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  buy = 1");
+                    Logger logger = new Logger($"_Result  -  {ProcessName}  -  {DateTime.Now:yyyy-MM-dd  HH.mm.ss}");
+                    for (int i = 1; i < 60; i += 1)
+                    {
+                        logger.WriteLine($"{startTime:yyyy-MM-dd}    sma = {i}    {SimulateSMA("1m", 1, i, 1, 0.0025f, 0.0025f, startTime)}");
+                    }
+                    return;
+                }
+                SimulateSMA("1m", 1, 15, 1, 0.01f, 0.005f, startTime); return;
 
-                    //for (int delay = 1; delay <= 15; delay++)
-                    //{
-                    //    int sma = 25;
-                    //    while (sma < 1000)
-                    //    {
-                    //        sma += sma / 60 + 1;
-                    //        string result = TestSMA("1m", 1, sma, delay, startTime);
-                    //        logger.WriteLine($"  {sma} / {delay} \t {result}");
-                    //    }
-                    //    logger.WriteLine("\n");
-                    //}
-
-                    //TestSMA("5m", 1, 390, 22, startTime); return;
-                    //for (int delay = 1; delay <= 160; delay += 6)
-                    //{
-                    //    int sma = 312;
-                    //    string result = TestSMA("5m", 1, sma, delay, startTime);
-                    //    logger.WriteLine($"  {sma} / {delay} \t {result}");
-                    //}
-                    //return;
-
-                    //for (int delay = 1; delay <= 240; delay += 6)
-                    //{
-                    //    int sma = 240;
-                    //    while (sma < 6000)
-                    //    {
-                    //        string result = TestSMA("5m", 1, sma, delay, startTime);
-                    //        logger.WriteLine($"  {sma} / {delay} \t {result}");
-                    //        sma += sma < 996 ? 24 : 48;
-                    //    }
-                    //    logger.WriteLine("\n");
-                    //}
-
-                    //for (int delay = 1; delay <= 120; delay += 3)
-                    //{
-                    //    for (int sma = 120; sma <= 720; sma += 6)
-                    //    {
-                    //        string result = BenchmarkSMA("1h", 1, sma, delay, startTime);
-                    //        logger.WriteLine($"  {sma} / {delay} \t {result}");
-                    //    }
-                    //    logger.WriteLine("\n");
-                    //}
-
-                    //SimulateSMA("1h", 1, 186, 25, 0.0125f, 0.025f, startTime);
-
-                    Test_1m();
+                List<BtcBin> list = BtcDao.SelectAll("5m");
+                const int rsiLength = 14;
+                {
+                    List<TradeBin> binList = new List<TradeBin>();
+                    foreach (BtcBin m in list)
+                    {
+                        binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_XBTUSD, (decimal)m.Open, (decimal)m.High, (decimal)m.Low, (decimal)m.Close));
+                    }
+                    double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
+                    int count = list.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        BtcBin m = list[i];
+                        m.RSI = (float)rsiArray[i];
+                    }
+                    list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp >= endTime.Value);
                 }
 
+                Simulate(startTime, endTime); return;
+
+                Benchmark2(list, 1, 15, 20); return;
+
                 {
-                    //Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  Sell = 2");
-                    //float step = 1f;
-                    //for (float i = 50f; i < 61; i += step)
-                    //{
-                    //    float result = Test2(2, i, i + step, startTime);
-                    //    logger.WriteLine($"{startTime:yyyy-MM-dd}    {i}    result = {result}");
-                    //}
-                    //Test2(2, 85, 100, startTime);
+                    Logger logger = new Logger($"_Result  -  {ProcessName}  -  {DateTime.Now:yyyy-MM-dd  HH.mm.ss}");
+                    int start = 0;
+                    while (start < 100)
+                    {
+                        int end;
+                        if (start == 0 || start == 90)
+                            end = start + 10;
+                        else
+                            end = start + 5;
+                        //logger.WriteLine($"{startTime:yyyy-MM-dd}    {Benchmark(list, 1, start, end)}");
+                        //logger.WriteLine($"{startTime:yyyy-MM-dd}    {Benchmark(list, 2, start, end)}");
+                        logger.WriteLine($"{startTime:yyyy-MM-dd}    {Benchmark2(list, 1, start, end)}");
+                        //logger.WriteLine($"{startTime:yyyy-MM-dd}    {Benchmark2(list, 2, start, end)}");
+                        start = end;
+                    }
                 }
 
                 //startTime = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc);
                 //DateTime endTime = new DateTime(2022, 4, 1, 0, 0, 0, DateTimeKind.Utc);
                 //TestBuyOrSell4(startTime, endTime);
+                //Test_Grid();
                 return;
             }
 
@@ -275,7 +269,7 @@ namespace Valloon.Trading.Backtest
             }
         }
 
-        const float lossX = 1.5f;
+        const float lossX = 1f;
 
         static void ExportCSV(DateTime? startTime = null, DateTime? endTime = null)
         {
@@ -307,6 +301,47 @@ namespace Valloon.Trading.Backtest
                     writer.Flush();
                 }
             }
+        }
+
+        static void Test_Grid()
+        {
+            DateTime? startTime = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime? endTime = null;// new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            List<BtcBin> list = BtcDao.SelectAll("1m");
+            list.RemoveAll(x => startTime != null && x.Timestamp < startTime.Value || endTime != null && x.Timestamp >= endTime.Value);
+            int count = list.Count;
+
+            int totalDays = (int)(list[count - 1].Timestamp - list[0].Timestamp).TotalDays;
+            Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  ({list[0].Date} ~ {totalDays:N0} days)");
+            logger.WriteLine("\n" + logger.LogFilename + "\n");
+            logger.WriteLine($"{count} loaded. ({totalDays:N0} days)");
+            Console.Title = logger.LogFilename;
+
+            int height = 1000;
+            int upper = (int)list[0].Open / height * height + height;
+            int lower = (int)list[0].Open / height * height;
+            int position = 0, profit = 0;
+            for (int i = 0; i < count - 1; i++)
+            {
+                if (list[i].High > upper)
+                {
+                    position--;
+                    if (position > 0) profit++;
+                    logger.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t position = {position} \t profit = {profit}");
+                    lower = upper - height;
+                    upper += height;
+                }
+                if (list[i].Low < lower)
+                {
+                    position++;
+                    if (position < 0) profit++;
+                    logger.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t position = {position} \t profit = {profit}");
+                    upper = lower + height;
+                    lower -= height;
+                }
+            }
+            logger.WriteLine("\r\n");
         }
 
         static void Test_1m()
@@ -1097,20 +1132,23 @@ namespace Valloon.Trading.Backtest
                         logger.WriteLine($"{list[i].Timestamp} \t Closed \t close = {list[i].Close:F1} \t high = {list[i].High}");
                         continue;
                     }
-                    if (list[i].Date == "2022-01-24")
-                        list[i].Date = "2022-01-24";
                     //if (positionQty == 0 || positionEntryPrice > sma)
+                    if (list[i].Open > sma)
                     {
                         int limitPrice;
                         int deep = 0;
                         do
                         {
+                            //if (positionQty == 0)
+                            //    limitPrice = (int)Math.Ceiling(sma - sma * limitX * (2 + deep / 5f));
+                            //else 
+                            //if (positionEntryPrice > sma)
+                            //    limitPrice = (int)Math.Ceiling(sma - sma * limitX * (1 + /* (positionQty - 1) */ deep));
                             if (positionQty == 0)
-                                limitPrice = (int)Math.Ceiling(sma - sma * limitX * (2 + deep / 5f));
-                            else if (positionEntryPrice > sma)
-                                limitPrice = (int)Math.Ceiling(sma - sma * limitX * (1 + /* (positionQty - 1) */ deep / 5f));
+                                limitPrice = (int)Math.Ceiling(100000 - 100000 * limitX * (1 + deep));
+                            //limitPrice = (int)Math.Ceiling(sma - sma * limitX * (1 + deep));
                             else
-                                limitPrice = (int)Math.Ceiling(positionEntryPrice - positionEntryPrice * limitX * (1 + /* (positionQty - 1) */ deep / 5f));
+                                limitPrice = (int)Math.Ceiling(positionEntryPrice - positionEntryPrice * limitX * (1 + /* (positionQty - 1) */ deep));
                             if (list[i].Open > limitPrice && list[i].Low < limitPrice)
                             {
                                 tryCount++;
@@ -1135,65 +1173,48 @@ namespace Valloon.Trading.Backtest
             return text;
         }
 
-        static string Benchmark(int buyOrSell, float minRSI, float maxRSI, DateTime startTime, DateTime? endTime = null)
+        static string Benchmark(List<BtcBin> list, int buyOrSell, float minRSI, float maxRSI)
         {
-            List<BtcBin> list = BtcDao.SelectAll(binSize);
             int count = list.Count;
-            const int rsiLength = 14;
-            {
-                List<TradeBin> binList = new List<TradeBin>();
-                foreach (BtcBin m in list)
-                {
-                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_XBTUSD, (decimal)m.Open, (decimal)m.High, (decimal)m.Low, (decimal)m.Close));
-                }
-                double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
-                for (int i = 0; i < count; i++)
-                {
-                    BtcBin m = list[i];
-                    m.RSI = (float)rsiArray[i];
-                }
-                list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp >= endTime.Value);
-                count = list.Count;
-            }
             int totalDays = (int)(list[count - 1].Timestamp - list[0].Timestamp).TotalDays;
-            Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  buyOrSell = {buyOrSell}    {minRSI} ~ {maxRSI}   ({list[0].Date} ~ {totalDays:N0} days)");
+            Logger logger = new Logger($"{ProcessName}  -  {DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  buyOrSell = {buyOrSell}    {minRSI} ~ {maxRSI}   ({list[0].Date} ~ {totalDays:N0} days)");
             logger.WriteLine("\n" + logger.LogFilename + "\n");
             logger.WriteLine($"{count} loaded. ({totalDays:N0} days)");
             Console.Title = logger.LogFilename;
 
             List<Dictionary<string, object>> topList = new List<Dictionary<string, object>>();
-            //List<Dictionary<string, float>> top0List = new List<Dictionary<string, float>>();
 
-            for (float minDiff = -5f; minDiff < 5f; minDiff += .5f)
-            //float minDiff = 9.5f;
+            for (float minDiff = -20f; minDiff < 5f; minDiff += minDiff < -10 ? 1 : .5f)
+            //float minDiff = -4;
             {
-                for (float maxDiff = 20; maxDiff > minDiff + 1f; maxDiff -= maxDiff < 10 ? .5f : 1f)
-                //float maxDiff = 2.46f;
+                for (float maxDiff = 20; maxDiff > minDiff + 1; maxDiff -= maxDiff > 10 ? 1 : .5f)
+                //float maxDiff = 3f;
                 {
                     logger.WriteLine($"\n\n----    minDiff = {minDiff}    maxDiff = {maxDiff}    ----\n");
-                    for (float stopX = 0.002f; stopX < 0.015f; stopX += 0.001f)
-                    //float stopX = 0.0135f;
+                    for (float stopX = 0.001f; stopX < 0.01f; stopX += 0.001f)
+                    //float stopX = 0.005f;
                     {
-                        for (float closeX = 0.003f; closeX < 0.015f; closeX += closeX < 0.01f ? 0.001f : 0.001f)
-                        //float closeX = 0.0075f;
+                        for (float closeX = 0.001f; closeX < 0.01f; closeX += .001f)
+                        //float closeX = 0.006f;
                         {
-                            int tryCount = 0, succeedCount = 0, failedCount = 0, unknownCount = 0;
+                            int tryCount = 0, succeedCount = 0, failedCount = 0;
                             float totalProfit = 0;
                             float finalPercent = 1;
                             double p = (closeX - 0.001) / (stopX + 0.002);
                             for (int i = 3; i < count - 1; i++)
                             {
-                                if (buyOrSell == 1 && list[i - 3].RSI >= list[i - 2].RSI && list[i - 2].RSI >= minRSI && list[i - 2].RSI < maxRSI && list[i - 1].RSI - list[i - 2].RSI >= minDiff && (list[i - 1].RSI - list[i - 2].RSI) < maxDiff)
+                                if (buyOrSell == 1 && list[i - 3].RSI >= list[i - 2].RSI && list[i - 1].RSI >= minRSI && list[i - 1].RSI < maxRSI && list[i - 1].RSI - list[i - 2].RSI >= minDiff && (list[i - 1].RSI - list[i - 2].RSI) < maxDiff)
                                 {
                                     tryCount++;
                                     float positionEntryPrice = list[i].Open;
-                                    for (int j = i; j < count && j < i + rsiLength * 3; j++)
+                                    for (int j = i; j < count; j++)
                                     {
                                         if (list[j].Low < positionEntryPrice - positionEntryPrice * stopX)
                                         {
                                             failedCount++;
-                                            totalProfit -= (stopX + 0.002f) * lossX;
+                                            totalProfit -= stopX + 0.002f;
                                             finalPercent *= .95f;
+                                            i = j + 1;
                                             goto solved;
                                         }
                                         else if (list[j].High > positionEntryPrice + positionEntryPrice * closeX)
@@ -1201,26 +1222,24 @@ namespace Valloon.Trading.Backtest
                                             succeedCount++;
                                             totalProfit += closeX - 0.001f;
                                             finalPercent *= (float)(1 + .05 * p);
+                                            i = j + 1;
                                             goto solved;
                                         }
-                                        //i = j + 1;
                                     }
-                                    unknownCount++;
-                                    totalProfit -= (stopX + 0.002f) * lossX;
-                                    finalPercent *= .95f;
                                 solved:;
                                 }
-                                else if (buyOrSell == 2 && list[i - 3].RSI <= list[i - 2].RSI && list[i - 2].RSI >= minRSI && list[i - 2].RSI < maxRSI && list[i - 2].RSI - list[i - 1].RSI >= minDiff && (list[i - 2].RSI - list[i - 1].RSI) < maxDiff)
+                                else if (buyOrSell == 2 && list[i - 3].RSI <= list[i - 2].RSI && list[i - 1].RSI >= minRSI && list[i - 1].RSI < maxRSI && list[i - 2].RSI - list[i - 1].RSI >= minDiff && (list[i - 2].RSI - list[i - 1].RSI) < maxDiff)
                                 {
                                     tryCount++;
                                     float positionEntryPrice = list[i].Open;
-                                    for (int j = i; j < count && j < i + rsiLength * 3; j++)
+                                    for (int j = i; j < count; j++)
                                     {
                                         if (list[j].High > positionEntryPrice + positionEntryPrice * stopX)
                                         {
                                             failedCount++;
-                                            totalProfit -= (stopX + 0.002f) * lossX;
+                                            totalProfit -= stopX + 0.002f;
                                             finalPercent *= .95f;
+                                            i = j + 1;
                                             goto solved;
                                         }
                                         else if (list[j].Low < positionEntryPrice - positionEntryPrice * closeX)
@@ -1228,13 +1247,10 @@ namespace Valloon.Trading.Backtest
                                             succeedCount++;
                                             totalProfit += closeX - 0.001f;
                                             finalPercent *= (float)(1 + .05 * p);
+                                            i = j + 1;
                                             goto solved;
                                         }
-                                        //i = j + 1;
                                     }
-                                    unknownCount++;
-                                    totalProfit -= (stopX + 0.002f) * lossX;
-                                    finalPercent *= .95f;
                                 solved:;
                                 }
                             }
@@ -1243,7 +1259,7 @@ namespace Valloon.Trading.Backtest
                             if (failedCount > 0) score = (float)succeedCount / failedCount;
                             else score = succeedCount;
                             float avgProfit = 10000 * totalProfit / totalDays * (float)Math.Sqrt((closeX - 0.001f) / (stopX + 0.002f));
-                            string text = $"{minRSI} ~ {maxRSI}    {minDiff} / {maxDiff}    {closeX:F4}  /  {stopX:F4}    count = {tryCount}    {succeedCount}    {failedCount}    {unknownCount}    score = {score:F2} \t total = {totalProfit:F4} \t avg = {avgProfit:F4} \t final = {finalPercent:F4}";
+                            string text = $"{minRSI} ~ {maxRSI}    {minDiff} / {maxDiff}    <{buyOrSell}>    {closeX:F4}  /  {stopX:F4}    count = {tryCount}    {succeedCount}    {failedCount}    score = {score:F2} \t total = {totalProfit:F4} \t avg = {avgProfit:F4} \t final = {finalPercent:F4}";
                             if (finalPercent > 1 && succeedCount >= 2)
                             {
                                 Dictionary<string, object> dic = new Dictionary<string, object>
@@ -1255,7 +1271,6 @@ namespace Valloon.Trading.Backtest
                                     { "tryCount", tryCount },
                                     { "succeedCount", succeedCount },
                                     { "failedCount", failedCount },
-                                    { "unknownCount", unknownCount },
                                     { "score", score },
                                     { "totalProfit", totalProfit },
                                     { "avgProfit", avgProfit },
@@ -1273,8 +1288,8 @@ namespace Valloon.Trading.Backtest
                                     for (int i = 0; i < topListCount; i++)
                                     {
                                         if ((float)topList[i]["finalPercent"] > finalPercent ||
-                                                (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] < minDiff ||
-                                                (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] == minDiff && (float)topList[i]["maxDiff"] > maxDiff)
+                                                (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] > minDiff ||
+                                                (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] == minDiff && (float)topList[i]["maxDiff"] < maxDiff)
                                         {
                                             topList.Insert(i, dic);
                                             goto topListEnd;
@@ -1289,10 +1304,10 @@ namespace Valloon.Trading.Backtest
                                 }
                                 logger.WriteLine(text);
                             }
-                            else if (finalPercent > .5f)
-                            {
-                                Console.WriteLine(text);
-                            }
+                            //else if (finalPercent > .5f)
+                            //{
+                            //    Console.WriteLine(text);
+                            //}
                             if (tryCount < 2) goto next_minDiff;
                             if (succeedCount < 2) break;
                         }
@@ -1307,166 +1322,164 @@ namespace Valloon.Trading.Backtest
             return null;
         }
 
-
-        static string Benchmark2(int buyOrSell, float minRSI, float maxRSI, DateTime startTime, DateTime? endTime = null)
+        static string Benchmark2(List<BtcBin> list, int buyOrSell, float minRSI, float maxRSI)
         {
-            List<BtcBin> list = BtcDao.SelectAll(binSize);
+            minRSI = 30;
+            maxRSI = 35;
+
+            #region
             int count = list.Count;
-            const int rsiLength = 14;
-            {
-                List<TradeBin> binList = new List<TradeBin>();
-                foreach (BtcBin m in list)
-                {
-                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_XBTUSD, (decimal)m.Open, (decimal)m.High, (decimal)m.Low, (decimal)m.Close));
-                }
-                double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
-                for (int i = 0; i < count; i++)
-                {
-                    BtcBin m = list[i];
-                    m.RSI = (float)rsiArray[i];
-                }
-                list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp >= endTime.Value);
-                count = list.Count;
-            }
             int totalDays = (int)(list[count - 1].Timestamp - list[0].Timestamp).TotalDays;
-            Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  buyOrSell = {buyOrSell}    {minRSI} ~ {maxRSI}   ({list[0].Date} ~ {totalDays:N0} days)");
+            Logger logger = new Logger($"{ProcessName}  -  {DateTime.Now:yyyy-MM-dd  HH.mm.ss}  -  buyOrSell = {buyOrSell}    {minRSI} ~ {maxRSI}   ({list[0].Date} ~ {totalDays:N0} days)");
             logger.WriteLine("\n" + logger.LogFilename + "\n");
             logger.WriteLine($"{count} loaded. ({totalDays:N0} days)");
             Console.Title = logger.LogFilename;
-
             List<Dictionary<string, object>> topList = new List<Dictionary<string, object>>();
-            //List<Dictionary<string, float>> top0List = new List<Dictionary<string, float>>();
-
-            for (float minDiff = 0f; minDiff < 20f; minDiff += 1f)
-            //float minDiff = 9.5f;
+            #endregion
+            //for (float minDiff2 = -30f; minDiff2 < 10f; minDiff2 += 1)
+            float minDiff2 = -23;
             {
-                logger.WriteLine($"\n\n----    minDiff = {minDiff}    ----\n");
-                for (float stopX = 0.002f; stopX < 0.02f; stopX += 0.001f)
-                //float stopX = 0.0135f;
+                //for (float maxDiff2 = 40; maxDiff2 > minDiff2 + 1; maxDiff2 -= 1)
+                float maxDiff2 = 0;
                 {
-                    for (float closeX = stopX; closeX < 0.02f; closeX += 0.001f)
-                    //float closeX = 0.0075f;
+                    for (float minDiff = -25f; minDiff < 5; minDiff += .5f)
+                    //float minDiff = 0.5f;
                     {
-                        int tryCount = 0, succeedCount = 0, failedCount = 0, unknownCount = 0;
-                        float totalProfit = 0;
-                        float finalPercent = 1;
-                        double p = (closeX - 0.001) / (stopX + 0.002);
-                        for (int i = 3; i < count - 1; i++)
+                        for (float maxDiff = 20; maxDiff > minDiff + 1; maxDiff -= .5f)
+                        //float maxDiff = 3.5f;
                         {
-                            if (buyOrSell == 1 && list[i - 2].RSI >= minRSI && list[i - 2].RSI < maxRSI && list[i - 2].RSI - list[i - 1].RSI >= minDiff)
+                            for (float stopX = 0.003f; stopX < 0.0105f; stopX += 0.001f)
+                            //float stopX = 0.004f;
                             {
-                                tryCount++;
-                                float positionEntryPrice = list[i].Open;
-                                for (int j = i; j < count && j < i + rsiLength * 24; j++)
+                                for (float closeX = 0.005f; closeX < 0.0105f; closeX += .001f)
+                                //float closeX = 0.01f;
                                 {
-                                    if (list[j].High > positionEntryPrice + positionEntryPrice * stopX)
+                                    int tryCount = 0, succeedCount = 0, failedCount = 0;
+                                    float totalProfit = 0;
+                                    float finalPercent = 1;
+                                    double p = (closeX - 0.001) / (stopX + 0.002);
+                                    for (int i = 3; i < count - 1; i++)
                                     {
-                                        failedCount++;
-                                        totalProfit -= (stopX + 0.002f) * lossX;
-                                        finalPercent *= .95f;
-                                        goto solved;
+                                        if (buyOrSell == 1 && list[i - 1].RSI >= minRSI && list[i - 1].RSI < maxRSI && list[i - 1].RSI - list[i - 2].RSI >= minDiff && (list[i - 1].RSI - list[i - 2].RSI) < maxDiff && list[i - 1].RSI - list[i - 3].RSI >= minDiff2 && (list[i - 1].RSI - list[i - 3].RSI) < maxDiff2)
+                                        {
+                                            tryCount++;
+                                            float positionEntryPrice = list[i].Open;
+                                            for (int j = i; j < count; j++)
+                                            {
+                                                if (list[j].Low < positionEntryPrice - positionEntryPrice * stopX)
+                                                {
+                                                    failedCount++;
+                                                    totalProfit -= stopX + 0.002f;
+                                                    finalPercent *= .95f;
+                                                    i = j + 1;
+                                                    goto solved;
+                                                }
+                                                else if (list[j].High > positionEntryPrice + positionEntryPrice * closeX)
+                                                {
+                                                    succeedCount++;
+                                                    totalProfit += closeX - 0.001f;
+                                                    finalPercent *= (float)(1 + .05 * p);
+                                                    i = j + 1;
+                                                    goto solved;
+                                                }
+                                            }
+                                        solved:;
+                                        }
+                                        else if (buyOrSell == 2 && list[i - 1].RSI >= minRSI && list[i - 1].RSI < maxRSI && list[i - 2].RSI - list[i - 1].RSI >= minDiff && (list[i - 2].RSI - list[i - 1].RSI) < maxDiff && list[i - 3].RSI - list[i - 1].RSI >= minDiff2 && (list[i - 3].RSI - list[i - 1].RSI) < maxDiff2)
+                                        {
+                                            tryCount++;
+                                            float positionEntryPrice = list[i].Open;
+                                            for (int j = i; j < count; j++)
+                                            {
+                                                if (list[j].High > positionEntryPrice + positionEntryPrice * stopX)
+                                                {
+                                                    failedCount++;
+                                                    totalProfit -= stopX + 0.002f;
+                                                    finalPercent *= .95f;
+                                                    i = j + 1;
+                                                    goto solved;
+                                                }
+                                                else if (list[j].Low < positionEntryPrice - positionEntryPrice * closeX)
+                                                {
+                                                    succeedCount++;
+                                                    totalProfit += closeX - 0.001f;
+                                                    finalPercent *= (float)(1 + .05 * p);
+                                                    i = j + 1;
+                                                    goto solved;
+                                                }
+                                            }
+                                        solved:;
+                                        }
                                     }
-                                    else if (list[j].Low < positionEntryPrice - positionEntryPrice * closeX)
+                                    //float score = succeedCount - failedCount * stopX / closeX * lossX;
+                                    float score;
+                                    if (failedCount > 0) score = (float)succeedCount / failedCount;
+                                    else score = succeedCount;
+                                    float avgProfit = 10000 * totalProfit / totalDays * (float)Math.Sqrt((closeX - 0.001f) / (stopX + 0.002f));
+                                    string text = $"{minRSI} ~ {maxRSI}    {minDiff2} / {maxDiff2}    {minDiff} / {maxDiff}    <{buyOrSell}>    {closeX:F4}  /  {stopX:F4}    count = {tryCount}    {succeedCount}    {failedCount}    score = {score:F2} \t total = {totalProfit:F4} \t avg = {avgProfit:F4} \t final = {finalPercent:F4}";
+                                    if (finalPercent > 1 && succeedCount >= 2)
                                     {
-                                        succeedCount++;
-                                        totalProfit += closeX - 0.001f;
-                                        finalPercent *= (float)(1 + .05 * p);
-                                        goto solved;
+                                        Dictionary<string, object> dic = new Dictionary<string, object>
+                                        {
+                                            { "minRSI", minRSI },
+                                            { "maxRSI", maxRSI },
+                                            { "minDiff2", minDiff2 },
+                                            { "maxDiff2", maxDiff2 },
+                                            { "minDiff", minDiff },
+                                            { "maxDiff", maxDiff },
+                                            { "buyOrSell", buyOrSell },
+                                            { "closeX", closeX },
+                                            { "stopX", stopX },
+                                            { "tryCount", tryCount },
+                                            { "succeedCount", succeedCount },
+                                            { "failedCount", failedCount },
+                                            { "score", score },
+                                            { "totalProfit", totalProfit },
+                                            { "avgProfit", avgProfit },
+                                            { "finalPercent", finalPercent },
+                                            { "text", text },
+                                        };
+                                        int topListCount = topList.Count;
+                                        if (topListCount > 0)
+                                        {
+                                            while (topListCount > 1000)
+                                            {
+                                                topList.RemoveAt(0);
+                                                topListCount--;
+                                            }
+                                            for (int i = 0; i < topListCount; i++)
+                                            {
+                                                if ((float)topList[i]["finalPercent"] > finalPercent ||
+                                                        (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] > minDiff ||
+                                                        (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] == minDiff && (float)topList[i]["maxDiff"] < maxDiff ||
+                                                        (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] == minDiff && (float)topList[i]["maxDiff"] == maxDiff && (float)topList[i]["minDiff2"] > minDiff2 ||
+                                                        (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] == minDiff && (float)topList[i]["maxDiff"] == maxDiff && (float)topList[i]["minDiff2"] == minDiff2 && (float)topList[i]["maxDiff2"] < maxDiff2)
+                                                {
+                                                    topList.Insert(i, dic);
+                                                    goto topListEnd;
+                                                }
+                                            }
+                                            topList.Add(dic);
+                                        topListEnd:;
+                                        }
+                                        else
+                                        {
+                                            topList.Add(dic);
+                                        }
+                                        logger.WriteLine(text);
                                     }
-                                    //i = j + 1;
+                                    //else if (finalPercent > .5f)
+                                    //{
+                                    //    Console.WriteLine(text);
+                                    //}
+                                    if (tryCount < 2) goto next_minDiff;
+                                    if (succeedCount < 2) break;
                                 }
-                                unknownCount++;
-                                totalProfit -= (stopX + 0.002f) * lossX;
-                                finalPercent *= .95f;
-                            solved:;
-                            }
-                            else if (buyOrSell == 2 && list[i - 2].RSI >= minRSI && list[i - 2].RSI < maxRSI && list[i - 1].RSI - list[i - 2].RSI >= minDiff)
-                            {
-                                tryCount++;
-                                float positionEntryPrice = list[i].Open;
-                                for (int j = i; j < count && j < i + rsiLength * 24; j++)
-                                {
-                                    if (list[j].Low < positionEntryPrice - positionEntryPrice * stopX)
-                                    {
-                                        failedCount++;
-                                        totalProfit -= (stopX + 0.002f) * lossX;
-                                        finalPercent *= .95f;
-                                        goto solved;
-                                    }
-                                    else if (list[j].High > positionEntryPrice + positionEntryPrice * closeX)
-                                    {
-                                        succeedCount++;
-                                        totalProfit += closeX - 0.001f;
-                                        finalPercent *= (float)(1 + .05 * p);
-                                        goto solved;
-                                    }
-                                    //i = j + 1;
-                                }
-                                unknownCount++;
-                                totalProfit -= (stopX + 0.002f) * lossX;
-                                finalPercent *= .95f;
-                            solved:;
                             }
                         }
-                        //float score = succeedCount - failedCount * stopX / closeX * lossX;
-                        float score;
-                        if (failedCount > 0) score = (float)succeedCount / failedCount;
-                        else score = succeedCount;
-                        float avgProfit = 10000 * totalProfit / totalDays * (float)Math.Sqrt((closeX - 0.001f) / (stopX + 0.002f));
-                        string text = $"{minRSI} ~ {maxRSI}    minDiff = {minDiff}    {closeX:F4}  /  {stopX:F4}    count = {tryCount}    {succeedCount}    {failedCount}    {unknownCount}    score = {score:F2} \t total = {totalProfit:F4} \t avg = {avgProfit:F4} \t final = {finalPercent:F4}";
-                        if (finalPercent > 1 && succeedCount >= 2)
-                        {
-                            Dictionary<string, object> dic = new Dictionary<string, object>
-                                {
-                                    { "minDiff", minDiff },
-                                    { "closeX", closeX },
-                                    { "stopX", stopX },
-                                    { "tryCount", tryCount },
-                                    { "succeedCount", succeedCount },
-                                    { "failedCount", failedCount },
-                                    { "unknownCount", unknownCount },
-                                    { "score", score },
-                                    { "totalProfit", totalProfit },
-                                    { "avgProfit", avgProfit },
-                                    { "finalPercent", finalPercent },
-                                    { "text", text },
-                                };
-                            int topListCount = topList.Count;
-                            if (topListCount > 0)
-                            {
-                                while (topListCount > 1000)
-                                {
-                                    topList.RemoveAt(0);
-                                    topListCount--;
-                                }
-                                for (int i = 0; i < topListCount; i++)
-                                {
-                                    if ((float)topList[i]["finalPercent"] > finalPercent ||
-                                            (float)topList[i]["finalPercent"] == finalPercent && (float)topList[i]["minDiff"] < minDiff)
-                                    {
-                                        topList.Insert(i, dic);
-                                        goto topListEnd;
-                                    }
-                                }
-                                topList.Add(dic);
-                            topListEnd:;
-                            }
-                            else
-                            {
-                                topList.Add(dic);
-                            }
-                            logger.WriteLine(text);
-                        }
-                        else
-                        //if (finalPercent > .5f)
-                        {
-                            Console.WriteLine(text);
-                        }
-                        if (tryCount < 2) goto next_minDiff;
-                        if (succeedCount < 2) break;
+                    next_minDiff:;
                     }
                 }
-            next_minDiff:;
             }
             logger.WriteLine($"\r\n\r\n\r\n\r\ntopList={topList.Count}\r\n" + JArray.FromObject(topList).ToString());
             //logger.WriteLine($"\r\n\r\n\r\n\r\ntop0List={top0List.Count}\r\n" + JArray.FromObject(top0List).ToString());
@@ -1476,39 +1489,59 @@ namespace Valloon.Trading.Backtest
         }
 
 
+
         public class ParamMap
         {
+            public string ID { get; set; }
             public int BuyOrSell { get; set; }
             public decimal MinRSI { get; set; }
             public decimal MaxRSI { get; set; }
+            public decimal MinDiff2 { get; set; }
+            public decimal MaxDiff2 { get; set; }
             public decimal MinDiff { get; set; }
             public decimal MaxDiff { get; set; }
             public decimal CloseX { get; set; }
             public decimal StopX { get; set; }
             public decimal QtyX { get; set; }
+
+            public int SucceedCount { get; set; }
+            public int FailedCount { get; set; }
         }
 
         static string Simulate(DateTime startTime, DateTime? endTime = null)
         {
             ParamMap[] paramMapArray;
             {
-                string paramText = @"2	87.5	100	-1	14	0.0075	0.0135	0.65
-2	82.5	87.5	0	2	0.0048	0.0036	1.79
-2	82.5	87.5	2	6.5	0.003	0.0057	1.3
-2	82.5	87.5	6.5	9.5	0.0115	0.0095	0.87
-2	82.5	87.5	9.5	15	0.003	0.009	0.91
-2	78.5	82.5	-0.4	10.3	0.0088	0.0036	1.78
-2	73.5	78.5	-0.2	0.15	0.0062	0.0055	1.33
-2	72.5	78.5	1	1.2	0.0098	0.0031	1.96
-2	71.5	78.5	-0.6	-0.3	0.0035	0.003	2
-2	70	78.5	0.24	0.53	0.0094	0.0027	2.13
-2	70	78.5	0.39	0.55	0.0033	0.0025	2.22
-1	0	16	-0.5	5.3	0.0085	0.0045	1.54
-1	0	16	5.3	12.5	0.0095	0.0115	0.74
-1	16	17.6	-0.5	7.5	0.008	0.0115	0.74
-1	17.6	19.9	-0.1	4.6	0.0105	0.003	2
-1	19.9	22.7	0.84	2.75	0.006	0.016	0.56
-1	22.7	27.2	1.52	2.46	0.0037	0.012	0.71
+                string paramText = @"1	1	0	10	-15	0	-5	-1	0.01	0.008	1
+2	1	10	15	-5	5	-3	-1.5	0.01	0.008	1
+3	1	15	20	-25	-6	-10.5	-6.5	0.01	0.007	1.111111111
+4	1	20	25	-20	-10	-11	-8.5	0.008	0.007	1.111111111
+5	1	20	25	-5	0	2.5	5	0.01	0.01	0.833333333
+6	1	25	30	-15	-2	-0.5	1	0.01	0.01	0.833333333
+7	1	30	35	-7	-2	-10	-8	0.01	0.007	1.111111111
+8	1	30	35	-19	0	-18	-15.5	0.009	0.007	1.111111111
+9	1	30	35	-23	-13	-11	-9.5	0.01	0.01	0.833333333
+10	1	35	40	-25	-5	-18	-14.5	0.009	0.009	0.909090909
+11	1	35	40	-8	0	4	10	0.01	0.008	1
+12	1	40	45	-15	-10	-4.5	-3	0.01	0.01	0.833333333
+13	1	45	50	-22	10	-18	-13	0.01	0.009	0.909090909
+14	1	45	50	-22	-10	-9	-7.5	0.007	0.007	1.111111111
+15	1	45	50	-25	-10	-2.5	0.5	0.01	0.008	1
+16	1	50	55	6	9	-6.5	-2.5	0.009	0.01	0.833333333
+17	1	55	60	-14	-5	-16	-13	0.01	0.008	1
+18	1	55	60	-15	-8	-11	-9.5	0.008	0.009	0.909090909
+19	1	60	65	-7	9	-12	-9.5	0.01	0.003	2
+20	1	65	70	-13	2	-13	-11.5	0.007	0.003	2
+21	1	65	70	2	5	4.5	8	0.009	0.009	0.909090909
+22	1	70	75	-20	-10	-20	-5	0.01	0.004	1.666666667
+23	1	70	75	-16	2	-7.5	-6	0.009	0.007	1.111111111
+24	1	70	75	1	5	-2	0.5	0.009	0.007	1.111111111
+25	1	75	80	-10	19	-7	-5	0.009	0.004	1.666666667
+26	1	75	80	-15	-4	-3.5	-2	0.007	0.004	1.666666667
+27	1	80	85	-5	4	-4.5	0.5	0.01	0.005	1.428571429
+28	1	80	85	-5	2	-2	11	0.01	0.006	1.25
+29	1	85	90	9	11	3	6.5	0.01	0.004	1.666666667
+30	1	90	100	7	33	0.5	3.5	0.01	0.003	2
 ";
                 string[] paramLines = paramText.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                 List<ParamMap> paramMapList = new List<ParamMap>();
@@ -1517,20 +1550,23 @@ namespace Valloon.Trading.Backtest
                     string[] paramValues = paramLine.Split(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
                     paramMapList.Add(new ParamMap
                     {
-                        BuyOrSell = Int32.Parse(paramValues[0]),
-                        MinRSI = decimal.Parse(paramValues[1]),
-                        MaxRSI = decimal.Parse(paramValues[2]),
-                        MinDiff = decimal.Parse(paramValues[3]),
-                        MaxDiff = decimal.Parse(paramValues[4]),
-                        CloseX = decimal.Parse(paramValues[5]),
-                        StopX = decimal.Parse(paramValues[6]),
-                        QtyX = decimal.Parse(paramValues[7]),
+                        ID = paramValues[0],
+                        BuyOrSell = Int32.Parse(paramValues[1]),
+                        MinRSI = decimal.Parse(paramValues[2]),
+                        MaxRSI = decimal.Parse(paramValues[3]),
+                        MinDiff2 = decimal.Parse(paramValues[4]),
+                        MaxDiff2 = decimal.Parse(paramValues[5]),
+                        MinDiff = decimal.Parse(paramValues[6]),
+                        MaxDiff = decimal.Parse(paramValues[7]),
+                        CloseX = decimal.Parse(paramValues[8]),
+                        StopX = decimal.Parse(paramValues[9]),
+                        QtyX = decimal.Parse(paramValues[10]),
                     });
                 }
                 paramMapArray = paramMapList.ToArray();
             }
 
-            List<BtcBin> list = BtcDao.SelectAll(binSize);
+            List<BtcBin> list = BtcDao.SelectAll("5m");
             int count = list.Count;
             {
                 const int rsiLength = 14;
@@ -1563,67 +1599,75 @@ namespace Valloon.Trading.Backtest
                 {
                     float closeX = (float)paramMap.CloseX;
                     float stopX = (float)paramMap.StopX;
-                    if (paramMap.BuyOrSell == 1 && paramMap.QtyX > 0 && list[i - 3].RSI > list[i - 2].RSI && list[i - 2].RSI >= (float)paramMap.MinRSI && list[i - 2].RSI < (float)paramMap.MaxRSI && list[i - 1].RSI - list[i - 2].RSI >= (float)paramMap.MinDiff && (list[i - 1].RSI - list[i - 2].RSI) < (float)paramMap.MaxDiff)
+                    if (paramMap.BuyOrSell == 1 && paramMap.QtyX > 0 && list[i - 1].RSI >= (float)paramMap.MinRSI && list[i - 1].RSI < (float)paramMap.MaxRSI && list[i - 1].RSI - list[i - 2].RSI >= (float)paramMap.MinDiff && (list[i - 1].RSI - list[i - 2].RSI) < (float)paramMap.MaxDiff && list[i - 1].RSI - list[i - 3].RSI >= (float)paramMap.MinDiff2 && (list[i - 1].RSI - list[i - 3].RSI) < (float)paramMap.MaxDiff2)
                     {
                         float positionEntryPrice = list[i].Open;
                         DateTime positionTime = list[i].Timestamp;
                         logger.WriteLine($"{list[i].Timestamp} \t position created: open = {list[i].Open}    high = {list[i].High}    low = {list[i].Low}    close = {list[i].Close}    rsi = {list[i - 2].RSI}    diff = {list[i - 1].RSI - list[i - 2].RSI}");
                         for (int j = i; j < count; j++)
                         {
-                            double p = (closeX - 0.001) / (stopX + 0.002);
+                            double p = (closeX - 0.0002) / (stopX + 0.001);
                             if (list[j].Low < positionEntryPrice - positionEntryPrice * stopX)
                             {
                                 failedCount++;
-                                totalProfit -= (stopX + 0.002f) * lossX;
+                                totalProfit -= (stopX + 0.001f) * lossX;
                                 finalPercent10 *= .95;
                                 finalPercent15 *= .925;
                                 finalPercent20 *= .9;
                                 positionEntryPrice = 0;
-                                logger.WriteLine($"{list[j].Timestamp} \t - failed ({(list[j].Timestamp - positionTime).TotalMinutes}) \t p = {p:F2} \t final = {finalPercent10:F2} \t final2 = {finalPercent20:F2}\r\n");
+                                logger.WriteLine($"{list[j].Timestamp} \t - failed on {paramMap.ID} ({(list[j].Timestamp - positionTime).TotalMinutes}) \t p = {p:F2} \t final = {finalPercent10:F2} \t final2 = {finalPercent20:F2}\r\n");
+                                paramMap.FailedCount++;
+                                //i = j + 1;
                                 break;
                             }
                             if (list[j].High > positionEntryPrice + positionEntryPrice * closeX)
                             {
                                 succeedCount++;
-                                totalProfit += closeX - 0.001f;
+                                totalProfit += closeX - 0.0002f;
                                 finalPercent10 *= 1 + .05 * p;
                                 finalPercent15 *= 1 + .075 * p;
                                 finalPercent20 *= 1 + .1 * p;
                                 positionEntryPrice = 0;
-                                logger.WriteLine($"{list[j].Timestamp} \t succeed ({(list[j].Timestamp - positionTime).TotalMinutes}) \t p = {p:F2} \t final = {finalPercent10:F2} / {finalPercent15:F2} / {finalPercent20:F2}\r\n");
+                                logger.WriteLine($"{list[j].Timestamp} \t succeed on {paramMap.ID} ({(list[j].Timestamp - positionTime).TotalMinutes}) \t p = {p:F2} \t final = {finalPercent10:F2} / {finalPercent15:F2} / {finalPercent20:F2}\r\n");
+                                paramMap.SucceedCount++;
+                                //i = j + 1;
                                 break;
                             }
                         }
                         break;
                     }
-                    if (paramMap.BuyOrSell == 2 && paramMap.QtyX > 0 && list[i - 3].RSI < list[i - 2].RSI && list[i - 2].RSI >= (float)paramMap.MinRSI && list[i - 2].RSI < (float)paramMap.MaxRSI && list[i - 2].RSI - list[i - 1].RSI >= (float)paramMap.MinDiff && (list[i - 2].RSI - list[i - 1].RSI) < (float)paramMap.MaxDiff)
+                    if (paramMap.BuyOrSell == 2 && paramMap.QtyX > 0 && list[i - 1].RSI >= (float)paramMap.MinRSI && list[i - 1].RSI < (float)paramMap.MaxRSI && list[i - 2].RSI - list[i - 1].RSI >= (float)paramMap.MinDiff && (list[i - 2].RSI - list[i - 1].RSI) < (float)paramMap.MaxDiff && list[i - 3].RSI - list[i - 1].RSI >= (float)paramMap.MinDiff2 && (list[i - 3].RSI - list[i - 1].RSI) < (float)paramMap.MaxDiff2)
                     {
                         float positionEntryPrice = list[i].Open;
                         DateTime positionTime = list[i].Timestamp;
                         logger.WriteLine($"{list[i].Timestamp} \t position created: open = {list[i].Open}    high = {list[i].High}    low = {list[i].Low}    close = {list[i].Close}    rsi = {list[i - 2].RSI}    diff = {list[i - 1].RSI - list[i - 2].RSI}");
                         for (int j = i; j < count; j++)
                         {
-                            double p = (closeX - 0.001) / (stopX + 0.002);
+                            double p = (closeX - 0.0002) / (stopX + 0.001);
                             if (list[j].High > positionEntryPrice + positionEntryPrice * stopX)
                             {
                                 failedCount++;
-                                totalProfit -= (stopX + 0.002f) * lossX;
+                                totalProfit -= (stopX + 0.001f) * lossX;
                                 finalPercent10 *= .95;
                                 finalPercent15 *= .925;
                                 finalPercent20 *= .9;
                                 positionEntryPrice = 0;
-                                logger.WriteLine($"{list[j].Timestamp} \t - failed ({(list[j].Timestamp - positionTime).TotalMinutes}) \t p = {p:F2} \t final = {finalPercent10:F2} / {finalPercent15:F2} / {finalPercent20:F2}\r\n");
+                                logger.WriteLine($"{list[j].Timestamp} \t - failed on {paramMap.ID} ({(list[j].Timestamp - positionTime).TotalMinutes}) \t p = {p:F2} \t final = {finalPercent10:F2} / {finalPercent15:F2} / {finalPercent20:F2}\r\n");
+                                paramMap.FailedCount++;
+                                //i = j + 1;
                                 break;
                             }
                             if (list[j].Low < positionEntryPrice - positionEntryPrice * closeX)
                             {
                                 succeedCount++;
-                                totalProfit += closeX - 0.001f;
+                                totalProfit += closeX - 0.0002f;
                                 finalPercent10 *= 1 + .05 * p;
                                 finalPercent15 *= 1 + .075 * p;
                                 finalPercent20 *= 1 + .1 * p;
                                 positionEntryPrice = 0;
-                                logger.WriteLine($"{list[j].Timestamp} \t succeed ({(list[j].Timestamp - positionTime).TotalMinutes}) \t p = {p:F2} \t final = {finalPercent10:F2} / {finalPercent15:F2} / {finalPercent20:F2}\r\n");
+                                logger.WriteLine($"{list[j].Timestamp} \t succeed on {paramMap.ID} ({(list[j].Timestamp - positionTime).TotalMinutes}) \t p = {p:F2} \t final = {finalPercent10:F2} / {finalPercent15:F2} / {finalPercent20:F2}\r\n");
+                                paramMap.SucceedCount++;
+                                //i = j + 1;
                                 break;
                             }
                         }
@@ -1634,6 +1678,10 @@ namespace Valloon.Trading.Backtest
             float avgProfit = totalProfit / totalDays;
             string result = $"\r\nsucceed = {succeedCount} \t failed = {failedCount} \t total = {totalProfit:F8} \t avg = {avgProfit:F8} \t final = {finalPercent10:F2} / {finalPercent15:F2} / {finalPercent20:F2}\r\n";
             logger.WriteLine(result);
+            foreach (ParamMap paramMap in paramMapArray)
+            {
+                logger.WriteLine($"{paramMap.ID} \t {paramMap.MinRSI} ~ {paramMap.MaxRSI} \t {paramMap.SucceedCount} \t {paramMap.FailedCount}");
+            }
             return result;
         }
 

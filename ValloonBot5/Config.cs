@@ -27,17 +27,32 @@ namespace Valloon.Trading
         [JsonProperty("testnet_mode")]
         public bool TestnetMode { get; set; }
 
+        [JsonProperty("symbol")]
+        public string Symbol { get; set; }
+
         [JsonProperty("leverage")]
         public decimal Leverage { get; set; } = 1;
 
+        [JsonProperty("buy_or_sell")]
+        public int BuyOrSell { get; set; } = 3;
+
         [JsonProperty("qty")]
-        public int Qty { get; set; } = 100;
+        public int Qty { get; set; }
 
-        [JsonProperty("limit_height")]
-        public int LimitHeight { get; set; } = 100;
+        [JsonProperty("start_price")]
+        public decimal StartPrice { get; set; }
 
-        [JsonProperty("close_height")]
-        public int CloseHeight { get; set; } = 100;
+        [JsonProperty("price_height")]
+        public decimal PriceHeight { get; set; }
+
+        [JsonProperty("min_price")]
+        public decimal MinPrice { get; set; }
+
+        [JsonProperty("max_price")]
+        public decimal MaxPrice { get; set; }
+
+        [JsonProperty("interval")]
+        public int Interval { get; set; } = 30;
 
         [JsonProperty("exit")]
         public int Exit { get; set; }

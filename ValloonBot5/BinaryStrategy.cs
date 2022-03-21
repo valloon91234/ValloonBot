@@ -46,7 +46,7 @@ namespace Valloon.Trading
                         logger.WriteLine(JObject.FromObject(config).ToString(Formatting.Indented));
                         logger.WriteLine();
                     }
-                    Margin margin = apiHelper.GetMargin();
+                    Margin margin = apiHelper.GetMargin(BitMEXApiHelper.CURRENCY_XBt);
                     decimal walletBalance = margin.WalletBalance.Value / 100000000m;
                     List<Order> activeOrderList = apiHelper.GetActiveOrders(SYMBOL);
                     List<TradeBin> binList = apiHelper.GetBinList("5m", false, SYMBOL, 1000, null, true);
@@ -148,7 +148,7 @@ namespace Valloon.Trading
                                 continue;
                             }
 
-                            List<Order> lastFilledOrders = apiHelper.GetOrders("{\"ordStatus\":\"Filled\"}");
+                            List<Order> lastFilledOrders = apiHelper.GetFilledOrders(SYMBOL);
                             Order lastFilledStopOrder = null;
                             foreach (Order order in lastFilledOrders)
                             {
@@ -323,7 +323,7 @@ namespace Valloon.Trading
 
                     lastCandle = binList[0];
 
-                    margin = apiHelper.GetMargin();
+                    margin = apiHelper.GetMargin(BitMEXApiHelper.CURRENCY_XBt);
                     walletBalance = margin.WalletBalance.Value / 100000000m;
                     if (lastWalletBalance != walletBalance)
                     {

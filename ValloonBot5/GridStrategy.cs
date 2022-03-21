@@ -21,9 +21,10 @@ namespace Valloon.Trading
 
         public void Run(Config config = null)
         {
-            const string SYMBOL = BitMEXApiHelper.SYMBOL_XBTUSD;
             int loopIndex = 0;
             DateTime? lastLoopTime = null;
+            bool lastBusy = false;
+            bool stopMode = false;
             int prevPrice = 0;
             decimal lastWalletBalance = 0;
             Logger logger = null;
@@ -45,13 +46,47 @@ namespace Valloon.Trading
                         logger.WriteLine(JObject.FromObject(config).ToString(Formatting.Indented));
                         logger.WriteLine();
                     }
-                    Margin margin = apiHelper.GetMargin();
+                    string symbol = config.Symbol.ToUpper();
+                    Margin margin = apiHelper.GetMargin(BitMEXApiHelper.CURRENCY_XBt);
                     decimal walletBalance = margin.WalletBalance.Value / 100000000m;
-                    List<Order> activeOrderList = apiHelper.GetActiveOrders(SYMBOL);
-
-                    Instrument instrument = apiHelper.GetInstrument(SYMBOL);
+                    List<Order> activeOrderList = apiHelper.GetActiveOrders(symbol);
+                    Instrument instrument = apiHelper.GetInstrument(symbol);
                     decimal lastPrice = instrument.LastPrice.Value;
                     decimal markPrice = instrument.MarkPrice.Value;
+                    Position position = apiHelper.GetPosition(symbol);
+                    decimal positionEntryPrice = 0;
+                    int positionQty = 0;
+                    if (symbol == "XBTUSD")
+                    {
+                        if (config.PriceHeight < 10)
+                        {
+                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Height is too low for {symbol}. Height = {config.PriceHeight}", ConsoleColor.Red);
+                            goto endLoop;
+                        }
+                        if (config.MinPrice < 10000 || config.MinPrice >= config.MaxPrice)
+                        {
+                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Invalid MinPrice or MaxPrice for {symbol}.", ConsoleColor.Red);
+                            goto endLoop;
+                        }
+                    }
+                    else if (symbol == "SOLUSD")
+                    {
+                        if (config.PriceHeight > 50)
+                        {
+                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Height is too high for {symbol}. Height = {config.PriceHeight}", ConsoleColor.Red);
+                            goto endLoop;
+                        }
+                        if (config.MinPrice > 10000 || config.MinPrice >= config.MaxPrice)
+                        {
+                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Invalid MinPrice or MaxPrice for {symbol}.", ConsoleColor.Red);
+                            goto endLoop;
+                        }
+                    }
+                    else
+                    {
+                        logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Invalid symbol: {symbol}.", ConsoleColor.Red);
+                        goto endLoop;
+                    }
                     List<Order> botOrderList = new List<Order>();
                     foreach (Order order in activeOrderList)
                         if (order.Text.Contains("<BOT>")) botOrderList.Add(order);
@@ -68,9 +103,6 @@ namespace Valloon.Trading
                         }
                         logger.WriteLine($"[{BitMEXApiHelper.ServerTime:yyyy-MM-dd  HH:mm:ss fff}  ({++loopIndex})]    $ {lastPrice:F2}  /  $ {markPrice:F3}    {walletBalance:N8} XBT    {botOrderList.Count} / {activeOrderList.Count} / {unavailableMarginPercent:N2} %{balanceChange}", ConsoleColor.White);
                     }
-                    Position position = apiHelper.GetPosition(SYMBOL);
-                    decimal positionEntryPrice = 0;
-                    int positionQty = 0;
                     {
                         string consoleTitle = $"$ {lastPrice:N2}  /  {walletBalance:N8} XBT";
                         if (position != null && position.CurrentQty.Value != 0) consoleTitle += "  /  1 Position";
@@ -87,6 +119,8 @@ namespace Valloon.Trading
                         }
                     }
 
+                    if (config.Exit == 2)
+                        goto endLoop;
                     if (positionQty == 0)
                     {
                         bool exit = false;
@@ -97,7 +131,7 @@ namespace Valloon.Trading
                             exist = true;
                         } else 
 #endif
-                        if (config.Exit > 0)
+                        if (config.Exit == 1)
                         {
                             logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  No order. (exit = {config.Exit})", ConsoleColor.DarkGray);
                             exit = true;
@@ -119,142 +153,169 @@ namespace Valloon.Trading
                                 int canceledCount = apiHelper.CancelOrders(cancelOrderList).Count;
                                 logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  {canceledCount} old orders have been canceled.");
                             }
-                            Logger.WriteWait("", 60, 5);
-                            continue;
+                            goto endLoop;
                         }
                     }
 
-                    Order oldLimitOrder = null;
-                    foreach (Order order in botOrderList)
+                    decimal height = config.PriceHeight;
+                    if (lastBusy)
                     {
-                        if (order.Side == "Buy")
+                        logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  lastBusy");
+                        lastBusy = prevPrice - lastPrice > height || lastPrice - prevPrice > height;
+                    }
+                    else if (config.BuyOrSell == 1)
+                    {
+                        Order oldLimitOrder = null;
+                        foreach (Order order in botOrderList)
                         {
-                            oldLimitOrder = order;
-                            break;
-                        }
-                    }
-
-                    if (prevPrice == 0)
-                    {
-                    }
-                    else if (prevPrice - lastPrice > config.LimitHeight)
-                    {
-                        logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  price is falling. diff = {lastPrice - prevPrice}");
-                        if (oldLimitOrder != null) apiHelper.CancelOrder(oldLimitOrder.OrderID);
-                    }
-                    else if (lastPrice - prevPrice > config.CloseHeight)
-                    {
-                        logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  price is rising. diff = {lastPrice - prevPrice}");
-                    }
-                    else
-                    {
-                        List<Order> lastFilledOrders = apiHelper.GetOrders(SYMBOL, "{\"ordStatus\":\"Filled\"}");
-                        Order lastFilledOrder = null;
-                        foreach (Order order in lastFilledOrders)
-                        {
-                            if (order.Text.Contains("<GRID-LIMIT>"))
+                            if (order.Side == "Buy")
                             {
-                                lastFilledOrder = order;
+                                oldLimitOrder = order;
                                 break;
                             }
                         }
 
-                        int limitPrice = 0, closePrice = 0;
-                        if (positionQty <= 0 || botOrderList.Count < 1)
+                        if (prevPrice > 0 && prevPrice - lastPrice > height)
                         {
-                            limitPrice = (int)lastPrice / config.LimitHeight * config.LimitHeight;
+                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  price is falling. diff = {lastPrice - prevPrice}");
+                            if (oldLimitOrder != null) apiHelper.CancelOrder(oldLimitOrder.OrderID);
                         }
-                        else if (lastFilledOrder == null)
+                        else if (prevPrice > 0 && lastPrice - prevPrice > height)
                         {
-                            limitPrice = (int)lastPrice / config.LimitHeight * config.LimitHeight;
-                            closePrice = limitPrice + config.CloseHeight;
+                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  price is rising. diff = {lastPrice - prevPrice}");
                         }
-                        else if (lastFilledOrder.Side == "Buy")
+                        else if (stopMode || lastPrice < config.MinPrice)
                         {
-                            limitPrice = (int)lastPrice / config.LimitHeight * config.LimitHeight;
-                            closePrice = (int)lastFilledOrder.Price.Value + config.CloseHeight;
-                            if (limitPrice >= (int)lastFilledOrder.Price.Value) limitPrice = 0;
-                            while (closePrice <= lastPrice)
+                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  price < MinPrice. stopMode = {stopMode}");
+                            stopMode = true;
+                        }
+                        else if (lastPrice > config.MaxPrice)
+                        {
+                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  price > MaxPrice.");
+                        }
+                        else
+                        {
+                            lastBusy = false;
+                            List<Order> lastFilledOrders = apiHelper.GetFilledOrders(symbol);
+                            Order lastFilledOrder = null;
+                            foreach (Order order in lastFilledOrders)
                             {
-                                closePrice += config.CloseHeight;
-                            }
-                        }
-                        else if (lastFilledOrder.Side == "Sell")
-                        {
-                            limitPrice = (int)lastPrice / config.LimitHeight * config.LimitHeight;
-                            closePrice = (int)lastFilledOrder.Price.Value + config.LimitHeight;
-                            if (limitPrice >= (int)lastFilledOrder.Price.Value) limitPrice = 0;
-                            while (closePrice <= lastPrice)
-                            {
-                                closePrice += config.CloseHeight;
-                            }
-                        }
-
-                        //if (limitPrice > 0 && lastPrice - limitPrice < config.LimitHeight / 2) limitPrice = 0;
-                        if (closePrice > 0)
-                        {
-                            int closeQtySum = 0;
-                            foreach (Order order in activeOrderList)
-                            {
-                                if (order.Side == "Sell") closeQtySum += order.OrderQty.Value;
-                            }
-                            if (closeQtySum >= positionQty) closePrice = 0;
-                        }
-
-                        foreach (Order order in botOrderList)
-                        {
-                            if (order.Side == "Buy" && order.Price.Value == limitPrice) limitPrice = 0;
-                            if (order.Side == "Sell" && order.Price.Value == closePrice) closePrice = 0;
-                        }
-
-                        if (limitPrice > 0)
-                        {
-                            if (oldLimitOrder == null)
-                            {
-                                Order newOrder = apiHelper.OrderNew(new Order
+                                if (order.Text.Contains("<GRID-LIMIT>") && order.Text.Contains($"<H={height}>"))
                                 {
-                                    Symbol = SYMBOL,
-                                    Side = "Buy",
-                                    OrderQty = config.Qty,
-                                    Price = limitPrice,
+                                    lastFilledOrder = order;
+                                    break;
+                                }
+                            }
+
+                            decimal limitPrice = config.StartPrice, closePrice = 0;
+                            while (limitPrice >= lastPrice)
+                                limitPrice -= config.PriceHeight;
+                            if (positionQty <= 0)
+                            {
+                            }
+                            else if (lastFilledOrder == null)
+                            {
+                                closePrice = positionEntryPrice + height;
+                            }
+                            else if (lastFilledOrder.Side == "Buy")
+                            {
+                                //limitPrice = lastFilledOrder.Price.Value - height;
+                                closePrice = lastFilledOrder.Price.Value + height;
+                                if (limitPrice > lastFilledOrder.Price.Value - height / 2)
+                                {
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  No new limit order. limitPrice = {limitPrice}, lastFilledShort = {lastFilledOrder.Price.Value}");
+                                    limitPrice = 0;
+                                }
+                                while (closePrice <= lastPrice)
+                                {
+                                    closePrice += height;
+                                }
+                            }
+                            else if (lastFilledOrder.Side == "Sell")
+                            {
+                                //limitPrice = lastFilledOrder.Price.Value - height;
+                                closePrice = lastFilledOrder.Price.Value + height;
+                                if (limitPrice > lastFilledOrder.Price.Value - height / 2)
+                                {
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  No new limit order. limitPrice = {limitPrice}, lastFilledShort = {lastFilledOrder.Price.Value}");
+                                    limitPrice = 0;
+                                }
+                                while (closePrice <= lastPrice)
+                                {
+                                    closePrice += height;
+                                }
+                            }
+
+                            //if (closePrice - lastPrice < height / 2)
+                            //    closePrice = 0;
+                            int closeQty = config.Qty;
+                            if (closePrice > 0)
+                            {
+                                int closeQtySum = 0;
+                                foreach (Order order in activeOrderList)
+                                {
+                                    if (order.Side == "Sell") closeQtySum += order.OrderQty.Value;
+                                }
+                                if (closeQtySum >= positionQty) closeQty = 0;
+                                if (positionQty - closeQtySum < closeQty) closeQty = positionQty - closeQtySum;
+                            }
+
+                            foreach (Order order in botOrderList)
+                            {
+                                if (order.Side == "Buy" && order.Price.Value == limitPrice) limitPrice = 0;
+                                if (order.Side == "Sell" && order.Price.Value == closePrice) closePrice = 0;
+                            }
+
+                            if (limitPrice > 0)
+                            {
+                                if (oldLimitOrder == null)
+                                {
+                                    Order newOrder = apiHelper.OrderNew(new Order
+                                    {
+                                        Symbol = symbol,
+                                        Side = "Buy",
+                                        OrderQty = config.Qty,
+                                        Price = limitPrice,
+                                        OrdType = "Limit",
+                                        Text = $"<BOT><GRID-LIMIT><H={height}></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New limit order created: qty = {config.Qty}, price = {limitPrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                }
+                                else if (oldLimitOrder.Price.Value != limitPrice)
+                                {
+                                    //Order newOrder = apiHelper.OrderAmend(new Order()
+                                    //{
+                                    //    OrderID = oldLimitOrder.OrderID,
+                                    //    OrderQty = config.Qty,
+                                    //    Price = limitPrice,
+                                    //    Text = $"<BOT><GRID-LIMIT><H={height}></BOT>",
+                                    //});
+                                    //logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New limit order amended: qty = {oldLimitOrder.OrderQty}, price = {oldLimitOrder.Price.Value}  ->  {limitPrice}");
+                                    //logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                }
+                            }
+                            if (closePrice > 0 && closeQty > 0)
+                            {
+                                Order limitOrder = apiHelper.OrderNew(new Order
+                                {
+                                    Symbol = symbol,
+                                    Side = "Sell",
+                                    OrderQty = closeQty,
+                                    Price = closePrice,
                                     OrdType = "Limit",
-                                    Text = $"<BOT><GRID-LIMIT></BOT>",
+                                    ExecInst = "ReduceOnly",
+                                    Text = $"<BOT><GRID-LIMIT><CLOSE><H={height}></BOT>",
                                 });
-                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New limit order created: qty = {config.Qty}, price = {limitPrice}");
-                                logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
+                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New close order created: qty = {config.Qty}, price = {closePrice}");
+                                logger.WriteFile("--- " + JObject.FromObject(limitOrder).ToString(Formatting.None));
                             }
-                            else if (oldLimitOrder.Price.Value != limitPrice)
-                            {
-                                Order newOrder = apiHelper.OrderAmend(new Order()
-                                {
-                                    OrderID = oldLimitOrder.OrderID,
-                                    OrderQty = oldLimitOrder.OrderQty,
-                                    Price = limitPrice,
-                                    Text = $"<BOT><GRID-LIMIT></BOT>",
-                                });
-                                logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New limit order amended: qty = {oldLimitOrder.OrderQty}, price = {limitPrice}");
-                                logger.WriteFile("--- " + JObject.FromObject(newOrder).ToString(Formatting.None));
-                            }
-                        }
-                        if (closePrice > 0)
-                        {
-                            Order limitOrder = apiHelper.OrderNew(new Order
-                            {
-                                Symbol = SYMBOL,
-                                Side = "Sell",
-                                OrderQty = config.Qty,
-                                Price = closePrice,
-                                OrdType = "Limit",
-                                ExecInst = "ReduceOnly",
-                                Text = $"<BOT><GRID-LIMIT></BOT>",
-                            });
-                            logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New close order created: qty = {config.Qty}, price = {closePrice}");
-                            logger.WriteFile("--- " + JObject.FromObject(limitOrder).ToString(Formatting.None));
                         }
                     }
                     prevPrice = (int)lastPrice;
 
-                    margin = apiHelper.GetMargin();
+                endLoop:;
+                    margin = apiHelper.GetMargin(BitMEXApiHelper.CURRENCY_XBt);
                     walletBalance = margin.WalletBalance.Value / 100000000m;
                     if (lastWalletBalance != walletBalance)
                     {
@@ -270,7 +331,7 @@ namespace Valloon.Trading
                         lastWalletBalance = walletBalance;
                     }
 
-                    int waitSeconds = 30;
+                    int waitSeconds = config.Interval;
                     Logger.WriteWait($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Sleeping {waitSeconds:N0} seconds ({apiHelper.RequestCount} requests) ", waitSeconds, 1);
                 }
                 catch (Exception ex)

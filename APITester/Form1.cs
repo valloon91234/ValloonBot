@@ -1,4 +1,5 @@
-﻿using IO.Swagger.Model;
+﻿using IO.Swagger.Client;
+using IO.Swagger.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -98,13 +99,6 @@ namespace Valloon.Trading
             textBox_Result.Text = JObject.FromObject(user).ToString();
         }
 
-        private void button_Wallet_Click(object sender, EventArgs e)
-        {
-            var apiHelper = GetApiHelper();
-            Wallet w = apiHelper.GetWallet();
-            textBox_Result.Text = JObject.FromObject(w).ToString();
-        }
-
         private void button_Chat_Click(object sender, EventArgs e)
         {
             var apiHelper = GetApiHelper();
@@ -140,50 +134,30 @@ namespace Valloon.Trading
             textBox_Result.Text = message + "\r\n\t\n" + apiHelper.SendChat(message, 7).ToString();
         }
 
-        private void buttonLimitBuy_Click(object sender, EventArgs e)
-        {
-            string execInst = null;
-            if (checkBox_ReduceOnly.Checked) execInst = "ReduceOnly";
-            var apiHelper = GetApiHelper();
-            int price = Int32.Parse(textBoxPrice.Text);
-            int qty = Int32.Parse(textBoxQty.Text);
-            textBox_Result.Text = apiHelper.OrderNew("Buy", qty, price, null, "Limit", execInst).ToString();
-        }
-
-        private void buttonLimitSell_Click(object sender, EventArgs e)
-        {
-            string execInst = null;
-            if (checkBox_ReduceOnly.Checked) execInst = "ReduceOnly";
-            var apiHelper = GetApiHelper();
-            int price = Int32.Parse(textBoxPrice.Text);
-            int qty = Int32.Parse(textBoxQty.Text);
-            textBox_Result.Text = apiHelper.OrderNew("Sell", qty, price, null, "Limit", execInst).ToString();
-        }
-
         private void button_CancelAllOrders_Click(object sender, EventArgs e)
         {
             var apiHelper = GetApiHelper();
-            textBox_Result.Text = JArray.FromObject(apiHelper.CancelAllOrders()).ToString(Formatting.Indented);
+            textBox_Result.Text = JArray.FromObject(apiHelper.CancelAllOrders(BitMEXApiHelper.SYMBOL_XBTUSD)).ToString(Formatting.Indented);
         }
 
         private void button_ViewAll_Click(object sender, EventArgs e)
         {
             var apiHelper = GetApiHelper();
-            textBox_Result.Text = JArray.FromObject(apiHelper.GetActiveOrders()).ToString(Formatting.Indented);
+            textBox_Result.Text = JArray.FromObject(apiHelper.GetActiveOrders(BitMEXApiHelper.SYMBOL_XBTUSD)).ToString(Formatting.Indented);
 
         }
 
         private void button_ClosePosition_Click(object sender, EventArgs e)
         {
             var apiHelper = GetApiHelper();
-            Position position = apiHelper.GetPosition();
+            Position position = apiHelper.GetPosition(BitMEXApiHelper.SYMBOL_XBTUSD);
             int positionQty = 0;
             if (position != null) positionQty = position.CurrentQty.Value;
             if (positionQty > 0)
             {
                 Order newOrder = apiHelper.OrderNew(new Order
                 {
-                    Symbol = BitMEXApiHelper.SYMBOL,
+                    Symbol = BitMEXApiHelper.SYMBOL_XBTUSD,
                     Side = "Sell",
                     OrderQty = positionQty,
                     OrdType = "Market",
@@ -196,7 +170,7 @@ namespace Valloon.Trading
             {
                 Order newOrder = apiHelper.OrderNew(new Order
                 {
-                    Symbol = BitMEXApiHelper.SYMBOL,
+                    Symbol = BitMEXApiHelper.SYMBOL_XBTUSD,
                     Side = "Buy",
                     OrderQty = -positionQty,
                     OrdType = "Market",
@@ -210,5 +184,49 @@ namespace Valloon.Trading
                 textBox_Result.Text = "No position.";
             }
         }
+
+        private void button_Wallet_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var apiHelper = GetApiHelper();
+                var w = apiHelper.GetWallet();
+                textBox_Result.Text = JArray.FromObject(w).ToString();
+            }
+            catch (ApiException ex)
+            {
+                string responseText = ex.ErrorContent;
+                textBox_Result.Text = JArray.Parse(responseText).ToString();
+            }
+        }
+        private void button_Margin_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var apiHelper = GetApiHelper();
+                var w = apiHelper.GetMargin();
+                textBox_Result.Text = JArray.FromObject(w).ToString();
+            }
+            catch (ApiException ex)
+            {
+                string responseText = ex.ErrorContent;
+                textBox_Result.Text = JArray.Parse(responseText).ToString();
+            }
+        }
+
+        private void button_History_Click(object sender, EventArgs e)
+        {
+            var apiHelper = GetApiHelper();
+            var w = apiHelper.GetWalletHistory();
+            textBox_Result.Text = JArray.FromObject(w).ToString();
+        }
+
+        private void button_Summary_Click(object sender, EventArgs e)
+        {
+            var apiHelper = GetApiHelper();
+            var w = apiHelper.GetWalletSummary();
+            textBox_Result.Text = JArray.FromObject(w).ToString();
+        }
+
     }
 }
