@@ -120,7 +120,10 @@ namespace Valloon.Trading
                     }
 
                     if (config.Exit == 2)
+                    {
+                        logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  No order. (exit = {config.Exit})", ConsoleColor.DarkGray);
                         goto endLoop;
+                    }
                     if (positionQty == 0)
                     {
                         bool exit = false;

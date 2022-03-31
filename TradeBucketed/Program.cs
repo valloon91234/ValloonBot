@@ -33,10 +33,10 @@ namespace Valloon.Trading.Backtest
             {
                 //Sol5.Run();
                 //Btc5.Run();
-                Btc1h.Run();
+                //Btc1h.Run();
                 //Btc.Run();
                 //Btc_H.Run();
-                //Sol5.Run();
+                Sol5.Run();
                 //Sol_H.Run();
                 goto end;
             }

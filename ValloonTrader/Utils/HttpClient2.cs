@@ -9,9 +9,9 @@ using System.Text;
  * @author Valloon Present
  * @version 2020-03-03
  */
-namespace Valloon.Trading
+namespace Valloon.Utils
 {
-    static class BackendClient
+    public static class HttpClient2
     {
         public static string HttpGet(string url)
         {

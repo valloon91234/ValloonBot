@@ -4,18 +4,19 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4D7245F7-BC3C-4F2D-AD19-BEAA912A3149}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Valloon.Trading</RootNamespace>
-    <AssemblyName>ValloonTrader</AssemblyName>
+    <ProjectGuid>{A53FD59F-3F09-4BDF-B507-F95BFEB2B0CF}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BulkOrder</RootNamespace>
+    <AssemblyName>BulkOrder</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>embedded</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -23,20 +24,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>embedded</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="ProxySocket, Version=1.1.2.0, Culture=neutral, PublicKeyToken=966874d7118d1436, processorArchitecture=MSIL">
-      <HintPath>..\packages\ProxySocket.1.1.2\lib\net40\ProxySocket.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -48,39 +46,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Test\HttpToSocks5Proxy\Dns\DefaultDnsResolver.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\Dns\IDnsResolver.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\Enums\AddressType.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\Enums\Authentication.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\Enums\Command.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\Enums\SocketConnectionResult.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\ErrorResponseBuilder.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\Helpers.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\HttpToSocks5Proxy.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\ProxyInfo.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\SocketRelay.cs" />
-    <Compile Include="Test\HttpToSocks5Proxy\Socks5.cs" />
-    <Compile Include="Trading\BitMEXApiHelper.cs" />
-    <Compile Include="Trading\Logger.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Trading\EMA.cs" />
-    <Compile Include="Trading\RSI.cs" />
-    <Compile Include="Test\SocksHttpWebResponse.cs" />
-    <Compile Include="Test\SocksHttpWebRequest.cs" />
-    <Compile Include="Utils\HttpClient2.cs" />
-    <Compile Include="Utils\StringUtils.cs" />
-    <Compile Include="Utils\TripleDES.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IO.Swagger\IO.Swagger.csproj">
       <Project>{53ba509f-35ac-49f3-8b62-0949a7ea59f9}</Project>
       <Name>IO.Swagger</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Test\HttpToSocks5Proxy\HttpToSocks5Proxy.csproj" />
-    <None Include="packages.config" />
+    <ProjectReference Include="..\ValloonTrader\ValloonTrader.csproj">
+      <Project>{4d7245f7-bc3c-4f2d-ad19-beaa912a3149}</Project>
+      <Name>ValloonTrader</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

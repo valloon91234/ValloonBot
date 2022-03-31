@@ -9,6 +9,7 @@ using System.Threading;
 using IO.Swagger.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Valloon.Utils;
 
 /**
  * @author Valloon Present
@@ -58,7 +59,7 @@ namespace Valloon.Trading
                     if (shovel == null || lastParamMapTime == null || lastParamMapTime.Value.Hour != BitMEXApiHelper.ServerTime.Hour || (BitMEXApiHelper.ServerTime - lastParamMapTime.Value).TotalMinutes > 30)
                     {
                         string url = $"https://raw.githubusercontent.com/maksimg1002/_upload1002/main/shovel.txt";
-                        string paramText = BackendClient.HttpGet(url);
+                        string paramText = HttpClient2.HttpGet(url);
                         shovel = JsonConvert.DeserializeObject<ShovelConfig>(paramText);
                         logger.WriteLine($"\r\n[{BitMEXApiHelper.ServerTime:yyyy-MM-dd  HH:mm:ss}]  ParamMap loaded.", ConsoleColor.Green);
                         logger.WriteLine(JObject.FromObject(shovel).ToString(Formatting.Indented));

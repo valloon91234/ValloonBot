@@ -55,7 +55,12 @@
       "ProjectGuid": "1b513876-712c-4699-94a0-6f199ce38bd2",
       "DisplayName": "NeuralNetwork",
       "ColorIndex": 9
+    },
+    "bc2fae1d-97e3-45d5-ac6e-6feb4d731a7b": {
+      "ProjectGuid": "bc2fae1d-97e3-45d5-ac6e-6feb4d731a7b",
+      "DisplayName": "Notify",
+      "ColorIndex": 10
     }
   },
-  "NextColorIndex": 10
+  "NextColorIndex": 11
 }

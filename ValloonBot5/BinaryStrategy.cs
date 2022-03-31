@@ -215,7 +215,7 @@ namespace Valloon.Trading
                                         Text = $"<BOT><STOP></BOT>",
                                     });
                                     logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New upper stop order: qty = {orderQty}, price = {stopPrice}");
-                                    logger.WriteFile("--- " + JObject.FromObject(closeOrder).ToString(Formatting.None));
+                                    logger.WriteFile("--- " + JObject.FromObject(stopOrder).ToString(Formatting.None));
                                 }
                             }
                         }

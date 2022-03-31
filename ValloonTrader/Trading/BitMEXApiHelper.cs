@@ -139,6 +139,14 @@ namespace Valloon.Trading
             return message;
         }
 
+        public List<Instrument> GetActiveInstruments()
+        {
+            RequestCount++;
+            ApiResponse<List<Instrument>> localVarResponse = InstrumentApiInstance.InstrumentGetActiveWithHttpInfo();
+            ServerTime = DateTime.Parse(localVarResponse.Headers["Date"]);
+            return localVarResponse.Data;
+        }
+
         public Instrument GetInstrument(string symbol)
         {
             RequestCount++;
@@ -387,6 +395,51 @@ namespace Valloon.Trading
             };
             CreateSignature("POST", "/chat", null, BuildQueryData(param));
             return ChatApiInstance.ChatNew(message, channelID);
+        }
+
+        public static List<TradeBin> LoadBinListFrom5m(string binSize, List<TradeBin> list)
+        {
+            int batchLength;
+            switch (binSize)
+            {
+                case "5m":
+                    return list;
+                case "15m":
+                    batchLength = 3;
+                    break;
+                case "30m":
+                    batchLength = 6;
+                    break;
+                default:
+                    throw new Exception($"Invalid bin_size: {binSize}");
+            }
+            int count = list.Count;
+            List<TradeBin> resultList = new List<TradeBin>();
+            int i = 0;
+            while (i < count)
+            {
+                if (list[i].Timestamp.Value.Minute % (batchLength * 5) != 5)
+                {
+                    i++;
+                    continue;
+                }
+                DateTime timestamp = list[i].Timestamp.Value.AddMinutes(25);
+                decimal open = list[i].Open.Value;
+                decimal high = list[i].High.Value;
+                decimal low = list[i].Low.Value;
+                decimal close = list[i].Close.Value;
+                decimal volume = list[i].Volume.Value;
+                for (int j = i + 1; j < i + batchLength && j < count; j++)
+                {
+                    if (high < list[j].High.Value) high = list[j].High.Value;
+                    if (low > list[j].Low.Value) low = list[j].Low.Value;
+                    close = list[j].Close.Value;
+                    volume += list[j].Volume.Value;
+                }
+                resultList.Add(new TradeBin(timestamp, list[i].Symbol, open, high, low, close, null, volume));
+                i += batchLength;
+            }
+            return resultList;
         }
 
     }

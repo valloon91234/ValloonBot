@@ -81,19 +81,21 @@ namespace Valloon.Trading
             CultureInfo culture = CultureInfo.CreateSpecificCulture("en-US");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
+            Config config = Config.Load();
+            switch (config.Strategy)
+            {
+                case "GRID":
+                    new GridStrategy().Run();
+                    break;
+                case "RSI":
+                    new RSIStrategy2().Run();
+                    break;
+                default:
+                    Console.WriteLine($"\r\nInvalid Strategy.");
+                    break;
+            }
             //new ShovelStrategy().Run();
             //new BinaryStrategy().Run();
-            new GridStrategy().Run();
-            //Config config = Config.Load(out _, true);
-            //switch (config.Strategy)
-            //{
-            //    case "drop":
-            //        new SolShotStrategy().Run(config);
-            //        break;
-            //    default:
-            //        new ShovelStrategy().Run(config);
-            //        break;
-            //}
             Console.WriteLine($"\r\nPress any key to exit... ");
             Console.ReadKey(false);
         }

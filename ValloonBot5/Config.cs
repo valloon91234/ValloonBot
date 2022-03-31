@@ -30,6 +30,9 @@ namespace Valloon.Trading
         [JsonProperty("symbol")]
         public string Symbol { get; set; }
 
+        [JsonProperty("strategy")]
+        public string Strategy { get; set; }
+
         [JsonProperty("leverage")]
         public decimal Leverage { get; set; } = 1;
 
@@ -56,6 +59,14 @@ namespace Valloon.Trading
 
         [JsonProperty("exit")]
         public int Exit { get; set; }
+
+        public static Config Load()
+        {
+            string configJson = File.ReadAllText(FILENAME);
+            Config config = JsonConvert.DeserializeObject<Config>(configJson);
+            if (config.Username == null) config.Username = config.ApiKey;
+            return config;
+        }
 
         public static Config Load(out bool updated, bool forceUpdate = false)
         {
