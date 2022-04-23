@@ -82,13 +82,23 @@ namespace Valloon.Trading
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
             Config config = Config.Load();
-            switch (config.Strategy)
+            switch (config.Strategy.ToUpper())
             {
+                case "CLOSE":
+                case "STOP":
+                    new CloseStopHelper().Run();
+                    break;
                 case "GRID":
                     new GridStrategy().Run();
                     break;
                 case "RSI":
-                    new RSIStrategy2().Run();
+                    new RSIStrategy3().Run();
+                    break;
+                case "PSAR":
+                    new PSarStopStrategy().Run();
+                    break;
+                case "PSAR2":
+                    new PSar2Strategy().Run();
                     break;
                 default:
                     Console.WriteLine($"\r\nInvalid Strategy.");

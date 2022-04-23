@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿#if proxy
+using Newtonsoft.Json.Linq;
 using Org.Mentalis.Network.ProxySocket;
 using System;
 using System.Collections.Specialized;
@@ -260,3 +261,4 @@ namespace Valloon.Utils
 
     }
 }
+#endif

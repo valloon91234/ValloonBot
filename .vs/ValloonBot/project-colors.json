@@ -60,7 +60,17 @@
       "ProjectGuid": "bc2fae1d-97e3-45d5-ac6e-6feb4d731a7b",
       "DisplayName": "Notify",
       "ColorIndex": 10
+    },
+    "a53fd59f-3f09-4bdf-b507-f95bfeb2b0cf": {
+      "ProjectGuid": "a53fd59f-3f09-4bdf-b507-f95bfeb2b0cf",
+      "DisplayName": "BulkOrder",
+      "ColorIndex": 11
+    },
+    "e24e5787-e84a-48b5-9103-a83c2410c709": {
+      "ProjectGuid": "e24e5787-e84a-48b5-9103-a83c2410c709",
+      "DisplayName": "Backtest",
+      "ColorIndex": 12
     }
   },
-  "NextColorIndex": 11
+  "NextColorIndex": 13
 }

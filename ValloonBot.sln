@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notify", "Notify\Notify.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkOrder", "BulkOrder\BulkOrder.csproj", "{A53FD59F-3F09-4BDF-B507-F95BFEB2B0CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backtest", "Backtest\Backtest.csproj", "{E24E5787-E84A-48B5-9103-A83C2410C709}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{A53FD59F-3F09-4BDF-B507-F95BFEB2B0CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A53FD59F-3F09-4BDF-B507-F95BFEB2B0CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A53FD59F-3F09-4BDF-B507-F95BFEB2B0CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E24E5787-E84A-48B5-9103-A83C2410C709}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E24E5787-E84A-48B5-9103-A83C2410C709}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E24E5787-E84A-48B5-9103-A83C2410C709}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E24E5787-E84A-48B5-9103-A83C2410C709}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

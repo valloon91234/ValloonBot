@@ -112,10 +112,10 @@ namespace Valloon.Trading
                         {
                             positionEntryPrice = position.AvgEntryPrice.Value;
                             positionQty = position.CurrentQty.Value;
+                            decimal leverage = 1 / (Math.Abs(positionEntryPrice - position.LiquidationPrice.Value) / positionEntryPrice);
                             decimal unrealisedPercent = 100m * position.UnrealisedPnl.Value / margin.WalletBalance.Value;
                             decimal nowLoss = 100m * (position.AvgEntryPrice.Value - lastPrice) / (position.LiquidationPrice.Value - position.AvgEntryPrice.Value);
-                            logger.WriteFile($"        wallet_balance = {margin.WalletBalance}    unrealised_pnl = {position.UnrealisedPnl}    {unrealisedPercent:N2} %    leverage = {position.Leverage}");
-                            logger.WriteLine($"    <Position>    entry = {positionEntryPrice:F2}    qty = {positionQty}    liq = {position.LiquidationPrice}    {unrealisedPercent:N2} % / {nowLoss:N2} %", ConsoleColor.Green);
+                            logger.WriteLine($"    <Position>    entry = {positionEntryPrice:F2}    qty = {positionQty}    liq = {position.LiquidationPrice}    leverage = {leverage:F2}    {unrealisedPercent:N2} % / {nowLoss:N2} %", ConsoleColor.Green);
                         }
                     }
 
@@ -269,8 +269,9 @@ namespace Valloon.Trading
                                 if (order.Side == "Sell" && order.Price.Value == closePrice) closePrice = 0;
                             }
 
-                            if (limitPrice > 0)
+                            if (limitPrice > 0 && !stopMode)
                             {
+
                                 if (oldLimitOrder == null)
                                 {
                                     Order newOrder = apiHelper.OrderNew(new Order

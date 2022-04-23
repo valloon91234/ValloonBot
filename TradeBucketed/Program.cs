@@ -36,8 +36,9 @@ namespace Valloon.Trading.Backtest
                 //Btc1h.Run();
                 //Btc.Run();
                 //Btc_H.Run();
-                Sol5.Run();
                 //Sol_H.Run();
+                Sol5.Run();
+                //Luna.Run();
                 goto end;
             }
 

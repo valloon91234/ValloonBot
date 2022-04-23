@@ -74,6 +74,7 @@ namespace Valloon.Trading
 
         public const string SYMBOL_XBTUSD = "XBTUSD";
         public const string SYMBOL_SOLUSD = "SOLUSD";
+        public const string SYMBOL_LUNAUSD = "LUNAUSD";
         public const string CURRENCY_XBt = "XBt";
         public const string CURRENCY_USDt = "USDt";
         public const string CURRENCY_BMEx = "BMEx";
@@ -163,6 +164,7 @@ namespace Valloon.Trading
 
         public List<TradeBin> GetBinList(string binSize = null, bool? partial = null, string symbol = null, decimal? count = null, decimal? start = null, bool? reverse = null, DateTime? startTime = null, DateTime? endTime = null)
         {
+            RequestCount++;
             return TradeApiInstance.TradeGetBucketed(binSize, partial, symbol, null, null, count, start, reverse, startTime, endTime);
         }
 

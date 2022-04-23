@@ -54,6 +54,18 @@ namespace Valloon.Trading
         [JsonProperty("max_price")]
         public decimal MaxPrice { get; set; }
 
+        [JsonProperty("upper_stop")]
+        public decimal UpperStopX { get; set; } = 0.025m;
+
+        [JsonProperty("lower_stop")]
+        public decimal LowerStopX { get; set; } = 0.025m;
+
+        [JsonProperty("close")]
+        public decimal Close { get; set; }
+
+        [JsonProperty("stop")]
+        public decimal Stop { get; set; }
+
         [JsonProperty("interval")]
         public int Interval { get; set; } = 30;
 

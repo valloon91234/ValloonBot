@@ -59,6 +59,9 @@
     <Compile Include="Logger2.cs" />
     <Compile Include="Btc_H.cs" />
     <Compile Include="Btc5.cs" />
+    <Compile Include="Luna.cs" />
+    <Compile Include="LunaDao.cs" />
+    <Compile Include="LunaBin.cs" />
     <Compile Include="Sol_H.cs" />
     <Compile Include="Sol5.cs" />
     <Compile Include="BtcDao.cs" />

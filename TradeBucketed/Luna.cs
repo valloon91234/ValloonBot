@@ -10,20 +10,20 @@ using Valloon.Utils;
 
 namespace Valloon.Trading.Backtest
 {
-    static class Sol5
+    static class Luna
     {
         const string binSize = "5m";
 
         public static void Run()
         {
-            Program.MoveWindow(20, 0, 1600, 140);
+            Program.MoveWindow(20, 0, 1440, 140);
             //Load2("15m"); return;
-            //DateTime startTime = new DateTime(2021, 10, 21, 0, 0, 0, DateTimeKind.Utc);
+            //DateTime startTime = new DateTime(2021, 9, 23, 0, 0, 0, DateTimeKind.Utc);
             //{
-            //    DateTime startTime = new DateTime(2022, 4, 20, 0, 0, 0, DateTimeKind.Utc);
+            //    DateTime startTime = new DateTime(2021, 9, 23, 0, 0, 0, DateTimeKind.Utc);
             //    DateTime endTime = DateTime.UtcNow;
-            //    Load("1m", startTime, endTime);
-            //    //LoadCSV("1m", startTime, endTime);
+            //    //Load("1m", startTime, endTime);
+            //    LoadCSV("1m", startTime, endTime);
             //    return;
             //}
 
@@ -67,26 +67,23 @@ namespace Valloon.Trading.Backtest
                             Console.WriteLine($"end: nextTime = {startTime:yyyy-MM-dd HH:mm:ss} > {endTime:yyyy-MM-dd HH:mm:ss}");
                             break;
                         }
-                        List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_SOLUSD, 1000, null, null, startTime, nextTime);
+                        List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_LUNAUSD, 1000, null, null, startTime, nextTime);
                         int count = list.Count;
                         for (int i = 0; i < count - 1; i++)
                         {
                             TradeBin t = list[i];
                             try
                             {
-                                writer.WriteLine($"{t.Timestamp.Value:yyyy-MM-dd HH:mm:ss},{t.Timestamp.Value:yyyy-MM-dd},{t.Timestamp.Value:HH:mm},{t.Open.Value * 100},{t.High.Value * 100},{t.Low.Value * 100},{t.Close.Value * 100},{t.Volume.Value}");
+                                writer.WriteLine($"{t.Timestamp.Value:yyyy-MM-dd HH:mm:ss},{t.Timestamp.Value:yyyy-MM-dd},{t.Timestamp.Value:HH:mm},{t.Open.Value * 1000},{t.High.Value * 1000},{t.Low.Value * 1000},{t.Close.Value * 1000},{t.Volume.Value}");
                                 writer.Flush();
                             }
                             catch (Exception ex)
                             {
-                                if (ex.Message.ContainsIgnoreCase("UNIQUE constraint failed:"))
-                                    Console.WriteLine($"Failed: {t.Timestamp:yyyy-MM-dd HH:mm:ss} - Already exists.");
-                                else
-                                    Console.WriteLine($"Failed: {t.Timestamp:yyyy-MM-dd HH:mm:ss}\r\n{ex.StackTrace}");
+                                Console.WriteLine($"Failed: {t.Timestamp:yyyy-MM-dd HH:mm:ss}\r\n{ex.StackTrace}");
                             }
                         }
                         Console.WriteLine($"Inserted: {startTime:yyyy-MM-dd HH:mm:ss}");
-                        Thread.Sleep(500);
+                        Thread.Sleep(700);
                         startTime = nextTime;
                     }
                     catch (Exception ex)
@@ -126,15 +123,15 @@ namespace Valloon.Trading.Backtest
                         Console.WriteLine($"end: nextTime = {startTime:yyyy-MM-dd HH:mm:ss} > {endTime:yyyy-MM-dd HH:mm:ss}");
                         break;
                     }
-                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_SOLUSD, 1000, null, null, startTime, nextTime);
+                    List<TradeBin> list = apiHelper.GetBinList(binSize, false, BitMEXApiHelper.SYMBOL_LUNAUSD, 1000, null, null, startTime, nextTime);
                     int count = list.Count;
                     for (int i = 0; i < count - 1; i++)
                     {
                         TradeBin t = list[i];
                         try
                         {
-                            SolBin b = new SolBin(t);
-                            SolDao.Insert(b, binSize);
+                            LunaBin b = new LunaBin(t);
+                            LunaDao.Insert(b, binSize);
                         }
                         catch (Exception ex)
                         {
@@ -157,16 +154,16 @@ namespace Valloon.Trading.Backtest
 
         static void Load2(string binSize, DateTime? startTime = null)
         {
-            List<SolBin> list;
+            List<LunaBin> list;
             int batchLength;
             switch (binSize)
             {
                 case "15m":
-                    list = SolDao.SelectAll("5m");
+                    list = LunaDao.SelectAll("5m");
                     batchLength = 3;
                     break;
                 case "30m":
-                    list = SolDao.SelectAll("5m");
+                    list = LunaDao.SelectAll("5m");
                     batchLength = 6;
                     break;
                 default:
@@ -194,7 +191,7 @@ namespace Valloon.Trading.Backtest
                     }
                     try
                     {
-                        SolBin t = new SolBin
+                        LunaBin t = new LunaBin
                         {
                             Timestamp = list[i].Timestamp,
                             Date = list[i].Date,
@@ -243,7 +240,7 @@ namespace Valloon.Trading.Backtest
 
             DateTime startTime = new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
-            List<SolBin> listAll = SolDao.SelectAll("5m");
+            List<LunaBin> listAll = LunaDao.SelectAll("5m");
             if (binSize != "5m") listAll = LoadBinListFrom5m(binSize, listAll);
             int countAll = listAll.Count;
             int totalDays = (int)(listAll[countAll - 1].Timestamp - listAll[0].Timestamp).TotalDays;
@@ -256,17 +253,17 @@ namespace Valloon.Trading.Backtest
             //for (int window = 10; window <= 40; window++)
             int window = 26;
             {
-                List<SolBin> list = new List<SolBin>(listAll);
+                List<LunaBin> list = new List<LunaBin>(listAll);
                 int count = list.Count;
                 List<TradeBin> binList = new List<TradeBin>();
-                foreach (SolBin m in list)
+                foreach (LunaBin m in list)
                 {
-                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_LUNAUSD, m.Open, m.High, m.Low, m.Close));
                 }
                 double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), window);
                 for (int i = 0; i < count; i++)
                 {
-                    SolBin m = list[i];
+                    LunaBin m = list[i];
                     m.RSI = (float)rsiArray[i];
                 }
                 list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
@@ -391,7 +388,7 @@ namespace Valloon.Trading.Backtest
 
             DateTime startTime = new DateTime(2022, 3, 23, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
-            List<SolBin> list = SolDao.SelectAll("1m");
+            List<LunaBin> list = LunaDao.SelectAll("1m");
             list.RemoveAll(x => x.Timestamp < startTime.AddDays(-1));
             int count = list.Count;
             int totalDays = (int)(list[count - 1].Timestamp - startTime).TotalDays;
@@ -408,14 +405,14 @@ namespace Valloon.Trading.Backtest
                 if (binSize == 1)
                 {
                     List<TradeBin> binList = new List<TradeBin>();
-                    foreach (SolBin m in list)
+                    foreach (LunaBin m in list)
                     {
-                        binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                        binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_LUNAUSD, m.Open, m.High, m.Low, m.Close));
                     }
                     double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), window);
                     for (int i = 0; i < count; i++)
                     {
-                        SolBin m = list[i];
+                        LunaBin m = list[i];
                         m.RSI = (float)rsiArray[i];
                     }
                 }
@@ -423,11 +420,11 @@ namespace Valloon.Trading.Backtest
                 {
                     for (int i = window * binSize; i < count; i++)
                     {
-                        List<SolBin> list4BinSize = LoadBinListFrom1m(binSize, list.GetRange(0, i + 1));
+                        List<LunaBin> list4BinSize = LoadBinListFrom1m(binSize, list.GetRange(0, i + 1));
                         List<TradeBin> binList = new List<TradeBin>();
-                        foreach (SolBin m in list4BinSize)
+                        foreach (LunaBin m in list4BinSize)
                         {
-                            binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                            binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_LUNAUSD, m.Open, m.High, m.Low, m.Close));
                         }
                         double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), window);
                         list[i].RSI = (float)rsiArray[rsiArray.Length - 1];
@@ -574,8 +571,8 @@ namespace Valloon.Trading.Backtest
 
             DateTime startTime = new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
-            List<SolBin> list5m = SolDao.SelectAll("5m");
-            List<SolBin> listAll = LoadBinListFrom5m(binSize, list5m);
+            List<LunaBin> list5m = LunaDao.SelectAll("5m");
+            List<LunaBin> listAll = LoadBinListFrom5m(binSize, list5m);
             int countAll = listAll.Count;
             int totalDays = (int)(listAll[countAll - 1].Timestamp - listAll[0].Timestamp).TotalDays;
             Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}    buyOrSell = {buyOrSell}    bin = {binSize}    ({startTime:yyyy-MM-dd HH.mm.ss} ~ {totalDays:N0} days)");
@@ -584,17 +581,17 @@ namespace Valloon.Trading.Backtest
             Console.Title = logger.LogFilename;
             List<Dictionary<string, float>> topList = new List<Dictionary<string, float>>();
 
-            List<SolBin> list = new List<SolBin>(listAll);
+            List<LunaBin> list = new List<LunaBin>(listAll);
             int count = list.Count;
             List<TradeBin> binList = new List<TradeBin>();
-            foreach (SolBin m in list)
+            foreach (LunaBin m in list)
             {
-                binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_LUNAUSD, m.Open, m.High, m.Low, m.Close));
             }
             double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), window);
             for (int i = 0; i < count; i++)
             {
-                SolBin m = list[i];
+                LunaBin m = list[i];
                 m.RSI = (float)rsiArray[i];
             }
             list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
@@ -659,7 +656,7 @@ namespace Valloon.Trading.Backtest
 
             DateTime startTime = new DateTime(2022, 3, 23, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
-            List<SolBin> list = SolDao.SelectAll("1m");
+            List<LunaBin> list = LunaDao.SelectAll("1m");
             list = LoadBinListFrom1m(binSize, list);
             list.RemoveAll(x => x.Timestamp < startTime.AddDays(-1));
             int count = list.Count;
@@ -843,7 +840,7 @@ namespace Valloon.Trading.Backtest
 
             DateTime startTime = new DateTime(2022, 3, 23, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
-            List<SolBin> list = SolDao.SelectAll("1m");
+            List<LunaBin> list = LunaDao.SelectAll("1m");
             list = LoadBinListFrom1m(binSize, list);
             list.RemoveAll(x => x.Timestamp < startTime.AddDays(-1));
             int count = list.Count;
@@ -991,7 +988,7 @@ namespace Valloon.Trading.Backtest
 
         //    DateTime startTime = new DateTime(2022, 3, 23, 0, 0, 0, DateTimeKind.Utc);
         //    DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
-        //    List<SolBin> list = SolDao.SelectAll("1m");
+        //    List<LunaBin> list = LunaDao.SelectAll("1m");
         //    list = LoadBinListFrom1m(binSize, list);
         //    list.RemoveAll(x => x.Timestamp < startTime.AddDays(-1));
         //    int count = list.Count;
@@ -1200,7 +1197,7 @@ namespace Valloon.Trading.Backtest
 
         //    DateTime startTime = new DateTime(2022, 3, 23, 0, 0, 0, DateTimeKind.Utc);
         //    DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
-        //    List<SolBin> list = SolDao.SelectAll("1m");
+        //    List<LunaBin> list = LunaDao.SelectAll("1m");
         //    list = LoadBinListFrom1m(binSize, list);
         //    list.RemoveAll(x => x.Timestamp < startTime.AddDays(-1));
         //    int count = list.Count;
@@ -1343,9 +1340,9 @@ namespace Valloon.Trading.Backtest
 
             DateTime startTime = new DateTime(2022, 3, 23, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
-            List<SolBin> list1m = SolDao.SelectAll("1m");
-            List<SolBin> list1 = LoadBinListFrom1m(binSize1, list1m);
-            List<SolBin> list2 = LoadBinListFrom1m(binSize2, list1m);
+            List<LunaBin> list1m = LunaDao.SelectAll("1m");
+            List<LunaBin> list1 = LoadBinListFrom1m(binSize1, list1m);
+            List<LunaBin> list2 = LoadBinListFrom1m(binSize2, list1m);
             int count1 = list1.Count;
             int totalDays = (int)(list1.Last().Timestamp - startTime).TotalDays;
             Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}    BenchmarkSAR2    bin = {binSize}    fee = {takerFee}    ({startTime:yyyy-MM-dd HH.mm.ss} ~ {totalDays:N0} days)");
@@ -1650,9 +1647,9 @@ namespace Valloon.Trading.Backtest
 
             //DateTime startTime = new DateTime(2021, 11, 1, 0, 0, 0, DateTimeKind.Utc);
             //DateTime? endTime = null;
-            List<SolBin> list1m = SolDao.SelectAll("1m");
-            List<SolBin> list1 = LoadBinListFrom1m(binSize1, list1m);
-            List<SolBin> list2 = LoadBinListFrom1m(binSize2, list1m);
+            List<LunaBin> list1m = LunaDao.SelectAll("1m");
+            List<LunaBin> list1 = LoadBinListFrom1m(binSize1, list1m);
+            List<LunaBin> list2 = LoadBinListFrom1m(binSize2, list1m);
             int count1 = list1.Count;
             int totalDays = (int)(list1.Last().Timestamp - startTime).TotalDays;
             Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}    TestSAR2    bin = {binSize}    takerFee = {takerFee}    ({startTime:yyyy-MM-dd HH.mm.ss} ~ {totalDays:N0} days)");
@@ -1885,25 +1882,23 @@ namespace Valloon.Trading.Backtest
 
         static float BenchmarkSAR3()
         {
-            TestSAR3(); return 0;
+            //TestSAR3(); return 0;
 
-            //const float makerFee = 0.001f;
-            //const float takerFee = 0.002f;
-            const float makerFee = 0.0003f;
-            const float takerFee = 0.001f;
+            const float makerFee = 0.001f;
+            const float takerFee = 0.002f;
+            //const float makerFee = 0.002f;
+            //const float takerFee = 0.003f;
             const int binSize1 = 5;
             //const int binSize2 = 60;
 
             DateTime startTime = new DateTime(2022, 3, 16, 0, 0, 0, DateTimeKind.Utc);
-            //DateTime startTime = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc);
-            //DateTime? endTime = new DateTime(2022, 4, 14, 0, 0, 0, DateTimeKind.Utc);
-            DateTime? endTime = null;
-            var list1m = SolDao.SelectAll("1m");
-            var list1 = LoadBinListFrom1m(binSize1, list1m);
-            //List<SolBin> list2 = LoadBinListFrom1m(binSize2, list1m);
+            DateTime? endTime = new DateTime(2022, 4, 14, 0, 0, 0, DateTimeKind.Utc);
+            List<LunaBin> list1m = LunaDao.SelectAll("1m");
+            List<LunaBin> list1 = LoadBinListFrom1m(binSize1, list1m);
+            //List<LunaBin> list2 = LoadBinListFrom1m(binSize2, list1m);
             int count1 = list1.Count;
             int totalDays = (int)(list1.Last().Timestamp - startTime).TotalDays;
-            Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}    BenchmarkSAR2    bin = {binSize1}    fee = {takerFee}    ({startTime:yyyy-MM-dd} ~ {endTime:yyyy-MM-dd} ({totalDays:N0}) days)");
+            Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}    BenchmarkSAR2    bin = {binSize1}    fee = {takerFee}    ({startTime:yyyy-MM-dd HH.mm.ss} ~ {totalDays:N0} days)");
             logger.WriteLine("\n" + logger.LogFilename + "\n");
             logger.WriteLine($"{count1} loaded. ({totalDays:N0} days)");
             Console.Title = logger.LogFilename;
@@ -1938,24 +1933,21 @@ namespace Valloon.Trading.Backtest
             list1.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
             //list2.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
 
-            //List<ParabolicSarResult> parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList1, .0005f, .005f).ToList();
-            //parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
-
-            for (float stopLoss = 0.01f; stopLoss <= 0.0151f; stopLoss += .001f)
-            //float stopLoss = .012f;
+            for (float stopLoss = 0.004f; stopLoss <= 0.01f; stopLoss += .0005f)
+            //float stopLoss = .0045f;
             {
-                for (float closeLimit = stopLoss; closeLimit <= stopLoss * 5; closeLimit += .001f)
-                //float closeLimit = .02f;
+                for (float closeLimit = stopLoss; closeLimit <= stopLoss * 3; closeLimit += .0005f)
+                //float closeLimit = .008f;
                 {
-                    //for (float step1 = 0.001f; step1 <= 0.01f; step1 += .0005f)
-                    float step1 = .0015f;
+                    for (float step1 = 0.001f; step1 <= 0.01f; step1 += .0005f)
+                    //float step1 = .00149f;
                     {
                         //for (float start1 = 0.001f; start1 <= 0.05f; start1 += .001f)
                         float start1 = step1;
                         //float start1 = .00186f;
                         {
-                            //for (float max1 = .01f; max1 <= .2; max1 += .01f)
-                            float max1 = .03f;
+                            for (float max1 = .01f; max1 <= 0.1; max1 += .005f)
+                            //float max1 = .033f;
                             {
                                 if (step1 >= max1) continue;
 
@@ -1989,19 +1981,18 @@ namespace Valloon.Trading.Backtest
                                             {
                                                 var pSar1 = parabolicSarList1[i];
                                                 //var pSar2 = parabolicSarList2.Find(x => x.Date > pSar1.Date);
-                                                //var pSar2 = parabolicSarList2[i];
 
                                                 if (position == 0)
                                                 {
                                                     if (pSar1.IsReversal.Value)
                                                     {
-                                                        //if (pSar1.OriginalSar.Value < pSar1.Sar.Value && pSar2.Sar.Value >= pSar1.Sar.Value)
+                                                        //if (pSar1.OriginalSar.Value < pSar1.Sar.Value && pSar2.Sar > list[i].Open)
                                                         if (pSar1.OriginalSar.Value < pSar1.Sar.Value)
                                                         {
                                                             position = -1;
                                                             positionEntryPrice = (int)pSar1.OriginalSar.Value;
                                                         }
-                                                        //else if (pSar1.OriginalSar.Value > pSar1.Sar.Value && pSar2.Sar.Value <= pSar1.Sar.Value)
+                                                        //else if (pSar1.OriginalSar.Value > pSar1.Sar.Value && pSar2.Sar < list[i].Open)
                                                         else if (pSar1.OriginalSar.Value > pSar1.Sar.Value)
                                                         {
                                                             position = 1;
@@ -2016,20 +2007,20 @@ namespace Valloon.Trading.Backtest
                                                 }
                                                 else if (position == 1)
                                                 {
-                                                    if ((float)list1[i].Low / positionEntryPrice < 1 - stopLoss || pSar1.IsReversal.Value && pSar1.OriginalSar.Value < pSar1.Sar.Value)
+                                                    if ((float)list1[i].Low / positionEntryPrice < 1 - stopLoss && list1[i].Low < pSar1.OriginalSar.Value)
                                                     {
                                                         tryCount++;
-                                                        int close = (int)Math.Ceiling(positionEntryPrice * (1 - stopLoss));
-                                                        if (pSar1.IsReversal.Value) close = (int)Math.Max(close, pSar1.OriginalSar.Value);
+                                                        int close = (int)Math.Floor(positionEntryPrice * (1 - stopLoss));
                                                         int profit = close - positionEntryPrice;
                                                         totalProfit += profit - positionEntryPrice * takerFee;
                                                         finalPercent *= (float)close / positionEntryPrice - takerFee;
                                                         if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
                                                         if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
+                                                        //position = -1;
+                                                        //positionEntryPrice = close;
                                                         if (profit > 0) succeedCount++;
                                                         else failedCount++;
                                                         position = 0;
-                                                        if (pSar1.IsReversal.Value) i--;
                                                     }
                                                     else if ((float)list1[i].High / positionEntryPrice > 1 + closeLimit)
                                                     {
@@ -2040,35 +2031,51 @@ namespace Valloon.Trading.Backtest
                                                         finalPercent *= (float)close / positionEntryPrice - makerFee;
                                                         if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
                                                         if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
-                                                        if (profit > 0) succeedCount++;
-                                                        else failedCount++;
                                                         //position = -1;
                                                         //positionEntryPrice = close;
+                                                        if (profit > 0) succeedCount++;
+                                                        else failedCount++;
                                                         position = 0;
                                                     }
-                                                    else if (pSar1.IsReversal.Value && pSar1.OriginalSar.Value >= pSar1.Sar.Value)
+                                                    else if (pSar1.IsReversal.Value)
                                                     {
-                                                        Console.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar} / {pSar1.IsReversal} / {pSar1.OriginalSar:F0} \t \t ERROR", ConsoleColor.Red);
+                                                        if (pSar1.OriginalSar.Value < pSar1.Sar.Value)
+                                                        {
+                                                            tryCount++;
+                                                            int close = (int)pSar1.OriginalSar.Value;
+                                                            int profit = close - positionEntryPrice;
+                                                            totalProfit += profit - positionEntryPrice * takerFee;
+                                                            finalPercent *= (float)close / positionEntryPrice - takerFee;
+                                                            if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
+                                                            if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
+                                                            //position = -1;
+                                                            //positionEntryPrice = close;
+                                                            if (profit > 0) succeedCount++;
+                                                            else failedCount++;
+                                                            position = 0;
+                                                        }
+                                                        else
+                                                        {
+                                                            Console.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar} / {pSar1.IsReversal} / {pSar1.OriginalSar:F0} \t \t ERROR", ConsoleColor.Red);
+                                                        }
                                                     }
                                                 }
                                                 else if (position == -1)
                                                 {
-                                                    if ((float)positionEntryPrice / list1[i].High < 1 - stopLoss || pSar1.IsReversal.Value && pSar1.OriginalSar.Value > pSar1.Sar.Value)
+                                                    if ((float)positionEntryPrice / list1[i].High < 1 - stopLoss && list1[i].High > pSar1.OriginalSar.Value)
                                                     {
                                                         tryCount++;
-                                                        int close = (int)Math.Floor(positionEntryPrice / (1 - stopLoss));
-                                                        if (pSar1.IsReversal.Value) close = (int)Math.Min(close, pSar1.OriginalSar.Value);
+                                                        int close = (int)Math.Ceiling(positionEntryPrice / (1 - stopLoss));
                                                         int profit = positionEntryPrice - close;
                                                         totalProfit += profit - positionEntryPrice * takerFee;
                                                         finalPercent *= (float)positionEntryPrice / close - takerFee;
                                                         if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
                                                         if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
-                                                        if (profit > 0) succeedCount++;
-                                                        else failedCount++;
                                                         //position = 1;
                                                         //positionEntryPrice = close;
+                                                        if (profit > 0) succeedCount++;
+                                                        else failedCount++;
                                                         position = 0;
-                                                        if (pSar1.IsReversal.Value) i--;
                                                     }
                                                     else if ((float)positionEntryPrice / list1[i].Low > 1 + closeLimit)
                                                     {
@@ -2079,15 +2086,33 @@ namespace Valloon.Trading.Backtest
                                                         finalPercent *= (float)positionEntryPrice / close - makerFee;
                                                         if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
                                                         if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
-                                                        if (profit > 0) succeedCount++;
-                                                        else failedCount++;
                                                         //position = 1;
                                                         //positionEntryPrice = close;
+                                                        if (profit > 0) succeedCount++;
+                                                        else failedCount++;
                                                         position = 0;
                                                     }
-                                                    else if (pSar1.IsReversal.Value && pSar1.OriginalSar.Value <= pSar1.Sar.Value)
+                                                    else if (pSar1.IsReversal.Value)
                                                     {
-                                                        Console.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar} / {pSar1.IsReversal} / {pSar1.OriginalSar:F0} \t \t ERROR", ConsoleColor.Red);
+                                                        if (pSar1.OriginalSar.Value > pSar1.Sar.Value)
+                                                        {
+                                                            tryCount++;
+                                                            int close = (int)pSar1.OriginalSar.Value;
+                                                            int profit = positionEntryPrice - close;
+                                                            totalProfit += profit - positionEntryPrice * takerFee;
+                                                            finalPercent *= (float)positionEntryPrice / close - takerFee;
+                                                            if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
+                                                            if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
+                                                            //position = 1;
+                                                            //positionEntryPrice = close;
+                                                            if (profit > 0) succeedCount++;
+                                                            else failedCount++;
+                                                            position = 0;
+                                                        }
+                                                        else
+                                                        {
+                                                            Console.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar} / {pSar1.IsReversal} / {pSar1.OriginalSar:F0} \t \t ERROR", ConsoleColor.Red);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -2115,7 +2140,6 @@ namespace Valloon.Trading.Backtest
                                             //}
                                             float avgProfit = totalProfit / tryCount;
                                             float successRate = failedCount == 0 ? failedCount : ((float)succeedCount / failedCount);
-                                            float score = (finalPercent - 1) / stopLoss;
                                             if (totalProfit > 0 && finalPercent > 1f && tryCount >= totalDays / 2)
                                             {
                                                 Dictionary<string, float> dic = new Dictionary<string, float>
@@ -2139,7 +2163,6 @@ namespace Valloon.Trading.Backtest
                                                     { "totalProfit", totalProfit },
                                                     { "avgProfit", avgProfit },
                                                     { "finalPercent", finalPercent },
-                                                    { "score", score },
                                                 };
                                                 int topListCount = topList.Count;
                                                 if (topListCount > 0)
@@ -2153,7 +2176,6 @@ namespace Valloon.Trading.Backtest
                                                     {
                                                         if (topList[i]["finalPercent"] > finalPercent ||
                                                                 topList[i]["finalPercent"] == finalPercent && topList[i]["avgProfit"] > avgProfit)
-                                                        //if (topList[i]["score"] > score)
                                                         {
                                                             topList.Insert(i, dic);
                                                             goto topListEnd;
@@ -2166,12 +2188,12 @@ namespace Valloon.Trading.Backtest
                                                 {
                                                     topList.Add(dic);
                                                 }
-                                                logger.WriteLine($"{start1:F6} / {step1:F6} / {max1:F6} \t limit = {closeLimit:F4} / {stopLoss:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F4} \t h = {minHeight:F4} / {maxHeight:F4} \t p = {totalProfit:F2} \t avg = {avgProfit:F2} \t % = {finalPercent:F4} / +{score:F4}");
+                                                logger.WriteLine($"{start1:F6} / {step1:F6} / {max1:F6} \t limit = {closeLimit:F4} / {stopLoss:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F4} \t h = {minHeight:F4} / {maxHeight:F4} \t p = {totalProfit:F2} \t avg = {avgProfit:F2} \t % = {finalPercent:F4}");
                                             }
-                                            else
-                                            {
-                                                //Console.WriteLine($"{start1:F6} / {step1:F6} / {max1:F6} \t limit = {closeLimit:F4} / {stopLoss:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F4} \t h = {minHeight:F4} / {maxHeight:F4} \t p = {totalProfit:F2} \t avg = {avgProfit:F2} \t % = {finalPercent:F4}");
-                                            }
+                                            //else
+                                            //{
+                                            //    Console.WriteLine($"{minRSI} ~ {maxRSI}    {minDiff} / {maxDiff}    {closeX:F4}    {stopX:F4} \t succeed = {succeedCount} \t failed = {failedCount} \t unknown = {unknownCount} \t score = {score:F2} \t total = {totalProfit:F4} \t avg = {avgProfit:F4} \t final = {finalPercent:F4}");
+                                            //}
                                         }
                                     }
                                 }
@@ -2188,10 +2210,10 @@ namespace Valloon.Trading.Backtest
 
         static string TestSAR3()
         {
-            //TestSAR3(new DateTime(2022, 3, 16, 0, 0, 0, DateTimeKind.Utc)); return null;
+            //TestSAR3(new DateTime(2022, 3, 23, 0, 0, 0, DateTimeKind.Utc)); return null;
 
             string result = "";
-            result += TestSAR3(new DateTime(2022, 4, 14, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
+            result += TestSAR3(new DateTime(2022, 4, 12, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += TestSAR3(new DateTime(2022, 4, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += TestSAR3(new DateTime(2022, 3, 23, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 4, 14, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += TestSAR3(new DateTime(2022, 3, 16, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 4, 14, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
@@ -2214,20 +2236,20 @@ namespace Valloon.Trading.Backtest
             const float takerFee = 0.002f;
             const int binSize1 = 5;
             //const int binSize2 = 60;
-            float start1 = 0.014f;
-            float step1 = 0.014f;
-            float max1 = 0.14f;
+            float start1 = 0.004f;
+            float step1 = 0.004f;
+            float max1 = 0.09f;
             //float start2 = 0.00044f;
             //float step2 = start2;
             //float max2 = 0.017f;
-            float closeLimit = 0.01f;
-            float stopLoss = 0.02f;
+            float closeLimit = 0.008f;
+            float stopLoss = 0.004f;
 
             //DateTime startTime = new DateTime(2021, 11, 1, 0, 0, 0, DateTimeKind.Utc);
             //DateTime? endTime = null;
-            List<SolBin> list1m = SolDao.SelectAll("1m");
-            List<SolBin> list1 = LoadBinListFrom1m(binSize1, list1m);
-            //List<SolBin> list2 = LoadBinListFrom1m(binSize2, list1m);
+            List<LunaBin> list1m = LunaDao.SelectAll("1m");
+            List<LunaBin> list1 = LoadBinListFrom1m(binSize1, list1m);
+            //List<LunaBin> list2 = LoadBinListFrom1m(binSize2, list1m);
             int count1 = list1.Count;
             int totalDays = (int)(list1.Last().Timestamp - startTime).TotalDays;
             Logger logger = new Logger($"{DateTime.Now:yyyy-MM-dd  HH.mm.ss}    TestSAR2    bin = {binSize}    takerFee = {takerFee}    ({startTime:yyyy-MM-dd HH.mm.ss} ~ {totalDays:N0} days)");
@@ -2267,8 +2289,8 @@ namespace Valloon.Trading.Backtest
 
             var parabolicSarList1 = ParabolicSar.GetParabolicSar(quoteList1, step1, max1, start1).ToList();
             parabolicSarList1.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
-            var parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList1, .0005f, .005f).ToList();
-            parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+            //var parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList2, step2, max2, start2).ToList();
+            //parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
             //for (int i = 1; i < parabolicSarList1.Count - 1; i++)
             //{
@@ -2301,50 +2323,50 @@ namespace Valloon.Trading.Backtest
             float finalPercent10 = 1;
             int position = 0;
             int positionEntryPrice = 0;
-            int positionCreated = 0;
 
-            int profitCount = 0, lossCount = 0, closeCount = 0, stopCount = 0, csrCount = 0;
+            int profitCount = 0, lossCount = 0, stopCount = 0;
+            float bestValue = 0, worstValue = 0;
 
             for (int i = 1; i < count - 1; i++)
             {
                 var pSar1 = parabolicSarList1[i];
                 //var pSar2 = parabolicSarList2.Find(x => x.Date > pSar1.Date);
-                var pSar2 = parabolicSarList2[i];
-                pSar2.Sar = null;
                 if (position == 0)
                 {
-                    if (list1[i].Timestamp.Hour >= 0 && list1[i].Timestamp.Hour <= 3) continue;
-                    //if (list1[i].Timestamp.DayOfWeek == DayOfWeek.Saturday) continue;
-                    if (pSar1.OriginalSar.Value < pSar1.Sar.Value && (pSar2.Sar == null || pSar2.Sar.Value >= pSar1.Sar.Value))
+                    if (pSar1.OriginalSar.Value < pSar1.Sar.Value)
                     {
                         position = -1;
                         positionEntryPrice = (int)pSar1.OriginalSar.Value;
-                        positionCreated = i;
                         //if (list1[i].Timestamp.DayOfWeek == DayOfWeek.Saturday || list1[i].Timestamp.DayOfWeek == DayOfWeek.Sunday)
                         //    logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t <SHORT>", ConsoleColor.Red);
                         //else
                         logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t <SHORT>");
+                        bestValue = 0;
+                        worstValue = 0;
                     }
-                    else if (pSar1.OriginalSar.Value > pSar1.Sar.Value && (pSar2.Sar == null || pSar2.Sar.Value <= pSar1.Sar.Value))
+                    else if (pSar1.OriginalSar.Value > pSar1.Sar.Value)
                     {
                         position = 1;
                         positionEntryPrice = (int)pSar1.OriginalSar.Value;
-                        positionCreated = i;
                         //if (list1[i].Timestamp.DayOfWeek == DayOfWeek.Saturday || list1[i].Timestamp.DayOfWeek == DayOfWeek.Sunday)
                         //    logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t <LONG>", ConsoleColor.Red);
                         //else
                         logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t <LONG>");
+                        bestValue = 0;
+                        worstValue = 0;
                     }
                 }
                 else if (position == 1)
                 {
-                    if (i >= positionCreated + 1)
+                    if (bestValue < (float)(list1[i].High - positionEntryPrice) / positionEntryPrice) bestValue = (float)(list1[i].High - positionEntryPrice) / positionEntryPrice;
+                    if (worstValue > (float)(list1[i].Low - positionEntryPrice) / positionEntryPrice) worstValue = (float)(list1[i].Low - positionEntryPrice) / positionEntryPrice;
+
+                    if ((float)list1[i].Low / positionEntryPrice < 1 - stopLoss && list1[i].Low < pSar1.OriginalSar.Value)
                     {
                         tryCount++;
-                        int close = list1[i].Close;
+                        int close = (int)Math.Floor(positionEntryPrice * (1 - stopLoss));
                         int profit = close - positionEntryPrice;
-                        if (profit > 0) profitCount++;
-                        else lossCount++;
+                        lossCount++;
                         totalProfit += profit - positionEntryPrice * takerFee;
                         finalPercent *= (float)close / positionEntryPrice - takerFee;
                         finalPercent2 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 2;
@@ -2354,45 +2376,12 @@ namespace Valloon.Trading.Backtest
                         if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
                         if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
                         if (profit > 0)
-                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}");
+                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4} \t {bestValue} / {worstValue}");
                         else
-                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}", ConsoleColor.Red);
+                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4} \t {bestValue} / {worstValue}", ConsoleColor.Red);
                         //position = -1;
                         //positionEntryPrice = close;
                         position = 0;
-                    }
-                    else if ((float)list1[i].Low / positionEntryPrice < 1 - stopLoss || pSar1.IsReversal.Value && pSar1.OriginalSar.Value < pSar1.Sar.Value)
-                    {
-                        tryCount++;
-                        int close = (int)Math.Ceiling(positionEntryPrice * (1 - stopLoss));
-                        if (pSar1.IsReversal.Value) close = (int)Math.Max(close, pSar1.OriginalSar.Value);
-                        int profit = close - positionEntryPrice;
-                        if (profit > 0) profitCount++;
-                        else lossCount++;
-                        totalProfit += profit - positionEntryPrice * takerFee;
-                        finalPercent *= (float)close / positionEntryPrice - takerFee;
-                        finalPercent2 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 2;
-                        finalPercent3 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 3;
-                        finalPercent5 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 5;
-                        finalPercent10 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 10;
-                        if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
-                        if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
-                        if (profit > 0)
-                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}");
-                        else
-                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}", ConsoleColor.Red);
-                        //position = -1;
-                        //positionEntryPrice = close;
-                        position = 0;
-                        if (pSar1.IsReversal.Value)
-                        {
-                            csrCount++;
-                            i--;
-                        }
-                        else
-                        {
-                            stopCount++;
-                        }
                     }
                     else if ((float)list1[i].High / positionEntryPrice > 1 + closeLimit)
                     {
@@ -2400,7 +2389,6 @@ namespace Valloon.Trading.Backtest
                         int close = (int)Math.Floor(positionEntryPrice * (1 + closeLimit));
                         int profit = close - positionEntryPrice;
                         profitCount++;
-                        closeCount++;
                         totalProfit += profit - positionEntryPrice * makerFee;
                         finalPercent *= (float)close / positionEntryPrice - makerFee;
                         finalPercent2 *= 1 + ((float)close / positionEntryPrice - makerFee - 1) * 2;
@@ -2409,49 +2397,55 @@ namespace Valloon.Trading.Backtest
                         finalPercent10 *= 1 + ((float)close / positionEntryPrice - makerFee - 1) * 10;
                         if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
                         if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
-                        logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}");
                         //position = -1;
                         //positionEntryPrice = close;
                         position = 0;
                     }
-                    else if (pSar1.IsReversal.Value && pSar1.OriginalSar.Value >= pSar1.Sar.Value)
+                    else if (pSar1.IsReversal.Value)
                     {
-                        Console.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar} / {pSar1.IsReversal} / {pSar1.OriginalSar:F0} \t \t ERROR", ConsoleColor.Red);
+                        if (pSar1.OriginalSar.Value < pSar1.Sar.Value)
+                        {
+                            tryCount++;
+                            int close = (int)Math.Max(pSar1.OriginalSar.Value, Math.Floor(positionEntryPrice * (1 - stopLoss)));
+                            int profit = close - positionEntryPrice;
+                            if (profit > 0)
+                                profitCount++;
+                            else
+                                lossCount++;
+                            stopCount++;
+                            totalProfit += profit - positionEntryPrice * takerFee;
+                            finalPercent *= (float)close / positionEntryPrice - takerFee;
+                            finalPercent2 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 2;
+                            finalPercent3 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 3;
+                            finalPercent5 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 5;
+                            finalPercent10 *= 1 + ((float)close / positionEntryPrice - takerFee - 1) * 10;
+                            if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
+                            if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
+                            if (profit > 0)
+                                logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4} \t {bestValue} / {worstValue}");
+                            else
+                                logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4} \t {bestValue} / {worstValue}", ConsoleColor.Red);
+                            //position = -1;
+                            //positionEntryPrice = close;
+                            position = 0;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar} / {pSar1.IsReversal} / {pSar1.OriginalSar:F0} \t \t ERROR", ConsoleColor.Red);
+                        }
                     }
                 }
                 else if (position == -1)
                 {
-                    if (i >= positionCreated + 1)
+                    if (bestValue < (float)(positionEntryPrice - list1[i].Low) / positionEntryPrice) bestValue = (float)(positionEntryPrice - list1[i].Low) / positionEntryPrice;
+                    if (worstValue > (float)(positionEntryPrice - list1[i].High) / positionEntryPrice) worstValue = (float)(positionEntryPrice - list1[i].High) / positionEntryPrice;
+
+                    if ((float)positionEntryPrice / list1[i].High < 1 - stopLoss && list1[i].High > pSar1.OriginalSar.Value)
                     {
                         tryCount++;
-                        int close = list1[i].Close;
-                        int profit = close - positionEntryPrice;
-                        if (profit > 0) profitCount++;
-                        else lossCount++;
-                        totalProfit += profit - positionEntryPrice * takerFee;
-                        finalPercent *= (float)positionEntryPrice / close - takerFee;
-                        finalPercent2 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 2;
-                        finalPercent3 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 3;
-                        finalPercent5 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 5;
-                        finalPercent10 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 10;
-                        if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
-                        if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
-                        if (profit > 0)
-                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}");
-                        else
-                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}", ConsoleColor.Red);
-                        //position = 1;
-                        //positionEntryPrice = close;
-                        position = 0;
-                    }
-                    else if ((float)positionEntryPrice / list1[i].High < 1 - stopLoss || pSar1.IsReversal.Value && pSar1.OriginalSar.Value > pSar1.Sar.Value)
-                    {
-                        tryCount++;
-                        int close = (int)Math.Floor(positionEntryPrice / (1 - stopLoss));
-                        if (pSar1.IsReversal.Value) close = (int)Math.Min(close, pSar1.OriginalSar.Value);
+                        int close = (int)Math.Ceiling(positionEntryPrice / (1 - stopLoss));
                         int profit = positionEntryPrice - close;
-                        if (profit > 0) profitCount++;
-                        else lossCount++;
+                        lossCount++;
                         totalProfit += profit - positionEntryPrice * takerFee;
                         finalPercent *= (float)positionEntryPrice / close - takerFee;
                         finalPercent2 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 2;
@@ -2461,21 +2455,12 @@ namespace Valloon.Trading.Backtest
                         if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
                         if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
                         if (profit > 0)
-                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}");
+                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4} \t {bestValue} / {worstValue}");
                         else
-                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}", ConsoleColor.Red);
+                            logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4} \t {bestValue} / {worstValue}", ConsoleColor.Red);
                         //position = 1;
                         //positionEntryPrice = close;
                         position = 0;
-                        if (pSar1.IsReversal.Value)
-                        {
-                            csrCount++;
-                            i--;
-                        }
-                        else
-                        {
-                            stopCount++;
-                        }
                     }
                     else if ((float)positionEntryPrice / list1[i].Low > 1 + closeLimit)
                     {
@@ -2483,7 +2468,6 @@ namespace Valloon.Trading.Backtest
                         int close = (int)Math.Ceiling(positionEntryPrice / (1 + closeLimit));
                         int profit = positionEntryPrice - close;
                         profitCount++;
-                        closeCount++;
                         totalProfit += profit - positionEntryPrice * makerFee;
                         finalPercent *= (float)positionEntryPrice / close - makerFee;
                         finalPercent2 *= 1 + ((float)positionEntryPrice / close - makerFee - 1) * 2;
@@ -2492,20 +2476,48 @@ namespace Valloon.Trading.Backtest
                         finalPercent10 *= 1 + ((float)positionEntryPrice / close - makerFee - 1) * 10;
                         if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
                         if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
-                        logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4}");
                         //position = 1;
                         //positionEntryPrice = close;
                         position = 0;
                     }
-                    else if ((float)positionEntryPrice / list1[i].Low > 1 + closeLimit)
+                    else if (pSar1.IsReversal.Value)
                     {
-                        Console.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar} / {pSar1.IsReversal} / {pSar1.OriginalSar:F0} \t \t ERROR", ConsoleColor.Red);
+                        if (pSar1.OriginalSar.Value > pSar1.Sar.Value)
+                        {
+                            tryCount++;
+                            int close = (int)Math.Min(pSar1.OriginalSar.Value, Math.Ceiling(positionEntryPrice / (1 - stopLoss)));
+                            int profit = positionEntryPrice - close;
+                            if (profit > 0)
+                                profitCount++;
+                            else
+                                lossCount++;
+                            stopCount++;
+                            totalProfit += profit - positionEntryPrice * takerFee;
+                            finalPercent *= (float)positionEntryPrice / close - takerFee;
+                            finalPercent2 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 2;
+                            finalPercent3 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 3;
+                            finalPercent5 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 5;
+                            finalPercent10 *= 1 + ((float)positionEntryPrice / close - takerFee - 1) * 10;
+                            if (minHeight > (float)profit / positionEntryPrice) minHeight = (float)profit / positionEntryPrice;
+                            if (maxHeight < (float)profit / positionEntryPrice) maxHeight = (float)profit / positionEntryPrice;
+                            if (profit > 0)
+                                logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4} \t {bestValue} / {worstValue}");
+                            else
+                                logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar:F0} / {pSar1.IsReversal} \t entry = {positionEntryPrice} \t profit = {profit} \t total = {totalProfit} \t % = {finalPercent:F4} / {finalPercent2:F4} \t {bestValue} / {worstValue}", ConsoleColor.Red);
+                            //position = 1;
+                            //positionEntryPrice = close;
+                            position = 0;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {pSar1.Sar} / {pSar1.IsReversal} / {pSar1.OriginalSar:F0} \t \t ERROR", ConsoleColor.Red);
+                        }
                     }
                 }
             }
             float avgProfit = totalProfit / tryCount;
             string result = $"{startTime} ~ {endTime} ({totalDays} days) \t {start1:F6} / {step1:F6} / {max1:F6} \t close = {closeLimit:F4} \t stop = {stopLoss:F4}" +
-                $"\r\ncount = {count} / {parabolicSarList1.Count} \t try = {tryCount} / {profitCount} / {lossCount} : {closeCount} / {stopCount} / {csrCount} \t h = {minHeight:F4} / {maxHeight:F4} \t p = {totalProfit:F2} \t avg = {avgProfit:F2} \t % = {finalPercent:F4} / {finalPercent2:F4} / {finalPercent3:F4} / {finalPercent5:F4} / {finalPercent10:F4}";
+                $"\r\ncount = {count} / {parabolicSarList1.Count} \t try = {tryCount} / {profitCount} / {lossCount} / {stopCount} \t h = {minHeight:F4} / {maxHeight:F4} \t p = {totalProfit:F2} \t avg = {avgProfit:F2} \t % = {finalPercent:F4} / {finalPercent2:F4} / {finalPercent3:F4} / {finalPercent5:F4} / {finalPercent10:F4}";
             logger.WriteLine($"\r\n{result}");
             return result;
         }
@@ -2514,7 +2526,7 @@ namespace Valloon.Trading.Backtest
 
         static string TestSMA(string binSize, int buyOrSell, int smaLength, int delayLength, DateTime startTime, DateTime? endTime = null)
         {
-            List<SolBin> list = SolDao.SelectAll(binSize);
+            List<LunaBin> list = LunaDao.SelectAll(binSize);
             int count = list.Count;
             {
                 for (int i = smaLength; i < count; i++)
@@ -2643,19 +2655,19 @@ namespace Valloon.Trading.Backtest
 
         static float Test2(int buyOrSell, float minRSI, float maxRSI, DateTime startTime, DateTime? endTime = null)
         {
-            List<SolBin> list = SolDao.SelectAll(binSize);
+            List<LunaBin> list = LunaDao.SelectAll(binSize);
             int count = list.Count;
             const int rsiLength = 14;
             {
                 List<TradeBin> binList = new List<TradeBin>();
-                foreach (SolBin m in list)
+                foreach (LunaBin m in list)
                 {
-                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_LUNAUSD, m.Open, m.High, m.Low, m.Close));
                 }
                 double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
                 for (int i = 0; i < count; i++)
                 {
-                    SolBin m = list[i];
+                    LunaBin m = list[i];
                     m.RSI = (float)rsiArray[i];
                 }
                 list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
@@ -2837,12 +2849,12 @@ namespace Valloon.Trading.Backtest
             return 0;
         }
 
-        static float TestBuyOrSell(List<SolBin> list, int smaLength, int buyOrSell, float heightX, float closeX, float stopX, DateTime startTime, DateTime? endTime = null)
+        static float TestBuyOrSell(List<LunaBin> list, int smaLength, int buyOrSell, float heightX, float closeX, float stopX, DateTime startTime, DateTime? endTime = null)
         {
             int count;
             if (list == null)
             {
-                list = SolDao.SelectAll("1m");
+                list = LunaDao.SelectAll("1m");
                 count = list.Count;
                 for (int i = smaLength; i < count; i++)
                 {
@@ -2985,19 +2997,19 @@ namespace Valloon.Trading.Backtest
 
         static float TestBuyOrSell2(int buyOrSell, float upperRSI, float lowerRSI, float minDiff, float maxDiff, float closeX, float stopX, DateTime startTime, DateTime? endTime = null)
         {
-            List<SolBin> list = SolDao.SelectAll(binSize);
+            List<LunaBin> list = LunaDao.SelectAll(binSize);
             int count = list.Count;
             {
                 const int rsiLength = 14;
                 List<TradeBin> binList = new List<TradeBin>();
-                foreach (SolBin m in list)
+                foreach (LunaBin m in list)
                 {
-                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_LUNAUSD, m.Open, m.High, m.Low, m.Close));
                 }
                 double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
                 for (int i = 0; i < count; i++)
                 {
-                    SolBin m = list[i];
+                    LunaBin m = list[i];
                     m.RSI = (float)rsiArray[i];
                 }
                 list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
@@ -3085,19 +3097,19 @@ namespace Valloon.Trading.Backtest
 
         static float TestBuyOrSell3(int buyOrSell, float minRSI, float maxRSI, float minDiff, float maxDiff, float closeX, float stopX, DateTime startTime, DateTime? endTime = null)
         {
-            List<SolBin> list = SolDao.SelectAll(binSize);
+            List<LunaBin> list = LunaDao.SelectAll(binSize);
             int count = list.Count;
             {
                 const int rsiLength = 14;
                 List<TradeBin> binList = new List<TradeBin>();
-                foreach (SolBin m in list)
+                foreach (LunaBin m in list)
                 {
-                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_LUNAUSD, m.Open, m.High, m.Low, m.Close));
                 }
                 double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
                 for (int i = 0; i < count; i++)
                 {
-                    SolBin m = list[i];
+                    LunaBin m = list[i];
                     m.RSI = (float)rsiArray[i];
                 }
                 list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
@@ -3224,19 +3236,19 @@ namespace Valloon.Trading.Backtest
                 paramMapArray = paramMapList.ToArray();
             }
 
-            List<SolBin> list = SolDao.SelectAll(binSize);
+            List<LunaBin> list = LunaDao.SelectAll(binSize);
             int count = list.Count;
             {
                 const int rsiLength = 14;
                 List<TradeBin> binList = new List<TradeBin>();
-                foreach (SolBin m in list)
+                foreach (LunaBin m in list)
                 {
-                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_SOLUSD, m.Open, m.High, m.Low, m.Close));
+                    binList.Add(new TradeBin(m.Timestamp, BitMEXApiHelper.SYMBOL_LUNAUSD, m.Open, m.High, m.Low, m.Close));
                 }
                 double[] rsiArray = RSI.CalculateRSIValues(binList.ToArray(), rsiLength);
                 for (int i = 0; i < count; i++)
                 {
-                    SolBin m = list[i];
+                    LunaBin m = list[i];
                     m.RSI = (float)rsiArray[i];
                 }
                 list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
@@ -3330,7 +3342,7 @@ namespace Valloon.Trading.Backtest
             return avgProfit;
         }
 
-        public static List<SolBin> LoadBinListFrom5m(string binSize, List<SolBin> list)
+        public static List<LunaBin> LoadBinListFrom5m(string binSize, List<LunaBin> list)
         {
             int batchLength;
             switch (binSize)
@@ -3345,7 +3357,7 @@ namespace Valloon.Trading.Backtest
                     throw new Exception($"Invalid bin_size: {binSize}");
             }
             int count = list.Count;
-            List<SolBin> resultList = new List<SolBin>();
+            List<LunaBin> resultList = new List<LunaBin>();
             int i = 0;
             while (i < count)
             {
@@ -3367,7 +3379,7 @@ namespace Valloon.Trading.Backtest
                     close = list[j].Close;
                     volume += list[j].Volume;
                 }
-                resultList.Add(new SolBin
+                resultList.Add(new LunaBin
                 {
                     Timestamp = timestamp,
                     Open = open,
@@ -3381,11 +3393,11 @@ namespace Valloon.Trading.Backtest
             return resultList;
         }
 
-        public static List<SolBin> LoadBinListFrom1m(int size, List<SolBin> list)
+        public static List<LunaBin> LoadBinListFrom1m(int size, List<LunaBin> list)
         {
             if (size == 1) return list;
             int count = list.Count;
-            var resultList = new List<SolBin>();
+            List<LunaBin> resultList = new List<LunaBin>();
             int i = 0;
             while (i < count)
             {
@@ -3407,7 +3419,7 @@ namespace Valloon.Trading.Backtest
                     close = list[j].Close;
                     volume += list[j].Volume;
                 }
-                resultList.Add(new SolBin
+                resultList.Add(new LunaBin
                 {
                     Timestamp = timestamp,
                     Open = open,

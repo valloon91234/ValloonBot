@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Cache;
 using System.Text;
 
 /**
@@ -19,6 +20,7 @@ namespace Valloon.Utils
             httpWebRequest.Timeout = 15000;
             httpWebRequest.ReadWriteTimeout = 15000;
             httpWebRequest.Method = "Get";
+            httpWebRequest.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
             using (var httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse())
             {
                 string Charset = httpWebResponse.CharacterSet;
