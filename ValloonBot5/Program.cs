@@ -91,8 +91,11 @@ namespace Valloon.Trading
                 case "GRID":
                     new GridStrategy().Run();
                     break;
+                case "GRID2":
+                    new Grid2Strategy().Run();
+                    break;
                 case "RSI":
-                    new RSIStrategy3().Run();
+                    new RSIStrategy4().Run();
                     break;
                 case "PSAR":
                     new PSarStopStrategy().Run();

@@ -58,12 +58,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Grid2Strategy.cs" />
     <Compile Include="PSarStopLimitStrategy.cs" />
     <Compile Include="CloseStopHelper.cs" />
     <Compile Include="PSarStopStrategy.cs" />
     <Compile Include="PSar2Strategy.cs" />
     <Compile Include="PSarStrategy.cs" />
     <Compile Include="PSarSmaStrategy.cs" />
+    <Compile Include="RSIStrategy4.cs" />
     <Compile Include="RSIStrategy3.cs" />
     <Compile Include="RSIStrategy2.cs" />
     <Compile Include="RSIStrategy.cs" />

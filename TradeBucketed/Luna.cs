@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Valloon.Stock.Indicators;
 using Valloon.Utils;
 
 namespace Valloon.Trading.Backtest
@@ -693,7 +694,7 @@ namespace Valloon.Trading.Backtest
                         if (step >= max) continue;
                         List<ParabolicSarResult> parabolicSarList = ParabolicSar.GetParabolicSar(quoteList, step, max, start).ToList();
                         list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
-                        parabolicSarList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+                        parabolicSarList.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
                         count = list.Count;
                         //Console.WriteLine($"\r\n start = {start} \t step = {step} \t max = {max} \t count = {count} / {smaList.Count} / {parabolicSarList.Count}\r\n");
 
@@ -865,7 +866,7 @@ namespace Valloon.Trading.Backtest
             }
             List<ParabolicSarResult> parabolicSarList = ParabolicSar.GetParabolicSar(quoteList, step, max, start).ToList();
             list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
-            parabolicSarList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+            parabolicSarList.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
             count = list.Count;
 
             //for (int i = 1; i < count - 1; i++)
@@ -1034,8 +1035,8 @@ namespace Valloon.Trading.Backtest
         //                    {
         //                        List<ParabolicSarResult> parabolicSarList = ParabolicSar.GetParabolicSar(quoteList, step, max, start).ToList();
         //                        list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
-        //                        smaList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
-        //                        parabolicSarList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+        //                        smaList.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
+        //                        parabolicSarList.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
         //                        count = list.Count;
         //                        //Console.WriteLine($"\r\n start = {start} \t step = {step} \t max = {max} \t count = {count} / {smaList.Count} / {parabolicSarList.Count}\r\n");
 
@@ -1223,8 +1224,8 @@ namespace Valloon.Trading.Backtest
         //    List<SmaResult> smaList = quoteList.GetSma(sma).ToList();
         //    List<ParabolicSarResult> parabolicSarList = ParabolicSar.GetParabolicSar(quoteList, step, max, start).ToList();
         //    list.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
-        //    smaList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
-        //    parabolicSarList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+        //    smaList.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
+        //    parabolicSarList.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
         //    count = list.Count;
 
         //    //for (int i = 1; i < count - 1; i++)
@@ -1396,7 +1397,7 @@ namespace Valloon.Trading.Backtest
                             //if (step1 >= max1) continue;
 
                             List<ParabolicSarResult> parabolicSarList1 = ParabolicSar.GetParabolicSar(quoteList1, step1, max1, start1).ToList();
-                            parabolicSarList1.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+                            parabolicSarList1.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
                             int count = parabolicSarList1.Count;
 
                             //for (float step2 = 0.0004f; step2 <= 0.0005f; step2 += .00001f)
@@ -1412,7 +1413,7 @@ namespace Valloon.Trading.Backtest
                                         //Console.WriteLine($"\r\n start = {start} \t step = {step} \t max = {max} \t count = {count} / {smaList.Count} / {parabolicSarList.Count}\r\n");
 
                                         List<ParabolicSarResult> parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList2, step2, max2, start2).ToList();
-                                        parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+                                        parabolicSarList2.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
 
                                         int tryCount = 0;
                                         float minHeight = 0, maxHeight = 0;
@@ -1423,7 +1424,7 @@ namespace Valloon.Trading.Backtest
                                         for (int i = 1; i < count - 1; i++)
                                         {
                                             var pSar1 = parabolicSarList1[i];
-                                            var pSar2 = parabolicSarList2.Find(x => x.Date > pSar1.Date);
+                                            var pSar2 = parabolicSarList2.Find(x => x.Timestamp > pSar1.Timestamp);
 
                                             if (position == 0)
                                             {
@@ -1688,9 +1689,9 @@ namespace Valloon.Trading.Backtest
             int count = list1.Count;
 
             var parabolicSarList1 = ParabolicSar.GetParabolicSar(quoteList1, step1, max1, start1).ToList();
-            parabolicSarList1.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+            parabolicSarList1.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
             var parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList2, step2, max2, start2).ToList();
-            parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+            parabolicSarList2.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
 
             //for (int i = 1; i < parabolicSarList1.Count - 1; i++)
             //{
@@ -1704,7 +1705,7 @@ namespace Valloon.Trading.Backtest
 
             //for (int i = parabolicSarList1.Count - 100; i < parabolicSarList1.Count - 1; i++)
             //{
-            //    var pSar2 = parabolicSarList2.Find(x => x.Date > list1[i].Timestamp);
+            //    var pSar2 = parabolicSarList2.Find(x => x.Timestamp > list1[i].Timestamp);
             //    var b = list2.Find(x => x.Timestamp == pSar2.Date);
             //    if (pSar2.Sar == pSar2.OriginalSar)
             //        logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {b.Timestamp:yyyy-MM-dd HH:mm:ss} \t {b.Open} / {b.High} / {b.Low} / {b.Close} \t {pSar2.Sar:F4}  /  {pSar2.IsReversal}");
@@ -1728,7 +1729,7 @@ namespace Valloon.Trading.Backtest
             for (int i = 1; i < count - 1; i++)
             {
                 var pSar1 = parabolicSarList1[i];
-                var pSar2 = parabolicSarList2.Find(x => x.Date > pSar1.Date);
+                var pSar2 = parabolicSarList2.Find(x => x.Timestamp > pSar1.Timestamp);
                 if (position == 0)
                 {
                     if (pSar1.OriginalSar.Value < pSar1.Sar.Value && pSar2.Sar.Value >= pSar1.Sar.Value)
@@ -1952,7 +1953,7 @@ namespace Valloon.Trading.Backtest
                                 if (step1 >= max1) continue;
 
                                 List<ParabolicSarResult> parabolicSarList1 = ParabolicSar.GetParabolicSar(quoteList1, step1, max1, start1).ToList();
-                                parabolicSarList1.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+                                parabolicSarList1.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
                                 int count = parabolicSarList1.Count;
 
                                 //for (float step2 = 0.0004f; step2 <= 0.0005f; step2 += .00001f)
@@ -1968,7 +1969,7 @@ namespace Valloon.Trading.Backtest
                                             //Console.WriteLine($"\r\n start = {start} \t step = {step} \t max = {max} \t count = {count} / {smaList.Count} / {parabolicSarList.Count}\r\n");
 
                                             //List<ParabolicSarResult> parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList2, step2, max2, start2).ToList();
-                                            //parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+                                            //parabolicSarList2.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
 
                                             int tryCount = 0;
                                             int succeedCount = 0, failedCount = 0;
@@ -1980,7 +1981,7 @@ namespace Valloon.Trading.Backtest
                                             for (int i = 1; i < count - 1; i++)
                                             {
                                                 var pSar1 = parabolicSarList1[i];
-                                                //var pSar2 = parabolicSarList2.Find(x => x.Date > pSar1.Date);
+                                                //var pSar2 = parabolicSarList2.Find(x => x.Timestamp > pSar1.Date);
 
                                                 if (position == 0)
                                                 {
@@ -2288,9 +2289,9 @@ namespace Valloon.Trading.Backtest
             int count = list1.Count;
 
             var parabolicSarList1 = ParabolicSar.GetParabolicSar(quoteList1, step1, max1, start1).ToList();
-            parabolicSarList1.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+            parabolicSarList1.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
             //var parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList2, step2, max2, start2).ToList();
-            //parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+            //parabolicSarList2.RemoveAll(x => x.Timestamp < startTime || endTime != null && x.Timestamp > endTime.Value);
 
             //for (int i = 1; i < parabolicSarList1.Count - 1; i++)
             //{
@@ -2304,7 +2305,7 @@ namespace Valloon.Trading.Backtest
 
             //for (int i = parabolicSarList1.Count - 100; i < parabolicSarList1.Count - 1; i++)
             //{
-            //    var pSar2 = parabolicSarList2.Find(x => x.Date > list1[i].Timestamp);
+            //    var pSar2 = parabolicSarList2.Find(x => x.Timestamp > list1[i].Timestamp);
             //    var b = list2.Find(x => x.Timestamp == pSar2.Date);
             //    if (pSar2.Sar == pSar2.OriginalSar)
             //        logger.WriteLine($"{list1[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list1[i].Open} / {list1[i].High} / {list1[i].Low} / {list1[i].Close} \t {b.Timestamp:yyyy-MM-dd HH:mm:ss} \t {b.Open} / {b.High} / {b.Low} / {b.Close} \t {pSar2.Sar:F4}  /  {pSar2.IsReversal}");
@@ -2330,7 +2331,7 @@ namespace Valloon.Trading.Backtest
             for (int i = 1; i < count - 1; i++)
             {
                 var pSar1 = parabolicSarList1[i];
-                //var pSar2 = parabolicSarList2.Find(x => x.Date > pSar1.Date);
+                //var pSar2 = parabolicSarList2.Find(x => x.Timestamp > pSar1.Date);
                 if (position == 0)
                 {
                     if (pSar1.OriginalSar.Value < pSar1.Sar.Value)

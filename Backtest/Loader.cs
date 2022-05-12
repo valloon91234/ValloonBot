@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Valloon.Stock.Indicators;
 using Valloon.Trading;
 using Valloon.Utils;
 
@@ -11,8 +12,9 @@ namespace Valloon.BitMEX.Backtest
 {
     static class Loader
     {
-        public static void LoadCSV(string symbol, string binSize, DateTime startTime, DateTime endTime)
+        public static void LoadCSV(string symbol, string binSize, DateTime startTime, DateTime? endTime = null)
         {
+            if (endTime == null) endTime = DateTime.UtcNow;
             string filename = $"data-{symbol}-{binSize}  {startTime:yyyy-MM-dd} ~ {endTime:yyyy-MM-dd}.csv";
             int x = CandleQuote.GetX(symbol);
             File.Delete(filename);
@@ -40,9 +42,9 @@ namespace Valloon.BitMEX.Backtest
                                 Console.WriteLine($"Invalid bin_size: {binSize}");
                                 return;
                         }
-                        if (startTime > endTime)
+                        if (startTime > endTime.Value)
                         {
-                            Console.WriteLine($"end: nextTime = {startTime:yyyy-MM-dd HH:mm:ss} > {endTime:yyyy-MM-dd HH:mm:ss}");
+                            Console.WriteLine($"end: nextTime = {startTime:yyyy-MM-dd HH:mm:ss} > {endTime.Value:yyyy-MM-dd HH:mm:ss}");
                             break;
                         }
                         List<TradeBin> list = apiHelper.GetBinList(binSize, false, symbol, 1000, null, null, startTime, nextTime);
@@ -76,8 +78,9 @@ namespace Valloon.BitMEX.Backtest
             }
         }
 
-        public static void Load(string symbol, string binSize, DateTime startTime, DateTime endTime)
+        public static void Load(string symbol, string binSize, DateTime startTime, DateTime? endTime = null)
         {
+            if (endTime == null) endTime = DateTime.UtcNow;
             BitMEXApiHelper apiHelper = new BitMEXApiHelper();
             while (true)
             {
@@ -99,9 +102,9 @@ namespace Valloon.BitMEX.Backtest
                             Console.WriteLine($"Invalid bin_size: {binSize}");
                             return;
                     }
-                    if (startTime > endTime)
+                    if (startTime > endTime.Value)
                     {
-                        Console.WriteLine($"end: nextTime = {startTime:yyyy-MM-dd HH:mm:ss} > {endTime:yyyy-MM-dd HH:mm:ss}");
+                        Console.WriteLine($"end: nextTime = {startTime:yyyy-MM-dd HH:mm:ss} > {endTime.Value:yyyy-MM-dd HH:mm:ss}");
                         break;
                     }
                     List<TradeBin> list = apiHelper.GetBinList(binSize, false, symbol, 1000, null, null, startTime, nextTime);
