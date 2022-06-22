@@ -20,6 +20,7 @@ namespace Valloon.Stock.Indicators
         public int Low { get; set; }
         public int Close { get; set; }
         public int Volume { get; set; }
+        public float RSI { get; set; }
 
         public CandleQuote() { }
 

@@ -12,12 +12,12 @@ using Valloon.Utils;
 
 namespace Valloon.BitMEX.Backtest
 {
-    public class CandleQuoteExtended : CandleQuote
-    {
-        public float SMA_1 { get; set; }
-        public float SMA_2 { get; set; }
-        public float RSI { get; set; }
-    }
+    //public class CandleQuoteExtended : CandleQuote
+    //{
+    //    public float SMA_1 { get; set; }
+    //    public float SMA_2 { get; set; }
+    //    public float RSI { get; set; }
+    //}
 
     static class SMA2
     {

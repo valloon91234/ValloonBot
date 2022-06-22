@@ -28,6 +28,7 @@ namespace Valloon.BitMEX.Backtest
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 
+            //Candle.Run();
             PSar.Run();
             //SMA2.Run();
 

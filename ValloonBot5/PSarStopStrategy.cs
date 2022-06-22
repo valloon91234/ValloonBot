@@ -35,6 +35,8 @@ namespace Valloon.Trading
             public decimal StopLoss { get; set; }
             [JsonProperty("take")]
             public decimal StopProfit { get; set; }
+            [JsonProperty("close")]
+            public decimal CloseProfit { get; set; }
         }
 
         public void Run(Config config = null)
@@ -272,6 +274,54 @@ namespace Valloon.Trading
                                     logger.WriteFile("--- " + JObject.FromObject(amendOrder).ToString(Formatting.None));
                                 }
                             }
+                            if (param.CloseProfit > 0)
+                            {
+                                var closePrice = Math.Floor((buyEntryPrice > 0 ? buyEntryPrice : positionEntryPrice) * (1 + param.CloseProfit) * 100) / 100m;
+                                Order oldCloseOrder = null;
+                                List<string> cancelOrderList = new List<string>();
+                                foreach (Order order in botOrderList)
+                                {
+                                    if (order.Text.Contains("<LIMIT-CLOSE>"))
+                                    {
+                                        oldCloseOrder = order;
+                                        cancelOrderList.Add(order.OrderID);
+                                    }
+                                }
+                                if (cancelOrderList.Count > 1 || oldCloseOrder != null && oldCloseOrder.Side != "Sell")
+                                {
+                                    var canceledOrders = apiHelper.CancelOrders(cancelOrderList);
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  {canceledOrders.Count} LIMIT-CLOSE orders have been canceled.");
+                                    oldCloseOrder = null;
+                                }
+                                if (oldCloseOrder == null)
+                                {
+                                    Order stopOrder = apiHelper.OrderNew(new Order
+                                    {
+                                        Symbol = symbol,
+                                        Side = "Sell",
+                                        OrderQty = positionQty,
+                                        Price = closePrice,
+                                        OrdType = "Limit",
+                                        ExecInst = "ReduceOnly",
+                                        Text = $"<BOT><LIMIT-CLOSE></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New LIMIT-CLOSE order: qty = {positionQty}, price = {closePrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(stopOrder).ToString(Formatting.None));
+                                }
+                                else if (oldCloseOrder.OrderQty != positionQty)
+                                {
+                                    Order amendOrder = apiHelper.OrderAmend(new Order
+                                    {
+                                        OrderID = oldCloseOrder.OrderID,
+                                        OrderQty = positionQty,
+                                        StopPx = closePrice,
+                                        ExecInst = "ReduceOnly",
+                                        Text = $"<BOT><LIMIT-CLOSE></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Amend LIMIT-CLOSE order: qty = {positionQty}, price = {closePrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(amendOrder).ToString(Formatting.None));
+                                }
+                            }
                         }
                         else
                         {
@@ -322,6 +372,54 @@ namespace Valloon.Trading
                                         Text = $"<BOT><STOP-CLOSE></BOT>",
                                     });
                                     logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Amend STOP-CLOSE order: qty = {positionQty}, price = {stopPrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(amendOrder).ToString(Formatting.None));
+                                }
+                            }
+                            if (param.CloseProfit > 0)
+                            {
+                                var closePrice = (int)Math.Floor(positionEntryPrice * (1 + param.CloseProfit) * 100) / 100m;
+                                Order oldCloseOrder = null;
+                                List<string> cancelOrderList = new List<string>();
+                                foreach (Order order in botOrderList)
+                                {
+                                    if (order.Text.Contains("<LIMIT-CLOSE>"))
+                                    {
+                                        oldCloseOrder = order;
+                                        cancelOrderList.Add(order.OrderID);
+                                    }
+                                }
+                                if (cancelOrderList.Count > 1 || oldCloseOrder != null && oldCloseOrder.Side != "Sell")
+                                {
+                                    var canceledOrders = apiHelper.CancelOrders(cancelOrderList);
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  {canceledOrders.Count} LIMIT-CLOSE orders have been canceled.");
+                                    oldCloseOrder = null;
+                                }
+                                if (oldCloseOrder == null)
+                                {
+                                    Order stopOrder = apiHelper.OrderNew(new Order
+                                    {
+                                        Symbol = symbol,
+                                        Side = "Sell",
+                                        OrderQty = positionQty,
+                                        Price = closePrice,
+                                        OrdType = "Limit",
+                                        ExecInst = "ReduceOnly",
+                                        Text = $"<BOT><LIMIT-CLOSE></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New LIMIT-CLOSE order: qty = {positionQty}, price = {closePrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(stopOrder).ToString(Formatting.None));
+                                }
+                                else if (oldCloseOrder.OrderQty != positionQty)
+                                {
+                                    Order amendOrder = apiHelper.OrderAmend(new Order
+                                    {
+                                        OrderID = oldCloseOrder.OrderID,
+                                        OrderQty = positionQty,
+                                        StopPx = closePrice,
+                                        ExecInst = "ReduceOnly",
+                                        Text = $"<BOT><LIMIT-CLOSE></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Amend LIMIT-CLOSE order: qty = {positionQty}, price = {closePrice}");
                                     logger.WriteFile("--- " + JObject.FromObject(amendOrder).ToString(Formatting.None));
                                 }
                             }
@@ -390,6 +488,54 @@ namespace Valloon.Trading
                                     logger.WriteFile("--- " + JObject.FromObject(amendOrder).ToString(Formatting.None));
                                 }
                             }
+                            if (param.CloseProfit > 0)
+                            {
+                                var closePrice = Math.Ceiling((sellEntryPrice > 0 ? sellEntryPrice : positionEntryPrice) * (1 - param.CloseProfit) * 100) / 100m;
+                                Order oldCloseOrder = null;
+                                List<string> cancelOrderList = new List<string>();
+                                foreach (Order order in botOrderList)
+                                {
+                                    if (order.Text.Contains("<LIMIT-CLOSE>"))
+                                    {
+                                        oldCloseOrder = order;
+                                        cancelOrderList.Add(order.OrderID);
+                                    }
+                                }
+                                if (cancelOrderList.Count > 1 || oldCloseOrder != null && oldCloseOrder.Side != "Buy")
+                                {
+                                    var canceledOrders = apiHelper.CancelOrders(cancelOrderList);
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  {canceledOrders.Count} LIMIT-CLOSE orders have been canceled.");
+                                    oldCloseOrder = null;
+                                }
+                                if (oldCloseOrder == null)
+                                {
+                                    Order stopOrder = apiHelper.OrderNew(new Order
+                                    {
+                                        Symbol = symbol,
+                                        Side = "Buy",
+                                        OrderQty = -positionQty,
+                                        Price = closePrice,
+                                        OrdType = "Limit",
+                                        ExecInst = "ReduceOnly",
+                                        Text = $"<BOT><LIMIT-CLOSE></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New LIMIT-CLOSE order: qty = {-positionQty}, price = {closePrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(stopOrder).ToString(Formatting.None));
+                                }
+                                else if (oldCloseOrder.OrderQty != -positionQty)
+                                {
+                                    Order amendOrder = apiHelper.OrderAmend(new Order
+                                    {
+                                        OrderID = oldCloseOrder.OrderID,
+                                        OrderQty = -positionQty,
+                                        StopPx = closePrice,
+                                        ExecInst = "ReduceOnly",
+                                        Text = $"<BOT><LIMIT-CLOSE></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Amend LIMIT-CLOSE order: qty = {-positionQty}, price = {closePrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(amendOrder).ToString(Formatting.None));
+                                }
+                            }
                         }
                         else
                         {
@@ -440,6 +586,54 @@ namespace Valloon.Trading
                                         Text = $"<BOT><STOP-CLOSE></BOT>",
                                     });
                                     logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Amend STOP-CLOSE order: qty = {-positionQty}, price = {stopPrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(amendOrder).ToString(Formatting.None));
+                                }
+                            }
+                            if (param.CloseProfit > 0)
+                            {
+                                var closePrice = Math.Ceiling(positionEntryPrice * (1 - param.CloseProfit) * 100) / 100m;
+                                Order oldCloseOrder = null;
+                                List<string> cancelOrderList = new List<string>();
+                                foreach (Order order in botOrderList)
+                                {
+                                    if (order.Text.Contains("<LIMIT-CLOSE>"))
+                                    {
+                                        oldCloseOrder = order;
+                                        cancelOrderList.Add(order.OrderID);
+                                    }
+                                }
+                                if (cancelOrderList.Count > 1 || oldCloseOrder != null && oldCloseOrder.Side != "Buy")
+                                {
+                                    var canceledOrders = apiHelper.CancelOrders(cancelOrderList);
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  {canceledOrders.Count} LIMIT-CLOSE orders have been canceled.");
+                                    oldCloseOrder = null;
+                                }
+                                if (oldCloseOrder == null)
+                                {
+                                    Order stopOrder = apiHelper.OrderNew(new Order
+                                    {
+                                        Symbol = symbol,
+                                        Side = "Buy",
+                                        OrderQty = -positionQty,
+                                        Price = closePrice,
+                                        OrdType = "Limit",
+                                        ExecInst = "ReduceOnly",
+                                        Text = $"<BOT><LIMIT-CLOSE></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  New LIMIT-CLOSE order: qty = {-positionQty}, price = {closePrice}");
+                                    logger.WriteFile("--- " + JObject.FromObject(stopOrder).ToString(Formatting.None));
+                                }
+                                else if (oldCloseOrder.OrderQty != -positionQty)
+                                {
+                                    Order amendOrder = apiHelper.OrderAmend(new Order
+                                    {
+                                        OrderID = oldCloseOrder.OrderID,
+                                        OrderQty = -positionQty,
+                                        StopPx = closePrice,
+                                        ExecInst = "ReduceOnly",
+                                        Text = $"<BOT><LIMIT-CLOSE></BOT>",
+                                    });
+                                    logger.WriteLine($"        [{BitMEXApiHelper.ServerTime:HH:mm:ss fff}]  Amend LIMIT-CLOSE order: qty = {-positionQty}, price = {closePrice}");
                                     logger.WriteFile("--- " + JObject.FromObject(amendOrder).ToString(Formatting.None));
                                 }
                             }

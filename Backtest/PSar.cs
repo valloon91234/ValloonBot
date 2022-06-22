@@ -24,7 +24,7 @@ namespace Valloon.BitMEX.Backtest
             //Loader.Load(SYMBOL, "1m", new DateTime(2022, 5, 11, 0, 0, 0, DateTimeKind.Utc)); return;
 
             //{
-            //    DateTime startTime = new DateTime(2022, 4, 20, 0, 0, 0, DateTimeKind.Utc);
+            //    DateTime startTime = new DateTime(2022, 6, 16, 0, 0, 0, DateTimeKind.Utc);
             //    DateTime endTime = DateTime.UtcNow;
             //    //Loader.LoadCSV(SYMBOL, "1m", startTime, endTime);
             //    Loader.Load(SYMBOL, "1m", startTime, endTime);
@@ -32,6 +32,7 @@ namespace Valloon.BitMEX.Backtest
             //}
 
             {
+                //Benchmark();
                 Benchmark1();
                 return;
             }
@@ -44,13 +45,13 @@ namespace Valloon.BitMEX.Backtest
             //Test(); return 0;
 
             const float makerFee = 0.0015f;
-            const float takerFee = 0.003f;
+            const float takerFee = 0.004f;
             //const float makerFee = 0.002f;
             //const float takerFee = 0.003f;
             const int binSize1 = 5;
             //const int binSize2 = 60;
 
-            DateTime startTime = new DateTime(2022, 5, 9, 0, 0, 0, DateTimeKind.Utc);
+            DateTime startTime = new DateTime(2022, 5, 15, 0, 0, 0, DateTimeKind.Utc);
             //DateTime startTime = new DateTime(2022, 3, 16, 0, 0, 0, DateTimeKind.Utc);
             //DateTime? endTime = new DateTime(2022, 4, 14, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;
@@ -97,20 +98,20 @@ namespace Valloon.BitMEX.Backtest
             //List<ParabolicSarResult> parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList1, .0005f, .005f).ToList();
             //parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
-            for (float stopLoss = 0.01f; stopLoss <= 0.02f; stopLoss += .005f)
+            for (float stopLoss = 0.005f; stopLoss <= 0.02f; stopLoss += .0025f)
             //float stopLoss = .015f;
             {
-                for (float closeLimit = stopLoss; closeLimit <= 0.05f; closeLimit += .005f)
+                for (float closeLimit = stopLoss; closeLimit <= 0.02f; closeLimit += .0025f)
                 //float closeLimit = .015f;
                 {
-                    for (float step1 = 0.001f; step1 <= 0.04f; step1 += .0005f)
+                    for (float step1 = 0.001f; step1 <= 0.04f; step1 += .001f)
                     //float step1 = .0015f;
                     {
                         //for (float start1 = 0.001f; start1 <= 0.05f; start1 += .001f)
                         float start1 = step1;
                         //float start1 = .00186f;
                         {
-                            for (float max1 = .01f; max1 <= 0.4; max1 += .005f)
+                            for (float max1 = .01f; max1 <= 0.4; max1 += .01f)
                             //float max1 = .03f;
                             {
                                 if (step1 >= max1) continue;
@@ -347,14 +348,14 @@ namespace Valloon.BitMEX.Backtest
         {
             //Test(); return 0;
 
-            const float makerFee = 0.0015f;
+            const float makerFee = 0.002f;
             const float takerFee = 0.004f;
             //const float makerFee = 0.002f;
             //const float takerFee = 0.003f;
             const int binSize1 = 5;
             //const int binSize2 = 60;
 
-            DateTime startTime = new DateTime(2022, 5, 10, 0, 0, 0, DateTimeKind.Utc);
+            DateTime startTime = new DateTime(2022, 6, 11, 0, 0, 0, DateTimeKind.Utc);
             //DateTime startTime = new DateTime(2022, 3, 16, 0, 0, 0, DateTimeKind.Utc);
             //DateTime? endTime = new DateTime(2022, 4, 14, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;
@@ -401,21 +402,21 @@ namespace Valloon.BitMEX.Backtest
             //List<ParabolicSarResult> parabolicSarList2 = ParabolicSar.GetParabolicSar(quoteList1, .0005f, .005f).ToList();
             //parabolicSarList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
-            for (float stopLoss = 0.01f; stopLoss <= 0.05f; stopLoss += .005f)
+            for (float stopLoss = 0.05f; stopLoss <= 0.25f; stopLoss += .05f)
             //float stopLoss = .015f;
             {
                 //for (float closeLimit = stopLoss; closeLimit <= 0.05f; closeLimit += .001f)
                 float closeLimit = 0;
-                for (float stopProfit = 0.05f; stopProfit <= 0.2f; stopProfit += .025f)
+                for (float stopProfit = 0.02f; stopProfit <= 0.2f; stopProfit += .02f)
                 {
-                    for (float step1 = 0.001f; step1 <= 0.04f; step1 += .001f)
+                    for (float step1 = 0.001f; step1 <= 0.02f; step1 += .001f)
                     //float step1 = .012f;
                     {
                         //for (float start1 = 0.001f; start1 <= 0.03f; start1 += .001f)
                         float start1 = step1;
                         //float start1 = .00186f;
                         {
-                            for (float max1 = .01f; max1 <= 0.4; max1 += .01f)
+                            for (float max1 = .01f; max1 <= 0.2; max1 += .01f)
                             //float max1 = .03f;
                             {
                                 if (step1 >= max1 || start1 > max1) continue;
@@ -640,7 +641,7 @@ namespace Valloon.BitMEX.Backtest
                                             }
                                             else
                                             {
-                                                //logger.WriteLine($"{start1:F6} / {step1:F6} / {max1:F6} \t limit = {closeLimit:F4} / {stopLoss:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F4} \t h = {minHeight:F4} / {maxHeight:F4} \t p = {totalProfit:F2} \t avg = {avgProfit:F2} \t % = {finalPercent:F4}", ConsoleColor.DarkGray, false);
+                                                logger.WriteLine($"{start1:F6} / {step1:F6} / {max1:F6} \t limit = {closeLimit:F4} / {stopLoss:F4} / {stopProfit:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F4} \t h = {minHeight:F4} / {maxHeight:F4} \t p = {totalProfit:F2} \t avg = {avgProfit:F2} \t % = {finalPercent:F4}", ConsoleColor.DarkGray, false);
                                             }
                                         }
                                     }
