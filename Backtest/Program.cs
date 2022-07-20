@@ -29,8 +29,9 @@ namespace Valloon.BitMEX.Backtest
             Thread.CurrentThread.CurrentUICulture = culture;
 
             //Candle.Run();
-            PSar.Run();
+            //PSar.Run();
             //SMA2.Run();
+            RSI_MACD.Run();
 
             Console.WriteLine($"\nCompleted. Press any key to exit... ");
             Console.ReadKey(false);

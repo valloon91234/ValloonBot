@@ -1,7 +1,7 @@
 ﻿using IO.Swagger.Model;
 using System.Collections.Generic;
 
-namespace Valloon.Stock.Indicators
+namespace Valloon.Indicators
 {
     /**
      * https://daveskender.github.io/Stock.Indicators/indicators/

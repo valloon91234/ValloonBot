@@ -10,7 +10,7 @@ using IO.Swagger.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Skender.Stock.Indicators;
-using Valloon.Stock.Indicators;
+using Valloon.Indicators;
 using Valloon.Utils;
 
 /**

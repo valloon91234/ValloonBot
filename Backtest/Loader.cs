@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Valloon.Stock.Indicators;
+using Valloon.Indicators;
 using Valloon.Trading;
 using Valloon.Utils;
 
@@ -222,6 +222,46 @@ namespace Valloon.BitMEX.Backtest
                     Volume = volume
                 });
                 i += batchLength;
+            }
+            return resultList;
+        }
+
+        public static List<CandleQuote> LoadBinListFrom1h(int size, List<CandleQuote> list)
+        {
+            if (size == 1) return list;
+            int count = list.Count;
+            var resultList = new List<CandleQuote>();
+            int i = 0;
+            while (i < count)
+            {
+                if (list[i].Timestamp.Hour % size != 1)
+                {
+                    i++;
+                    continue;
+                }
+                DateTime timestamp = list[i].Timestamp.AddHours(size - 1);
+                int open = list[i].Open;
+                int high = list[i].High;
+                int low = list[i].Low;
+                int close = list[i].Close;
+                int volume = list[i].Volume;
+                for (int j = i + 1; j < i + size && j < count; j++)
+                {
+                    if (high < list[j].High) high = list[j].High;
+                    if (low > list[j].Low) low = list[j].Low;
+                    close = list[j].Close;
+                    volume += list[j].Volume;
+                }
+                resultList.Add(new CandleQuote
+                {
+                    Timestamp = timestamp,
+                    Open = open,
+                    High = high,
+                    Low = low,
+                    Close = close,
+                    Volume = volume
+                });
+                i += size;
             }
             return resultList;
         }
