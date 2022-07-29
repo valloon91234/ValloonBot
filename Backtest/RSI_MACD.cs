@@ -35,6 +35,8 @@ namespace Valloon.BitMEX.Backtest
         static float Benchmark()
         {
             const int buyOrSell = 2;
+            const float leverage = 5;
+
             const int binSize = 4;
 
             const float makerFee = 0.001f;
@@ -43,7 +45,8 @@ namespace Valloon.BitMEX.Backtest
 
             DateTime startTime = new DateTime(2021, 11, 1, 0, 0, 0, DateTimeKind.Utc);
             //DateTime startTime = new DateTime(2022, 3, 15, 0, 0, 0, DateTimeKind.Utc);
-            DateTime? endTime = null;// new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime? endTime = null;
+            //DateTime? endTime = new DateTime(2022, 5, 1, 0, 0, 0, DateTimeKind.Utc);
             var list1h = Dao.SelectAll(SYMBOL, "1h");
             var list = Loader.LoadBinListFrom1h(binSize, list1h);
             var quoteList = new List<Skender.Stock.Indicators.Quote>();
@@ -71,32 +74,34 @@ namespace Valloon.BitMEX.Backtest
             macdList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
             List<Dictionary<string, float>> topList = new List<Dictionary<string, float>>();
-            for (int rsiLength = 6; rsiLength <= 24; rsiLength += 2)
-            //int rsiLength = 6;
+            //for (int rsiLength = 6; rsiLength <= 24; rsiLength += 2)
+            int rsiLength = 6;
             {
                 var rsiList = quoteList.GetRsi(rsiLength).ToList();
                 rsiList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
                 for (int rsiValue = 20; rsiValue <= 90; rsiValue++)
-                //int rsiValue = 30;
+                //int rsiValue = 79;
                 {
-                    //for (int rsiDeep = 1; rsiDeep <= 7; rsiDeep++)
-                    int rsiDeep = 6;
+                    //for (int macdDeep = -20; macdDeep <= 20; macdDeep += 2)
+                    int macdDeep = 0;
                     {
-                        //for (int macdDeep = -20; macdDeep <= 20; macdDeep += 2)
-                        int macdDeep = 0;
+                        for (float closeX = 0.03f; closeX <= 0.3f; closeX += 0.01f)
+                        //float closeX = 0;
                         {
-                            for (float closeX = 0.03f; closeX <= 0.2f; closeX += 0.01f)
-                            //float closeX = .02f;
+                            for (float stopX = 0.03f; stopX <= 0.1f; stopX += 0.01f)
+                            //float stopX = .04f;
                             {
-                                for (float stopX = 0.03f; stopX <= 0.1f; stopX += 0.01f)
-                                //float StopX = .012f;
+                                //for (float tailX = 0.03f; tailX <= 0.2f; tailX += 0.01f)
+                                float tailX = 0;
                                 {
                                     int tryCount = 0;
                                     int succeedCount = 0, failedCount = 0;
+                                    int closeCount = 0, stopCount = 0, tailCount = 0;
                                     float finalPercent = 1;
                                     int position = 0;
                                     int positionEntryPrice = 0;
+                                    int topPrice = 0;
                                     for (int i = 2; i < count - 1; i++)
                                     {
                                         if (position == 0)
@@ -105,27 +110,7 @@ namespace Valloon.BitMEX.Backtest
                                             {
                                                 position = 1;
                                                 positionEntryPrice = list[i].Close;
-                                                //for (int j = i; j >= i - rsiDeep && j >= 1; j--)
-                                                //{
-                                                //    if (rsiList[j].Rsi < rsiValue)
-                                                //    {
-                                                //        //if (list[i - 2].Open < list[i - 2].Close && list[i - 1].Open < list[i - 1].Close && list[i].Open < list[i].Close)
-                                                //        //{
-                                                //        //    if (list[i + 1].Low < list[i].Open)
-                                                //        //    {
-                                                //        //        position = 1;
-                                                //        //        positionEntryPrice = list[i].Open;
-                                                //        //        i++;
-                                                //        //    }
-                                                //        //}
-                                                //        //else
-                                                //        {
-                                                //            position = 1;
-                                                //            positionEntryPrice = list[i].Close;
-                                                //        }
-                                                //        break;
-                                                //    }
-                                                //}
+                                                topPrice = positionEntryPrice;
                                             }
                                             else if (buyOrSell == 2 && rsiList[i].Rsi > 100 - rsiValue && macdList[i - 2].Histogram > macdDeep && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep)
                                             {
@@ -135,6 +120,7 @@ namespace Valloon.BitMEX.Backtest
                                                     {
                                                         position = -1;
                                                         positionEntryPrice = list[i].Close;
+                                                        topPrice = positionEntryPrice;
                                                         //break;
                                                     }
                                                 }
@@ -144,21 +130,37 @@ namespace Valloon.BitMEX.Backtest
                                         {
                                             int closePrice = (int)Math.Floor(positionEntryPrice * (1 + closeX));
                                             int stopPrice = (int)Math.Ceiling(positionEntryPrice * (1 - stopX));
-                                            if (list[i].Low < stopPrice)
+                                            int tailPrice = (int)Math.Ceiling(topPrice - positionEntryPrice * tailX);
+                                            if (list[i].Low < stopPrice && (stopPrice >= tailPrice || tailX == 0))
                                             {
                                                 tryCount++;
+                                                stopCount++;
                                                 failedCount++;
                                                 float percent = (float)stopPrice / positionEntryPrice - takerFee;
-                                                finalPercent *= percent;
+                                                finalPercent *= 1 + (percent - 1) * leverage;
                                                 position = 0;
                                                 positionEntryPrice = 0;
                                             }
-                                            else if (list[i].High > closePrice)
+                                            else if (tailX > 0 && list[i].Low < tailPrice && stopPrice < tailPrice)
                                             {
                                                 tryCount++;
+                                                tailCount++;
+                                                float percent = (float)tailPrice / positionEntryPrice - takerFee;
+                                                if (percent > 1)
+                                                    succeedCount++;
+                                                else
+                                                    failedCount++;
+                                                finalPercent *= 1 + (percent - 1) * leverage;
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                            }
+                                            else if (closeX > 0 && list[i].High > closePrice)
+                                            {
+                                                tryCount++;
+                                                closeCount++;
                                                 succeedCount++;
-                                                float percent = (float)closePrice / positionEntryPrice - makerFee;
-                                                finalPercent *= percent;
+                                                float percent = (float)closePrice / positionEntryPrice - takerFee;
+                                                finalPercent *= 1 + (percent - 1) * leverage;
                                                 position = 0;
                                                 positionEntryPrice = 0;
                                             }
@@ -170,30 +172,47 @@ namespace Valloon.BitMEX.Backtest
                                                     succeedCount++;
                                                 else
                                                     failedCount++;
-                                                finalPercent *= percent;
+                                                finalPercent *= 1 + (percent - 1) * leverage;
                                                 position = 0;
                                                 positionEntryPrice = 0;
                                             }
+                                            topPrice = Math.Max(topPrice, list[i].High);
                                         }
                                         else if (position == -1)
                                         {
                                             int closePrice = (int)Math.Ceiling(positionEntryPrice * (1 - closeX));
                                             int stopPrice = (int)Math.Floor(positionEntryPrice * (1 + stopX));
-                                            if (list[i].High > stopPrice)
+                                            int tailPrice = (int)Math.Ceiling(topPrice + positionEntryPrice * tailX);
+                                            if (list[i].High > stopPrice && (stopPrice <= tailPrice || tailX == 0))
                                             {
                                                 tryCount++;
+                                                stopCount++;
                                                 failedCount++;
                                                 float percent = (float)positionEntryPrice / stopPrice - takerFee;
-                                                finalPercent *= percent;
+                                                finalPercent *= 1 + (percent - 1) * leverage;
                                                 position = 0;
                                                 positionEntryPrice = 0;
                                             }
-                                            else if (list[i].Low < closePrice)
+                                            else if (tailX > 0 && list[i].High > tailPrice && stopPrice > tailPrice)
                                             {
                                                 tryCount++;
+                                                tailCount++;
+                                                float percent = (float)positionEntryPrice / tailPrice - takerFee;
+                                                if (percent > 1)
+                                                    succeedCount++;
+                                                else
+                                                    failedCount++;
+                                                finalPercent *= 1 + (percent - 1) * leverage;
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                            }
+                                            else if (closeX > 0 && list[i].Low < closePrice)
+                                            {
+                                                tryCount++;
+                                                closeCount++;
                                                 succeedCount++;
-                                                float percent = (float)positionEntryPrice / closePrice - makerFee;
-                                                finalPercent *= percent;
+                                                float percent = (float)positionEntryPrice / closePrice - takerFee;
+                                                finalPercent *= 1 + (percent - 1) * leverage;
                                                 position = 0;
                                                 positionEntryPrice = 0;
                                             }
@@ -205,10 +224,11 @@ namespace Valloon.BitMEX.Backtest
                                                     succeedCount++;
                                                 else
                                                     failedCount++;
-                                                finalPercent *= percent;
+                                                finalPercent *= 1 + (percent - 1) * leverage;
                                                 position = 0;
                                                 positionEntryPrice = 0;
                                             }
+                                            topPrice = Math.Min(topPrice, list[i].Low);
                                         }
                                     }
                                     float successRate = failedCount > 0 ? (float)succeedCount / failedCount : succeedCount;
@@ -222,13 +242,16 @@ namespace Valloon.BitMEX.Backtest
                                             { "takerFee", takerFee },
                                             { "rsiLength", rsiLength },
                                             { "rsiValue", rsiValue },
-                                            { "rsiDeep", rsiDeep },
                                             { "macdDeep", macdDeep },
                                             { "closeX", closeX },
                                             { "stopX", stopX },
+                                            { "tailX", tailX },
                                             { "tryCount", tryCount },
                                             { "succeedCount", succeedCount },
                                             { "failedCount", failedCount },
+                                            { "closeCount", closeCount },
+                                            { "stopCount", stopCount },
+                                            { "tailCount", tailCount },
                                             { "finalPercent", finalPercent },
                                         };
                                         int topListCount = topList.Count;
@@ -254,11 +277,11 @@ namespace Valloon.BitMEX.Backtest
                                         {
                                             topList.Add(dic);
                                         }
-                                        logger.WriteLine($"rsi = {rsiLength} / {rsiValue} \t limit = {closeX:F4} / {stopX:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4}");
+                                        logger.WriteLine($"rsi = {rsiLength} / {rsiValue} \t limit = {closeX:F4} / {stopX:F4} / {tailX:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4}");
                                     }
                                     else if (finalPercent > .5f && succeedCount > 0)
                                     {
-                                        logger.WriteLine($"rsi = {rsiLength} / {rsiValue} \t limit = {closeX:F4} / {stopX:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4}", ConsoleColor.DarkGray, false);
+                                        logger.WriteLine($"rsi = {rsiLength} / {rsiValue} \t limit = {closeX:F4} / {stopX:F4} / {tailX:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4}", ConsoleColor.DarkGray, false);
                                     }
                                 }
                             }
@@ -346,7 +369,7 @@ namespace Valloon.BitMEX.Backtest
 
             int tryCount = 0;
             int succeedCount = 0, failedCount = 0;
-            float finalPercent = 1;
+            float finalPercent = 1, finalPercent2 = 1, finalPercent3 = 1, finalPercent4 = 1, finalPercent5 = 1;
             int position = 0;
             int positionEntryPrice = 0;
             for (int i = 2; i < count - 1; i++)
@@ -376,6 +399,10 @@ namespace Valloon.BitMEX.Backtest
                         failedCount++;
                         float percent = (float)stopPrice / positionEntryPrice - takerFee;
                         finalPercent *= percent;
+                        finalPercent2 *= 1 + (percent - 1) * 2;
+                        finalPercent3 *= 1 + (percent - 1) * 3;
+                        finalPercent4 *= 1 + (percent - 1) * 4;
+                        finalPercent5 *= 1 + (percent - 1) * 5;
                         logger.WriteLine($"     {list[i].Timestamp:MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t Failed \t <LONG> \t Entry = {positionEntryPrice} \t Stop = {stopPrice} \t % = {percent:F4}  /  {finalPercent}", ConsoleColor.Red);
                         position = 0;
                         positionEntryPrice = 0;
@@ -384,8 +411,12 @@ namespace Valloon.BitMEX.Backtest
                     {
                         tryCount++;
                         succeedCount++;
-                        float percent = (float)closePrice / positionEntryPrice - makerFee;
+                        float percent = (float)closePrice / positionEntryPrice - takerFee;
                         finalPercent *= percent;
+                        finalPercent2 *= 1 + (percent - 1) * 2;
+                        finalPercent3 *= 1 + (percent - 1) * 3;
+                        finalPercent4 *= 1 + (percent - 1) * 4;
+                        finalPercent5 *= 1 + (percent - 1) * 5;
                         logger.WriteLine($"     {list[i].Timestamp:MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t Succeed \t <LONG> \t Entry = {positionEntryPrice} \t Close = {closePrice} \t % = {percent:F4}  /  {finalPercent}", ConsoleColor.Green);
                         position = 0;
                         positionEntryPrice = 0;
@@ -399,6 +430,10 @@ namespace Valloon.BitMEX.Backtest
                         else
                             failedCount++;
                         finalPercent *= percent;
+                        finalPercent2 *= 1 + (percent - 1) * 2;
+                        finalPercent3 *= 1 + (percent - 1) * 3;
+                        finalPercent4 *= 1 + (percent - 1) * 4;
+                        finalPercent5 *= 1 + (percent - 1) * 5;
                         logger.WriteLine($"     {list[i].Timestamp:MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t Stopped \t <LONG> \t Entry = {positionEntryPrice} \t Stop = {list[i].Close} \t % = {percent:F4}  /  {finalPercent}", ConsoleColor.DarkYellow);
                         position = 0;
                         positionEntryPrice = 0;
@@ -415,6 +450,10 @@ namespace Valloon.BitMEX.Backtest
                         failedCount++;
                         float percent = (float)positionEntryPrice / stopPrice - takerFee;
                         finalPercent *= percent;
+                        finalPercent2 *= 1 + (percent - 1) * 2;
+                        finalPercent3 *= 1 + (percent - 1) * 3;
+                        finalPercent4 *= 1 + (percent - 1) * 4;
+                        finalPercent5 *= 1 + (percent - 1) * 5;
                         logger.WriteLine($"     {list[i].Timestamp:MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t Failed \t <SHORT> \t Entry = {positionEntryPrice} \t Stop = {stopPrice} \t % = {percent:F4}  /  {finalPercent}", ConsoleColor.Red);
                         position = 0;
                         positionEntryPrice = 0;
@@ -423,8 +462,12 @@ namespace Valloon.BitMEX.Backtest
                     {
                         tryCount++;
                         succeedCount++;
-                        float percent = (float)positionEntryPrice / closePrice - makerFee;
+                        float percent = (float)positionEntryPrice / closePrice - takerFee;
                         finalPercent *= percent;
+                        finalPercent2 *= 1 + (percent - 1) * 2;
+                        finalPercent3 *= 1 + (percent - 1) * 3;
+                        finalPercent4 *= 1 + (percent - 1) * 4;
+                        finalPercent5 *= 1 + (percent - 1) * 5;
                         logger.WriteLine($"     {list[i].Timestamp:MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t Succeed \t <SHORT> \t Entry = {positionEntryPrice} \t Close = {closePrice} \t % = {percent:F4}  /  {finalPercent}", ConsoleColor.Green);
                         position = 0;
                         positionEntryPrice = 0;
@@ -438,6 +481,10 @@ namespace Valloon.BitMEX.Backtest
                         else
                             failedCount++;
                         finalPercent *= percent;
+                        finalPercent2 *= 1 + (percent - 1) * 2;
+                        finalPercent3 *= 1 + (percent - 1) * 3;
+                        finalPercent4 *= 1 + (percent - 1) * 4;
+                        finalPercent5 *= 1 + (percent - 1) * 5;
                         logger.WriteLine($"     {list[i].Timestamp:MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t Stopped \t <SHORT> \t Entry = {positionEntryPrice} \t Stop = {list[i].Close} \t % = {percent:F4}  /  {finalPercent}", ConsoleColor.DarkYellow);
                         position = 0;
                         positionEntryPrice = 0;
@@ -445,7 +492,7 @@ namespace Valloon.BitMEX.Backtest
                 }
             }
             float successRate = failedCount > 0 ? (float)succeedCount / failedCount : succeedCount;
-            string result = $"{startTime} ~ {endTime} ({totalDays} days) \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4}";
+            string result = $"{startTime} ~ {endTime} ({totalDays} days) \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4} / {finalPercent2:F4} / {finalPercent3:F4} / {finalPercent4:F4} / {finalPercent5:F4}";
             logger.WriteLine($"\r\n{result}\r\n");
             return result;
         }
