@@ -73,6 +73,7 @@ namespace Valloon.Trading
         }
 
         public const string SYMBOL_XBTUSD = "XBTUSD";
+        public const string SYMBOL_ETHUSD = "ETHUSD";
         public const string SYMBOL_SOLUSD = "SOLUSD";
         public const string SYMBOL_LUNAUSD = "LUNAUSD";
         public const string CURRENCY_XBt = "XBt";
@@ -440,6 +441,38 @@ namespace Valloon.Trading
                 }
                 resultList.Add(new TradeBin(timestamp, list[i].Symbol, open, high, low, close, null, volume));
                 i += batchLength;
+            }
+            return resultList;
+        }
+
+        public static List<TradeBin> LoadBinListFrom1h(int size, List<TradeBin> list)
+        {
+            if (size == 1) return list;
+            int count = list.Count;
+            List<TradeBin> resultList = new List<TradeBin>();
+            int i = 0;
+            while (i < count)
+            {
+                if (list[i].Timestamp.Value.Hour % size != 1)
+                {
+                    i++;
+                    continue;
+                }
+                DateTime timestamp = list[i].Timestamp.Value.AddMinutes(25);
+                decimal open = list[i].Open.Value;
+                decimal high = list[i].High.Value;
+                decimal low = list[i].Low.Value;
+                decimal close = list[i].Close.Value;
+                decimal volume = list[i].Volume.Value;
+                for (int j = i + 1; j < i + size && j < count; j++)
+                {
+                    if (high < list[j].High.Value) high = list[j].High.Value;
+                    if (low > list[j].Low.Value) low = list[j].Low.Value;
+                    close = list[j].Close.Value;
+                    volume += list[j].Volume.Value;
+                }
+                resultList.Add(new TradeBin(timestamp, list[i].Symbol, open, high, low, close, null, volume));
+                i += size;
             }
             return resultList;
         }

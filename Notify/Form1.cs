@@ -1,15 +1,18 @@
 ﻿using IO.Swagger.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Skender.Stock.Indicators;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using Valloon.Indicators;
 using Valloon.Trading;
 using Valloon.Utils;
 
@@ -117,29 +120,28 @@ namespace Notify
             }
         }
 
-        private class ParamConfig
-        {
-            public int BuyOrSell { get; set; }
-            public int BinSize { get; set; }
-            public int WindowBuy { get; set; }
-            public double MinDiffBuy { get; set; }
-            public double MaxDiffBuy { get; set; }
-            public double MinValueBuy { get; set; }
-            public double MaxValueBuy { get; set; }
-            public double CloseBuy { get; set; }
-            public decimal StopBuy { get; set; }
-            public int WindowSell { get; set; }
-            public double MinDiffSell { get; set; }
-            public double MaxDiffSell { get; set; }
-            public double MinValueSell { get; set; }
-            public double MaxValueSell { get; set; }
-            public double CloseSell { get; set; }
-            public decimal StopSell { get; set; }
-        }
+        //private class ParamConfig
+        //{
+        //    public int BuyOrSell { get; set; }
+        //    public int BinSize { get; set; }
+        //    public int WindowBuy { get; set; }
+        //    public double MinDiffBuy { get; set; }
+        //    public double MaxDiffBuy { get; set; }
+        //    public double MinValueBuy { get; set; }
+        //    public double MaxValueBuy { get; set; }
+        //    public double CloseBuy { get; set; }
+        //    public decimal StopBuy { get; set; }
+        //    public int WindowSell { get; set; }
+        //    public double MinDiffSell { get; set; }
+        //    public double MaxDiffSell { get; set; }
+        //    public double MinValueSell { get; set; }
+        //    public double MaxValueSell { get; set; }
+        //    public double CloseSell { get; set; }
+        //    public decimal StopSell { get; set; }
+        //}
 
         DateTime? LastConnected;
         DateTime? ServerTime;
-        ParamConfig Param;
         decimal LastSolPrice;
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -151,8 +153,7 @@ namespace Notify
             }
             textBox_BTC.Text = BtcPrice.LastPrice.Value.ToString("N1");
             textBox_SOL.Text = SolPrice.LastPrice.Value.ToString("N2");
-            this.Text = $"{SolPrice.LastPrice.Value:N2}   [ {ServerTime:HH:mm:ss} ]";
-            textBox_RSI.Text = $"{BtcPrice.MarkPrice.Value:N2}        {SolPrice.MarkPrice.Value:N3}";
+            string title = $"{SolPrice.LastPrice.Value:N2}   [ {ServerTime:HH:mm:ss} ]";
             if (LastSolPrice == 0)
             {
                 numericUpDown1.Value = Math.Round(SolPrice.LastPrice.Value - 3);
@@ -190,26 +191,18 @@ namespace Notify
             {
                 List<TradeBin> reversedBinList = new List<TradeBin>(BinList);
                 reversedBinList.Reverse();
-                List<TradeBin> list5 = BitMEXApiHelper.LoadBinListFrom5m($"{Param.BinSize}m", reversedBinList);
-                var reversedBinArray = list5.ToArray();
-                double[] rsiBuyArray = RSI.CalculateRSIValues(reversedBinArray, Param.WindowBuy);
-                double[] rsiSellArray = RSI.CalculateRSIValues(reversedBinArray, Param.WindowSell);
-                textBox_RSI.Text = $"RSI ({Param.WindowBuy})  =  {rsiBuyArray[rsiBuyArray.Length - 3]:F4}  /  {rsiBuyArray[rsiBuyArray.Length - 2]:F4}  /  {rsiBuyArray[rsiBuyArray.Length - 1]:F4}";
-                bool buySignal = rsiBuyArray[rsiBuyArray.Length - 1] - rsiBuyArray[rsiBuyArray.Length - 2] >= Param.MinDiffBuy && rsiBuyArray[rsiBuyArray.Length - 1] - rsiBuyArray[rsiBuyArray.Length - 2] < Param.MaxDiffBuy && rsiBuyArray[rsiBuyArray.Length - 1] >= Param.MinValueBuy && rsiBuyArray[rsiBuyArray.Length - 1] < Param.MaxValueBuy;
-                bool sellSignal = rsiSellArray[rsiSellArray.Length - 2] - rsiSellArray[rsiSellArray.Length - 1] >= Param.MinDiffSell && rsiSellArray[rsiSellArray.Length - 2] - rsiSellArray[rsiSellArray.Length - 1] < Param.MaxDiffSell && rsiSellArray[rsiSellArray.Length - 1] >= Param.MinValueSell && rsiSellArray[rsiSellArray.Length - 1] < Param.MaxValueSell;
-                if (buySignal)
-                {
-                    textBox_RSI_State.Text = "Long";
-                    textBox_RSI_State.ForeColor = Color.FromArgb(0, 218, 133);
-                }
-                else
-                {
-                    textBox_RSI_State.Text = "";
-                    textBox_RSI_State.ForeColor = Color.White;
-                }
+                List<TradeBin> list5 = BitMEXApiHelper.LoadBinListFrom1h(4, reversedBinList);
+                var quoteList = IndicatorHelper.ToQuote(list5);
+                var macdList = quoteList.GetMacd().ToList();
+                var rsiList = quoteList.GetRsi(6).ToList();
+                textBox_RSI.Text = $"{macdList[macdList.Count - 3].Histogram:F4}  {macdList[macdList.Count - 2].Histogram:F4}  {macdList[macdList.Count - 1].Histogram:F4}";
+                textBox_RSI_State.Text = $"{rsiList[rsiList.Count - 2].Rsi:F1}  {rsiList[rsiList.Count - 1].Rsi:F1}";
+                if (macdList[macdList.Count - 2].Histogram > 0 && macdList[macdList.Count - 1].Histogram <= 0 || macdList[macdList.Count - 2].Histogram < 0 && macdList[macdList.Count - 1].Histogram >= 0 || rsiList[rsiList.Count - 1].Rsi >= 80 || rsiList[rsiList.Count - 1].Rsi <= 20)
+                    title = "* " + title;
             }
             if (ErrorMessage != null) textBox_RSI.Text = ErrorMessage;
             LastSolPrice = SolPrice.LastPrice.Value;
+            this.Text = title;
         }
 
         Thread SyncThread;
@@ -253,7 +246,7 @@ namespace Notify
                     //    string paramText = HttpClient2.HttpGet(url);
                     //    Param = JsonConvert.DeserializeObject<ParamConfig>(paramText);
                     //}
-                    //BinList = (List<TradeBin>)JsonConvert.DeserializeObject(HttpGetFromBitMEX("https://www.bitmex.com/api/v1/trade/bucketed?binSize=5m&symbol=SOLUSD&count=1000&reverse=true&partial=true"), typeof(List<TradeBin>));
+                    BinList = (List<TradeBin>)JsonConvert.DeserializeObject(HttpGetFromBitMEX("https://www.bitmex.com/api/v1/trade/bucketed?binSize=1h&symbol=SOLUSD&count=1000&reverse=true&partial=true"), typeof(List<TradeBin>));
                     ErrorMessage = null;
                 }
                 catch (Exception ex)

@@ -57,7 +57,7 @@
             0,
             0,
             65536});
-            this.numericUpDown1.Location = new System.Drawing.Point(108, 4);
+            this.numericUpDown1.Location = new System.Drawing.Point(109, 4);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -175,7 +175,7 @@
             this.textBox_RSI.Location = new System.Drawing.Point(5, 122);
             this.textBox_RSI.Name = "textBox_RSI";
             this.textBox_RSI.ReadOnly = true;
-            this.textBox_RSI.Size = new System.Drawing.Size(224, 16);
+            this.textBox_RSI.Size = new System.Drawing.Size(201, 16);
             this.textBox_RSI.TabIndex = 6;
             // 
             // textBox_RSI_State
@@ -184,10 +184,10 @@
             this.textBox_RSI_State.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_RSI_State.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_RSI_State.ForeColor = System.Drawing.Color.White;
-            this.textBox_RSI_State.Location = new System.Drawing.Point(235, 122);
+            this.textBox_RSI_State.Location = new System.Drawing.Point(212, 122);
             this.textBox_RSI_State.Name = "textBox_RSI_State";
             this.textBox_RSI_State.ReadOnly = true;
-            this.textBox_RSI_State.Size = new System.Drawing.Size(56, 16);
+            this.textBox_RSI_State.Size = new System.Drawing.Size(79, 16);
             this.textBox_RSI_State.TabIndex = 8;
             this.textBox_RSI_State.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 

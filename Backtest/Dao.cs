@@ -63,7 +63,7 @@ namespace Valloon.BitMEX.Backtest
                             High = GetValue<int>(dr["high"]),
                             Low = GetValue<int>(dr["low"]),
                             Close = GetValue<int>(dr["close"]),
-                            Volume = GetValue<int>(dr["volume"]),
+                            Volume = GetValue<long>(dr["volume"]),
                         };
                         list.Add(m);
                     }

@@ -8,7 +8,7 @@ namespace Valloon.Indicators
      */
     public class IndicatorHelper
     {
-        public static List<Skender.Stock.Indicators.Quote> TradeBinToQuote(List<TradeBin> tradeBinList)
+        public static List<Skender.Stock.Indicators.Quote> ToQuote(List<TradeBin> tradeBinList)
         {
             var quoteList = new List<Skender.Stock.Indicators.Quote>();
             foreach (var t in tradeBinList)

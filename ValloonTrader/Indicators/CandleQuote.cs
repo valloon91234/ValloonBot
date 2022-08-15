@@ -19,7 +19,7 @@ namespace Valloon.Indicators
         public int High { get; set; }
         public int Low { get; set; }
         public int Close { get; set; }
-        public int Volume { get; set; }
+        public long Volume { get; set; }
         public float RSI { get; set; }
 
         public CandleQuote() { }
@@ -51,6 +51,8 @@ namespace Valloon.Indicators
             {
                 case BitMEXApiHelper.SYMBOL_XBTUSD:
                     return 10;
+                case BitMEXApiHelper.SYMBOL_ETHUSD:
+                    return 100;
                 case BitMEXApiHelper.SYMBOL_SOLUSD:
                     return 100;
                 default:

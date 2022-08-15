@@ -132,11 +132,11 @@ namespace Valloon.Trading
                     List<TradeBin> reversedBinList1 = new List<TradeBin>(binList_5m);
                     reversedBinList1.Reverse();
                     List<TradeBin> binListConverted1 = BitMEXApiHelper.LoadBinListFrom5m($"{param.BinSize1}m", reversedBinList1);
-                    var quoteList1 = IndicatorHelper.TradeBinToQuote(binListConverted1);
+                    var quoteList1 = IndicatorHelper.ToQuote(binListConverted1);
                     var parabolicSarList1 = quoteList1.GetParabolicSar(param.PSarStep1, param.PSarMax1, param.PSarStart1).ToList();
                     List<TradeBin> reversedBinList2 = new List<TradeBin>(binList_1h);
                     reversedBinList2.Reverse();
-                    var quoteList2 = IndicatorHelper.TradeBinToQuote(reversedBinList2);
+                    var quoteList2 = IndicatorHelper.ToQuote(reversedBinList2);
                     var parabolicSarList2 = quoteList2.GetParabolicSar(param.PSarStep2, param.PSarMax2, param.PSarStart2).ToList();
                     var lastPSar1 = parabolicSarList1.Last();
                     var lastPSar2 = parabolicSarList2.Last();

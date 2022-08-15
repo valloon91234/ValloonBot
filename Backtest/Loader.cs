@@ -135,42 +135,79 @@ namespace Valloon.BitMEX.Backtest
             }
         }
 
-        public static List<CandleQuote> LoadBinListFrom1m(int size, List<CandleQuote> list)
+        public static List<CandleQuote> LoadBinListFrom1m(int size, List<CandleQuote> list, bool endingTime = true)
         {
             if (size == 1) return list;
             int count = list.Count;
             var resultList = new List<CandleQuote>();
             int i = 0;
-            while (i < count)
+            if (endingTime)
             {
-                if (list[i].Timestamp.Minute % size != 1)
+                while (i < count)
                 {
-                    i++;
-                    continue;
+                    if (list[i].Timestamp.Minute % size != 1)
+                    {
+                        i++;
+                        continue;
+                    }
+                    DateTime timestamp = list[i].Timestamp.AddMinutes(size - 1);
+                    int open = list[i].Open;
+                    int high = list[i].High;
+                    int low = list[i].Low;
+                    int close = list[i].Close;
+                    long volume = list[i].Volume;
+                    for (int j = i + 1; j < i + size && j < count; j++)
+                    {
+                        if (high < list[j].High) high = list[j].High;
+                        if (low > list[j].Low) low = list[j].Low;
+                        close = list[j].Close;
+                        volume += list[j].Volume;
+                    }
+                    resultList.Add(new CandleQuote
+                    {
+                        Timestamp = timestamp,
+                        Open = open,
+                        High = high,
+                        Low = low,
+                        Close = close,
+                        Volume = volume
+                    });
+                    i += size;
                 }
-                DateTime timestamp = list[i].Timestamp.AddMinutes(size - 1);
-                int open = list[i].Open;
-                int high = list[i].High;
-                int low = list[i].Low;
-                int close = list[i].Close;
-                int volume = list[i].Volume;
-                for (int j = i + 1; j < i + size && j < count; j++)
+            }
+            else
+            {
+                while (i < count)
                 {
-                    if (high < list[j].High) high = list[j].High;
-                    if (low > list[j].Low) low = list[j].Low;
-                    close = list[j].Close;
-                    volume += list[j].Volume;
+                    if (list[i].Timestamp.Minute % size != 0)
+                    {
+                        i++;
+                        continue;
+                    }
+                    DateTime timestamp = list[i].Timestamp;
+                    int open = list[i].Open;
+                    int high = list[i].High;
+                    int low = list[i].Low;
+                    int close = list[i].Close;
+                    long volume = list[i].Volume;
+                    for (int j = i + 1; j < i + size && j < count; j++)
+                    {
+                        if (high < list[j].High) high = list[j].High;
+                        if (low > list[j].Low) low = list[j].Low;
+                        close = list[j].Close;
+                        volume += list[j].Volume;
+                    }
+                    resultList.Add(new CandleQuote
+                    {
+                        Timestamp = timestamp,
+                        Open = open,
+                        High = high,
+                        Low = low,
+                        Close = close,
+                        Volume = volume
+                    });
+                    i += size;
                 }
-                resultList.Add(new CandleQuote
-                {
-                    Timestamp = timestamp,
-                    Open = open,
-                    High = high,
-                    Low = low,
-                    Close = close,
-                    Volume = volume
-                });
-                i += size;
             }
             return resultList;
         }
@@ -204,7 +241,7 @@ namespace Valloon.BitMEX.Backtest
                 int high = list[i].High;
                 int low = list[i].Low;
                 int close = list[i].Close;
-                int volume = list[i].Volume;
+                long volume = list[i].Volume;
                 for (int j = i + 1; j < i + batchLength && j < count; j++)
                 {
                     if (high < list[j].High) high = list[j].High;
@@ -226,42 +263,79 @@ namespace Valloon.BitMEX.Backtest
             return resultList;
         }
 
-        public static List<CandleQuote> LoadBinListFrom1h(int size, List<CandleQuote> list)
+        public static List<CandleQuote> LoadBinListFrom1h(int size, List<CandleQuote> list, bool endingTime = true, int offset = 0)
         {
             if (size == 1) return list;
             int count = list.Count;
             var resultList = new List<CandleQuote>();
             int i = 0;
-            while (i < count)
+            if (endingTime)
             {
-                if (list[i].Timestamp.Hour % size != 1)
+                while (i < count)
                 {
-                    i++;
-                    continue;
+                    if (list[i].Timestamp.Hour % size != 1)
+                    {
+                        i++;
+                        continue;
+                    }
+                    DateTime timestamp = list[i].Timestamp.AddHours(size - 1);
+                    int open = list[i].Open;
+                    int high = list[i].High;
+                    int low = list[i].Low;
+                    int close = list[i].Close;
+                    long volume = list[i].Volume;
+                    for (int j = i + 1; j < i + size && j < count; j++)
+                    {
+                        if (high < list[j].High) high = list[j].High;
+                        if (low > list[j].Low) low = list[j].Low;
+                        close = list[j].Close;
+                        volume += list[j].Volume;
+                    }
+                    resultList.Add(new CandleQuote
+                    {
+                        Timestamp = timestamp,
+                        Open = open,
+                        High = high,
+                        Low = low,
+                        Close = close,
+                        Volume = volume
+                    });
+                    i += size;
                 }
-                DateTime timestamp = list[i].Timestamp.AddHours(size - 1);
-                int open = list[i].Open;
-                int high = list[i].High;
-                int low = list[i].Low;
-                int close = list[i].Close;
-                int volume = list[i].Volume;
-                for (int j = i + 1; j < i + size && j < count; j++)
+            }
+            else
+            {
+                while (i < count)
                 {
-                    if (high < list[j].High) high = list[j].High;
-                    if (low > list[j].Low) low = list[j].Low;
-                    close = list[j].Close;
-                    volume += list[j].Volume;
+                    if (list[i].Timestamp.Hour % size != offset)
+                    {
+                        i++;
+                        continue;
+                    }
+                    DateTime timestamp = list[i].Timestamp;
+                    int open = list[i].Open;
+                    int high = list[i].High;
+                    int low = list[i].Low;
+                    int close = list[i].Close;
+                    long volume = list[i].Volume;
+                    for (int j = i + 1; j < i + size && j < count; j++)
+                    {
+                        if (high < list[j].High) high = list[j].High;
+                        if (low > list[j].Low) low = list[j].Low;
+                        close = list[j].Close;
+                        volume += list[j].Volume;
+                    }
+                    resultList.Add(new CandleQuote
+                    {
+                        Timestamp = timestamp,
+                        Open = open,
+                        High = high,
+                        Low = low,
+                        Close = close,
+                        Volume = volume
+                    });
+                    i += size;
                 }
-                resultList.Add(new CandleQuote
-                {
-                    Timestamp = timestamp,
-                    Open = open,
-                    High = high,
-                    Low = low,
-                    Close = close,
-                    Volume = volume
-                });
-                i += size;
             }
             return resultList;
         }
