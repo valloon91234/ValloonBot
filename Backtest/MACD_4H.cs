@@ -36,7 +36,7 @@ namespace Valloon.BitMEX.Backtest
 
         static float Benchmark()
         {
-            const int buyOrSell = 1;
+            const int buyOrSell = 2;
 
             const int binSize = 4;
             const int binDelay = 0;
@@ -46,12 +46,12 @@ namespace Valloon.BitMEX.Backtest
             const float makerFee = 0.0003f;
             const float takerFee = 0.001f;
 
-            DateTime startTime = new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc);
+            //DateTime startTime = new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc);
             //DateTime startTime = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc);
-            //DateTime startTime = new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc);
             //DateTime startTime = new DateTime(2022, 5, 15, 0, 0, 0, DateTimeKind.Utc);
+            DateTime startTime = new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;
-            //DateTime? endTime = new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            //DateTime? endTime = new DateTime(2022, 8, 14, 0, 0, 0, DateTimeKind.Utc);
             var list1h = Dao.SelectAll(SYMBOL, "1h");
             var list = Loader.LoadBinListFrom1h(binSize, list1h, false, binDelay);
             //var list = Dao.SelectAll(SYMBOL, "4h");
@@ -86,7 +86,7 @@ namespace Valloon.BitMEX.Backtest
                 var rsiList = quoteList.GetRsi(rsiLength).ToList();
                 rsiList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
-                for (int rsiValue = 60; rsiValue <= 90; rsiValue++)
+                for (int rsiValue = 50; rsiValue <= 90; rsiValue++)
                 //int rsiValue = 80;
                 {
                     //for (int macdDeep = -20; macdDeep <= 20; macdDeep += 2)
@@ -95,10 +95,10 @@ namespace Valloon.BitMEX.Backtest
                         //for (float skipX = 0.02f; skipX <= 0.1f; skipX += 0.005f)
                         float skipX = 0;
                         {
-                            for (float closeX = 0; closeX <= 0.3f; closeX += 0.005f)
+                            for (float closeX = 0; closeX <= 0.4f; closeX += 0.005f)
                             //float closeX = 0;
                             {
-                                for (float stopX = 0.02f; stopX < 0.07f; stopX += 0.005f)
+                                for (float stopX = 0.02f; stopX < 0.1f; stopX += 0.005f)
                                 //float stopX = .03f;
                                 {
                                     //float leverage = maxLoss / stopX;
@@ -115,37 +115,72 @@ namespace Valloon.BitMEX.Backtest
                                             int position = 0;
                                             int positionEntryPrice = 0;
                                             int topPrice = 0;
+                                            int lastPositionEntryPrice = 0;
                                             for (int i = 2; i < count - 1; i++)
                                             {
                                                 if (position == 0)
                                                 {
                                                     //if (buyOrSell == 1 && macdList[i - 2].Histogram < macdDeep && macdList[i - 1].Histogram >= macdDeep && macdList[i].Histogram > macdDeep && (skipX == 0 || list[i].Close < list[i - 1].Open * (1 + skipX)))
-                                                    if (buyOrSell == 1 && macdList[i - 1].Histogram < macdDeep && macdList[i].Histogram >= macdDeep && (skipX == 0 || list[i].Close < list[i - 1].Open * (1 + skipX)))
+                                                    if (buyOrSell == 1)
                                                     {
-                                                        if (rsiList[i].Rsi < rsiValue)
+                                                        if (macdList[i - 1].Histogram < macdDeep && macdList[i].Histogram >= macdDeep && (skipX == 0 || list[i].Close < list[i - 1].Open * (1 + skipX)))
                                                         {
-                                                            position = 1;
-                                                            positionEntryPrice = list[i].Close;
-                                                            topPrice = positionEntryPrice;
+                                                            lastPositionEntryPrice = list[i].Close;
+                                                            if (rsiList[i].Rsi < rsiValue)
+                                                            {
+                                                                position = 1;
+                                                                positionEntryPrice = list[i].Close;
+                                                                topPrice = positionEntryPrice;
+                                                            }
+                                                            else
+                                                            {
+                                                                skipCount++;
+                                                            }
                                                         }
-                                                        else
-                                                        {
-                                                            skipCount++;
-                                                        }
+                                                        //else if (lastPositionEntryPrice > 0 && macdList[i - 1].Histogram >= macdDeep && macdList[i].Histogram > macdDeep && list[i].Close >= lastPositionEntryPrice)
+                                                        //{
+                                                        //    if (rsiList[i].Rsi < rsiValue)
+                                                        //    {
+                                                        //        position = 1;
+                                                        //        positionEntryPrice = list[i].Close;
+                                                        //        topPrice = positionEntryPrice;
+                                                        //    }
+                                                        //    else
+                                                        //    {
+                                                        //        skipCount++;
+                                                        //    }
+                                                        //}
                                                     }
                                                     //else if (buyOrSell == 2 && macdList[i - 2].Histogram > macdDeep && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && (skipX == 0 || list[i].Close > list[i - 1].Open * (1 - skipX)))
-                                                    else if (buyOrSell == 2 && macdList[i - 1].Histogram > macdDeep && macdList[i].Histogram <= macdDeep && (skipX == 0 || list[i].Close > list[i - 1].Open * (1 - skipX)))
+                                                    else if (buyOrSell == 2)
                                                     {
-                                                        if (rsiList[i].Rsi > 100 - rsiValue)
+                                                        if (macdList[i - 1].Histogram > macdDeep && macdList[i].Histogram <= macdDeep && (skipX == 0 || list[i].Close > list[i - 1].Open * (1 - skipX)))
                                                         {
-                                                            position = -1;
-                                                            positionEntryPrice = list[i].Close;
-                                                            topPrice = positionEntryPrice;
+                                                            lastPositionEntryPrice = list[i].Close;
+                                                            if (rsiList[i].Rsi > 100 - rsiValue)
+                                                            {
+                                                                position = -1;
+                                                                positionEntryPrice = list[i].Close;
+                                                                topPrice = positionEntryPrice;
+                                                            }
+                                                            else
+                                                            {
+                                                                skipCount++;
+                                                            }
                                                         }
-                                                        else
-                                                        {
-                                                            skipCount++;
-                                                        }
+                                                        //else if (lastPositionEntryPrice > 0 && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && list[i].Close <= lastPositionEntryPrice)
+                                                        //{
+                                                        //    if (rsiList[i].Rsi > 100 - rsiValue)
+                                                        //    {
+                                                        //        position = -1;
+                                                        //        positionEntryPrice = list[i].Close;
+                                                        //        topPrice = positionEntryPrice;
+                                                        //    }
+                                                        //    else
+                                                        //    {
+                                                        //        skipCount++;
+                                                        //    }
+                                                        //}
                                                     }
                                                 }
                                                 else if (position == 1)
@@ -365,7 +400,7 @@ namespace Valloon.BitMEX.Backtest
             result += Test(new DateTime(2022, 7, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 8, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 7, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 5, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
-            result += Test(new DateTime(2022, 4, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 5, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
+            result += Test(new DateTime(2022, 4, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 5, 2, 8, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 4, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 3, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 2, 2, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
@@ -404,10 +439,10 @@ namespace Valloon.BitMEX.Backtest
             int rsiValue2 = 26;
             int macdDeep = 0;
             float skipX1 = 0;
-            float closeX1 = 0.075f;
+            float closeX1 = 0.08f;
             float stopX1 = 0.04f;
             float skipX2 = 0;
-            float closeX2 = 0.11f;
+            float closeX2 = 0.25f;
             float stopX2 = 0.03f;
 
             const int binSize = 4;
@@ -455,25 +490,79 @@ namespace Valloon.BitMEX.Backtest
             float finalPercent = 1, finalPercent2 = 1, finalPercent3 = 1, finalPercent4 = 1, finalPercent5 = 1;
             int position = 0;
             int positionEntryPrice = 0;
+            int lastPositionEntryPrice = 0;
             for (int i = 2; i < count - 1; i++)
             {
                 if (position == 0)
                 {
-                    //if ((buyOrSell == 1 || buyOrSell == 3) && rsiList[i].Rsi < rsiValue1 && macdList[i - 2].Histogram < macdDeep && macdList[i - 1].Histogram >= macdDeep && macdList[i].Histogram > macdDeep && (skipX1 == 0 || list[i].Close < list[i - 1].Open * (1 + skipX1)))
-                    if ((buyOrSell == 1 || buyOrSell == 3) && rsiList[i].Rsi < rsiValue1 && macdList[i - 1].Histogram < macdDeep && macdList[i].Histogram >= macdDeep && (skipX1 == 0 || list[i].Close < list[i - 1].Open * (1 + skipX1)))
+                    if (buyOrSell == 1 || buyOrSell == 3)
                     {
-                        tryCount++;
-                        position = 1;
-                        positionEntryPrice = list[i].Close;
-                        logger.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t {rsiList[i].Rsi:F4}    {macdList[i].Macd:F4}  /  {macdList[i].Histogram:F4}  /  {macdList[i].Signal:F4} \t Position = {position} \t Entry = {positionEntryPrice} \t <LONG>");
+                        if (macdList[i - 1].Histogram < macdDeep && macdList[i].Histogram >= macdDeep && (skipX1 == 0 || list[i].Close < list[i - 1].Open * (1 + skipX1)))
+                        {
+                            lastPositionEntryPrice = list[i].Close;
+                            if (rsiList[i].Rsi < rsiValue1)
+                            {
+                                tryCount++;
+                                position = 1;
+                                positionEntryPrice = list[i].Close;
+                                //topPrice = positionEntryPrice;
+                                logger.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t {rsiList[i].Rsi:F4}    {macdList[i].Macd:F4}  /  {macdList[i].Histogram:F4}  /  {macdList[i].Signal:F4} \t Position = {position} \t Entry = {positionEntryPrice} \t <LONG>");
+                            }
+                            else
+                            {
+                                //skipCount++;
+                            }
+                        }
+                        //else if (lastPositionEntryPrice > 0 && macdList[i - 1].Histogram >= macdDeep && macdList[i].Histogram > macdDeep && list[i].Close >= lastPositionEntryPrice)
+                        //{
+                        //    if (rsiList[i].Rsi < rsiValue1)
+                        //    {
+                        //        tryCount++;
+                        //        position = 1;
+                        //        positionEntryPrice = list[i].Close;
+                        //        //topPrice = positionEntryPrice;
+                        //        logger.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t {rsiList[i].Rsi:F4}    {macdList[i].Macd:F4}  /  {macdList[i].Histogram:F4}  /  {macdList[i].Signal:F4} \t Position = {position} \t Entry = {positionEntryPrice} \t <LONG>");
+                        //    }
+                        //    else
+                        //    {
+                        //        //skipCount++;
+                        //    }
+                        //}
                     }
-                    //else if ((buyOrSell == 2 || buyOrSell == 3) && rsiList[i].Rsi > rsiValue2 && macdList[i - 2].Histogram > macdDeep && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && (skipX2 == 0 || list[i].Close > list[i - 1].Open * (1 - skipX2)))
-                    else if ((buyOrSell == 2 || buyOrSell == 3) && rsiList[i].Rsi > rsiValue2 && macdList[i - 1].Histogram > macdDeep && macdList[i].Histogram <= macdDeep && (skipX2 == 0 || list[i].Close > list[i - 1].Open * (1 - skipX2)))
+                    //else if (buyOrSell == 2 && macdList[i - 2].Histogram > macdDeep && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && (skipX == 0 || list[i].Close > list[i - 1].Open * (1 - skipX)))
+                    if (buyOrSell == 2 || buyOrSell == 3)
                     {
-                        tryCount++;
-                        position = -1;
-                        positionEntryPrice = list[i].Close;
-                        logger.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t {rsiList[i].Rsi:F4}    {macdList[i].Macd:F4}  /  {macdList[i].Histogram:F4}  /  {macdList[i].Signal:F4} \t Position = {position} \t Entry = {positionEntryPrice} \t <SHORT>");
+                        if (macdList[i - 1].Histogram > macdDeep && macdList[i].Histogram <= macdDeep && (skipX2 == 0 || list[i].Close > list[i - 1].Open * (1 - skipX2)))
+                        {
+                            lastPositionEntryPrice = list[i].Close;
+                            if (rsiList[i].Rsi > rsiValue2)
+                            {
+                                tryCount++;
+                                position = -1;
+                                positionEntryPrice = list[i].Close;
+                                //topPrice = positionEntryPrice;
+                                logger.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t {rsiList[i].Rsi:F4}    {macdList[i].Macd:F4}  /  {macdList[i].Histogram:F4}  /  {macdList[i].Signal:F4} \t Position = {position} \t Entry = {positionEntryPrice} \t <SHORT>");
+                            }
+                            else
+                            {
+                                //skipCount++;
+                            }
+                        }
+                        //else if (lastPositionEntryPrice > 0 && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && list[i].Close <= lastPositionEntryPrice)
+                        //{
+                        //    if (rsiList[i].Rsi > rsiValue2)
+                        //    {
+                        //        tryCount++;
+                        //        position = -1;
+                        //        positionEntryPrice = list[i].Close;
+                        //        //topPrice = positionEntryPrice;
+                        //        logger.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t {rsiList[i].Rsi:F4}    {macdList[i].Macd:F4}  /  {macdList[i].Histogram:F4}  /  {macdList[i].Signal:F4} \t Position = {position} \t Entry = {positionEntryPrice} \t <SHORT>");
+                        //    }
+                        //    else
+                        //    {
+                        //        //skipCount++;
+                        //    }
+                        //}
                     }
                 }
                 else if (position == 1)
@@ -494,7 +583,7 @@ namespace Valloon.BitMEX.Backtest
                         positionEntryPrice = 0;
                         i--;
                     }
-                    else if (list[i].High > closePrice)
+                    else if (closeX1 > 0 && list[i].High > closePrice)
                     {
                         succeedCount++;
                         float percent = (float)closePrice / positionEntryPrice - takerFee;
@@ -545,7 +634,7 @@ namespace Valloon.BitMEX.Backtest
                         positionEntryPrice = 0;
                         i--;
                     }
-                    else if (list[i].Low < closePrice)
+                    else if (closeX2 > 0 && list[i].Low < closePrice)
                     {
                         succeedCount++;
                         float percent = 2 - (float)closePrice / positionEntryPrice - takerFee;
