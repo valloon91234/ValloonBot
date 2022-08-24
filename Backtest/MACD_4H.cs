@@ -26,8 +26,8 @@ namespace Valloon.BitMEX.Backtest
             //Loader.Load(SYMBOL, "1h", new DateTime(2022, 8, 3, 0, 0, 0, DateTimeKind.Utc)); return;
 
             {
-                //Benchmark();
-                Test();
+                Benchmark();
+                //Test();
                 return;
             }
 
@@ -38,8 +38,6 @@ namespace Valloon.BitMEX.Backtest
         {
             const int buyOrSell = 2;
 
-            const int binSize = 4;
-            const int binDelay = 0;
             //const float maxLoss = 0.1f;
             const int leverage = 4;
 
@@ -52,9 +50,17 @@ namespace Valloon.BitMEX.Backtest
             DateTime startTime = new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;
             //DateTime? endTime = new DateTime(2022, 8, 14, 0, 0, 0, DateTimeKind.Utc);
-            var list1h = Dao.SelectAll(SYMBOL, "1h");
-            var list = Loader.LoadBinListFrom1h(binSize, list1h, false, binDelay);
-            //var list = Dao.SelectAll(SYMBOL, "4h");
+
+            //int rsiLength = 6;
+            //const int binSize = 4;
+            //var list1h = Dao.SelectAll(SYMBOL, "1h");
+            //var list = Loader.LoadBinListFrom1h(binSize, list1h, false, 0);
+
+            int rsiLength = 16;
+            const int binSize = 15;
+            var list1m = Dao.SelectAll(SYMBOL, "1m");
+            var list = Loader.LoadBinListFrom1m(binSize, list1m, false);
+
             var quoteList = new List<Skender.Stock.Indicators.Quote>();
             foreach (var t in list)
             {
@@ -80,8 +86,6 @@ namespace Valloon.BitMEX.Backtest
             macdList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
             List<Dictionary<string, float>> topList = new List<Dictionary<string, float>>();
-            //for (int rsiLength = 6; rsiLength <= 24; rsiLength += 2)
-            int rsiLength = 6;
             {
                 var rsiList = quoteList.GetRsi(rsiLength).ToList();
                 rsiList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
