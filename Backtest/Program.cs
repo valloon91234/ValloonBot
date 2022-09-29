@@ -31,7 +31,13 @@ namespace Valloon.BitMEX.Backtest
             //Candle.Run();
             //PSar.Run();
             //SMA2.Run();
-            MACD_4H.Run();
+            //MACD_4H.Run();
+            //MACD_4H2.Run();
+            //MACD_M.Run();
+            //MACD_BBW.Run();
+            //MACD_GRID.Run();
+            RSI_BBW.Run();
+            //EMACross.Run();
 
             Console.WriteLine($"\nCompleted. Press any key to exit... ");
             Console.ReadKey(false);

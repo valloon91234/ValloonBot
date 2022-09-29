@@ -34,6 +34,7 @@
             this.textBox_ApiKey = new System.Windows.Forms.TextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.textBox_Result = new System.Windows.Forms.TextBox();
+            this.button_Margin = new System.Windows.Forms.Button();
             this.button_Summary = new System.Windows.Forms.Button();
             this.button_History = new System.Windows.Forms.Button();
             this.button_ClosePosition = new System.Windows.Forms.Button();
@@ -48,7 +49,6 @@
             this.button_Wallet = new System.Windows.Forms.Button();
             this.button_ApiKeyAll = new System.Windows.Forms.Button();
             this.button_ApiKey = new System.Windows.Forms.Button();
-            this.button_Margin = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -86,7 +86,7 @@
             this.textBox_ApiSecret.Name = "textBox_ApiSecret";
             this.textBox_ApiSecret.Size = new System.Drawing.Size(457, 25);
             this.textBox_ApiSecret.TabIndex = 3;
-            this.textBox_ApiSecret.Text = "EtRX5unxJyZBfnv5AzVKCvHdj0rlX8WlxM3yhq8VhEPYx_Rf";
+            this.textBox_ApiSecret.Text = "8rpTnZKpUK_KRe3ez-wA2CvK6gYLicMcYRlG7P5WDwvA0c0-";
             // 
             // textBox_ApiKey
             // 
@@ -94,7 +94,7 @@
             this.textBox_ApiKey.Name = "textBox_ApiKey";
             this.textBox_ApiKey.Size = new System.Drawing.Size(258, 25);
             this.textBox_ApiKey.TabIndex = 2;
-            this.textBox_ApiKey.Text = "tWqM3sScwvqrQv93dapycTeM";
+            this.textBox_ApiKey.Text = "CnrbNq6BknhT8jG0v2mj7SmN";
             // 
             // splitContainer2
             // 
@@ -139,6 +139,16 @@
             this.textBox_Result.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_Result.Size = new System.Drawing.Size(723, 519);
             this.textBox_Result.TabIndex = 3;
+            // 
+            // button_Margin
+            // 
+            this.button_Margin.Location = new System.Drawing.Point(3, 150);
+            this.button_Margin.Name = "button_Margin";
+            this.button_Margin.Size = new System.Drawing.Size(119, 37);
+            this.button_Margin.TabIndex = 16;
+            this.button_Margin.Text = "Margin";
+            this.button_Margin.UseVisualStyleBackColor = true;
+            this.button_Margin.Click += new System.EventHandler(this.button_Margin_Click);
             // 
             // button_Summary
             // 
@@ -279,16 +289,6 @@
             this.button_ApiKey.Text = "APIKey";
             this.button_ApiKey.UseVisualStyleBackColor = true;
             this.button_ApiKey.Click += new System.EventHandler(this.button_ApiKey_Click);
-            // 
-            // button_Margin
-            // 
-            this.button_Margin.Location = new System.Drawing.Point(3, 150);
-            this.button_Margin.Name = "button_Margin";
-            this.button_Margin.Size = new System.Drawing.Size(119, 37);
-            this.button_Margin.TabIndex = 16;
-            this.button_Margin.Text = "Margin";
-            this.button_Margin.UseVisualStyleBackColor = true;
-            this.button_Margin.Click += new System.EventHandler(this.button_Margin_Click);
             // 
             // Form1
             // 

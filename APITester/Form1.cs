@@ -217,7 +217,11 @@ namespace Valloon.Trading
         private void button_History_Click(object sender, EventArgs e)
         {
             var apiHelper = GetApiHelper();
-            var w = apiHelper.GetWalletHistory();
+            List<Transaction> w = new List<Transaction>();
+            for (int i = 0; i < 100; i++)
+            {
+                w.AddRange(apiHelper.GetWalletHistory(BitMEXApiHelper.CURRENCY_ALL, 100, i * 100));
+            }
             textBox_Result.Text = JArray.FromObject(w).ToString();
         }
 

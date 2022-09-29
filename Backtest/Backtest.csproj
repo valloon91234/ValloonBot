@@ -55,7 +55,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dao.cs" />
+    <Compile Include="EMACross.cs" />
+    <Compile Include="RSI_BBW.cs" />
+    <Compile Include="MACD_GRID.cs" />
+    <Compile Include="MACD_BBW_M.cs" />
+    <Compile Include="MACD_BBW.cs" />
     <Compile Include="MACD_M.cs" />
+    <Compile Include="MACD_4H2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Loader.cs" />

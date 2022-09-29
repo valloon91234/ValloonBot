@@ -365,16 +365,17 @@ namespace Valloon.Trading
             return UserApiInstance.UserGetWallet(currency);
         }
 
-        public List<Transaction> GetWalletHistory(string currency = CURRENCY_ALL, int count = 100)
+        public List<Transaction> GetWalletHistory(string currency = CURRENCY_ALL, int count = 100, int? start = null)
         {
             RequestCount++;
             Dictionary<string, string> param = new Dictionary<string, string>
             {
                 ["currency"] = currency,
-                ["count"] = count.ToString()
+                ["count"] = count.ToString(),
+                ["start"] = start.ToString()
             };
             CreateSignature("GET", "/user/walletHistory", BuildQueryData(param));
-            return UserApiInstance.UserGetWalletHistory(currency, count);
+            return UserApiInstance.UserGetWalletHistory(currency, count, start);
         }
 
         public List<Transaction> GetWalletSummary(string currency = CURRENCY_ALL)

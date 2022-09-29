@@ -12,7 +12,7 @@ using Valloon.Utils;
 
 namespace Valloon.BitMEX.Backtest
 {
-    static class MACD_4H
+    static class MACD_4H2
     {
         //static readonly string SYMBOL = BitMEXApiHelper.SYMBOL_ETHUSD;
         //static readonly string SYMBOL = BitMEXApiHelper.SYMBOL_SOLUSD;
@@ -26,8 +26,8 @@ namespace Valloon.BitMEX.Backtest
             //Loader.Load(SYMBOL, "1h", new DateTime(2022, 8, 3, 0, 0, 0, DateTimeKind.Utc)); return;
 
             {
-                //Benchmark();
-                Test();
+                Benchmark();
+                //Test();
                 return;
             }
 
@@ -39,18 +39,19 @@ namespace Valloon.BitMEX.Backtest
             const int buyOrSell = 2;
 
             //const float maxLoss = 0.1f;
-            //const int leverage = 4;
+            const int leverage = 4;
 
             const float makerFee = 0.0003f;
-            const float takerFee = 0.002f;
+            const float takerFee = 0.001f;
 
             //DateTime startTime = new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc);
-            DateTime startTime = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc);
+            //DateTime startTime = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc);
             //DateTime startTime = new DateTime(2022, 5, 15, 0, 0, 0, DateTimeKind.Utc);
-            //DateTime startTime = new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime startTime = new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;
-            //DateTime? endTime = new DateTime(2022, 5, 1, 0, 0, 0, DateTimeKind.Utc);
+            //DateTime? endTime = new DateTime(2022, 8, 14, 0, 0, 0, DateTimeKind.Utc);
 
+            int rsiLength = 6;
             const int binSize = 4;
             var list1h = Dao.SelectAll(SYMBOL, "1h");
             var list = Loader.LoadBinListFrom1h(binSize, list1h, false, 0);
@@ -76,253 +77,267 @@ namespace Valloon.BitMEX.Backtest
             logger.WriteLine($"{count} loaded. ({totalDays:N0} days)");
             Console.Title = logger.LogFilename;
 
-            var macdList = quoteList.GetMacd().ToList();
-            macdList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+            var macdList0 = quoteList.GetMacd().ToList();
+            macdList0.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+
+            var macdList2 = new List<MacdResult>();
+            var quoteList2 = new List<Quote>
+            {
+                quoteList[0]
+            };
+            for (int i = 1; i < quoteList.Count; i++)
+            {
+                var q = quoteList[i];
+                quoteList2.Last().Close = q.Open;
+                q.Close = q.Open;
+                quoteList2.Add(q);
+                var macd = quoteList2.GetMacd().Last();
+                macdList2.Add(macd);
+            }
+            macdList2.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+
+            //for (int i = 0; i < count; i++)
+            //{
+            //    Console.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close}    {macdList0[i].Macd:F4}  /  {macdList0[i].Histogram:F4}  /  {macdList0[i].Signal:F4}        {macdList2[i].Macd:F4}  /  {macdList2[i].Histogram:F4}  /  {macdList2[i].Signal:F4}");
+            //}
 
             List<Dictionary<string, float>> topList = new List<Dictionary<string, float>>();
-            //for (int rsiLength = 4; rsiLength <= 24; rsiLength += 2)
-            int rsiLength = 6;
-            {
-                var rsiList = quoteList.GetRsi(rsiLength).ToList();
-                rsiList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+            var rsiList = quoteList.GetRsi(rsiLength).ToList();
+            rsiList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
-                for (int rsiValue = 60; rsiValue <= 90; rsiValue++)
-                //int rsiValue = 80;
+            for (int rsiValue = 50; rsiValue <= 90; rsiValue++)
+            //int rsiValue = 80;
+            {
+                //for (int macdDeep = -20; macdDeep <= 20; macdDeep += 2)
+                int macdDeep = 0;
                 {
-                    //for (int macdDeep = -20; macdDeep <= 20; macdDeep += 2)
-                    int macdDeep = 0;
+                    for (float closeX = 0; closeX <= 0.4f; closeX += 0.005f)
+                    //float closeX = 0;
                     {
-                        //for (float skipX = 0.02f; skipX <= 0.1f; skipX += 0.005f)
-                        float skipX = 0;
+                        for (float stopX = 0.02f; stopX < 0.1f; stopX += 0.005f)
+                        //float stopX = .03f;
                         {
-                            for (float closeX = 0; closeX <= 0.16f; closeX += 0.005f)
-                            //float closeX = 0.24f;
+                            //float leverage = maxLoss / stopX;
+                            //for (float tailMin = 0.02f; tailMin <= 0.3f; tailMin += 0.01f)
+                            float tailMin = 0;
                             {
-                                for (float stopX = 0.01f; stopX < 0.1f; stopX += 0.005f)
-                                //float stopX = .03f;
+                                //for (float tailX = 0.1f; tailX < 1f; tailX += 0.01f)
+                                float tailX = 0;
                                 {
-                                    //float leverage = 0.1f / stopX;
-                                    float leverage = 5;
-                                    //for (float tailMin = 0.02f; tailMin <= 0.3f; tailMin += 0.01f)
-                                    float tailMin = 0;
+                                    int tryCount = 0;
+                                    int succeedCount = 0, failedCount = 0;
+                                    int closeCount = 0, stopCount = 0, tailCount = 0, flipCount = 0, skipCount = 0;
+                                    float maxProfit = 0, finalPercent = 1, finalPercent2 = 1;
+                                    int position = 0;
+                                    int positionEntryPrice = 0;
+                                    int topPrice = 0;
+                                    int lastPositionEntryPrice = 0;
+                                    for (int i = 2; i < count - 1; i++)
                                     {
-                                        //for (float tailX = 0.1f; tailX < 1f; tailX += 0.01f)
-                                        float tailX = 0;
+                                        if (position == 0)
                                         {
-                                            int tryCount = 0;
-                                            int succeedCount = 0, failedCount = 0;
-                                            int closeCount = 0, stopCount = 0, tailCount = 0, flipCount = 0, skipCount = 0;
-                                            float maxProfit = 0, finalPercent = 1, finalPercent2 = 1;
-                                            int position = 0;
-                                            int positionEntryPrice = 0;
-                                            int topPrice = 0;
-                                            int lastPositionEntryPrice = 0;
-                                            for (int i = 2; i < count - 1; i++)
+                                            //if (buyOrSell == 1 && macdList[i - 2].Histogram < macdDeep && macdList[i - 1].Histogram >= macdDeep && macdList[i].Histogram > macdDeep && (skipX == 0 || list[i].Close < list[i - 1].Open * (1 + skipX)))
+                                            if (buyOrSell == 1)
                                             {
-                                                if (position == 0)
+                                                if (macdList2[i - 1].Histogram < macdDeep && macdList2[i].Histogram >= macdDeep)
                                                 {
-                                                    //if (buyOrSell == 1 && macdList[i - 2].Histogram < macdDeep && macdList[i - 1].Histogram >= macdDeep && macdList[i].Histogram > macdDeep && (skipX == 0 || list[i].Close < list[i - 1].Open * (1 + skipX)))
-                                                    if (buyOrSell == 1)
+                                                    lastPositionEntryPrice = list[i].Open;
+                                                    if (rsiList[i].Rsi < rsiValue)
                                                     {
-                                                        if (macdList[i - 1].Histogram < macdDeep && macdList[i].Histogram >= macdDeep && (skipX == 0 || list[i].Close < list[i - 1].Open * (1 + skipX)))
-                                                        {
-                                                            lastPositionEntryPrice = list[i].Close;
-                                                            if (rsiList[i].Rsi < rsiValue)
-                                                            {
-                                                                position = 1;
-                                                                positionEntryPrice = list[i].Close;
-                                                                topPrice = positionEntryPrice;
-                                                            }
-                                                            else
-                                                            {
-                                                                skipCount++;
-                                                            }
-                                                        }
-                                                        //else if (lastPositionEntryPrice > 0 && macdList[i - 1].Histogram >= macdDeep && macdList[i].Histogram > macdDeep && list[i].Close >= lastPositionEntryPrice)
-                                                        //{
-                                                        //    if (rsiList[i].Rsi < rsiValue)
-                                                        //    {
-                                                        //        position = 1;
-                                                        //        positionEntryPrice = list[i].Close;
-                                                        //        topPrice = positionEntryPrice;
-                                                        //    }
-                                                        //    else
-                                                        //    {
-                                                        //        skipCount++;
-                                                        //    }
-                                                        //}
+                                                        position = 1;
+                                                        positionEntryPrice = list[i].Open;
+                                                        topPrice = positionEntryPrice;
                                                     }
-                                                    //else if (buyOrSell == 2 && macdList[i - 2].Histogram > macdDeep && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && (skipX == 0 || list[i].Close > list[i - 1].Open * (1 - skipX)))
-                                                    else if (buyOrSell == 2)
+                                                    else
                                                     {
-                                                        if (macdList[i - 1].Histogram > macdDeep && macdList[i].Histogram <= macdDeep && (skipX == 0 || list[i].Close > list[i - 1].Open * (1 - skipX)))
-                                                        {
-                                                            lastPositionEntryPrice = list[i].Close;
-                                                            if (rsiList[i].Rsi > 100 - rsiValue)
-                                                            {
-                                                                position = -1;
-                                                                positionEntryPrice = list[i].Close;
-                                                                topPrice = positionEntryPrice;
-                                                            }
-                                                            else
-                                                            {
-                                                                skipCount++;
-                                                            }
-                                                        }
-                                                        //else if (lastPositionEntryPrice > 0 && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && list[i].Close <= lastPositionEntryPrice)
-                                                        //{
-                                                        //    if (rsiList[i].Rsi > 100 - rsiValue)
-                                                        //    {
-                                                        //        position = -1;
-                                                        //        positionEntryPrice = list[i].Close;
-                                                        //        topPrice = positionEntryPrice;
-                                                        //    }
-                                                        //    else
-                                                        //    {
-                                                        //        skipCount++;
-                                                        //    }
-                                                        //}
+                                                        skipCount++;
                                                     }
                                                 }
-                                                else if (position == 1)
-                                                {
-                                                    int closePrice = (int)Math.Floor(positionEntryPrice * (1 + closeX));
-                                                    int stopPrice = (int)Math.Ceiling(positionEntryPrice * (1 - stopX));
-                                                    int tailPrice = (int)Math.Ceiling(positionEntryPrice + (topPrice - positionEntryPrice) * tailX);
-                                                    //int tailPrice = (int)Math.Ceiling(positionEntryPrice * (1 + tailMin) + (topPrice - positionEntryPrice * (1 + tailMin)) * tailX);
-                                                    if (list[i].Low < stopPrice)
-                                                    {
-                                                        tryCount++;
-                                                        stopCount++;
-                                                        failedCount++;
-                                                        float percent = (float)stopPrice / positionEntryPrice - takerFee;
-                                                        finalPercent *= percent;
-                                                        finalPercent2 *= 1 + (percent - 1) * leverage;
-                                                        maxProfit = Math.Max(maxProfit, percent);
-                                                        position = 0;
-                                                        positionEntryPrice = 0;
-                                                        i--;
-                                                    }
-                                                    else if (topPrice > positionEntryPrice * (1 + tailMin) && tailX > 0 && list[i].Low <= tailPrice)
-                                                    {
-                                                        tryCount++;
-                                                        tailCount++;
-                                                        if (list[i].Open < tailPrice) tailPrice = list[i].Open;
-                                                        float percent = (float)tailPrice / positionEntryPrice - takerFee;
-                                                        if (percent > 1)
-                                                            succeedCount++;
-                                                        else
-                                                            failedCount++;
-                                                        finalPercent *= percent;
-                                                        finalPercent2 *= 1 + (percent - 1) * leverage;
-                                                        maxProfit = Math.Max(maxProfit, percent);
-                                                        position = 0;
-                                                        positionEntryPrice = 0;
-                                                        i--;
-                                                    }
-                                                    else if (closeX > 0 && list[i].High > closePrice)
-                                                    {
-                                                        tryCount++;
-                                                        closeCount++;
-                                                        succeedCount++;
-                                                        float percent = (float)closePrice / positionEntryPrice - takerFee;
-                                                        finalPercent *= percent;
-                                                        finalPercent2 *= 1 + (percent - 1) * leverage;
-                                                        maxProfit = Math.Max(maxProfit, percent);
-                                                        position = 0;
-                                                        positionEntryPrice = 0;
-                                                        i--;
-                                                    }
-                                                    else if (macdList[i].Histogram < 0)
-                                                    {
-                                                        tryCount++;
-                                                        flipCount++;
-                                                        float percent = (float)list[i].Close / positionEntryPrice - takerFee;
-                                                        if (percent > 1)
-                                                            succeedCount++;
-                                                        else
-                                                            failedCount++;
-                                                        finalPercent *= percent;
-                                                        finalPercent2 *= 1 + (percent - 1) * leverage;
-                                                        maxProfit = Math.Max(maxProfit, percent);
-                                                        position = 0;
-                                                        positionEntryPrice = 0;
-                                                        i--;
-                                                    }
-                                                    topPrice = Math.Max(topPrice, list[i].High);
-                                                }
-                                                else if (position == -1)
-                                                {
-                                                    int closePrice = (int)Math.Ceiling(positionEntryPrice * (1 - closeX));
-                                                    int stopPrice = (int)Math.Floor(positionEntryPrice * (1 + stopX));
-                                                    //int tailPrice = (int)Math.Ceiling(positionEntryPrice - (positionEntryPrice - topPrice) * tailX);
-                                                    int tailPrice = (int)Math.Ceiling(positionEntryPrice * (1 - tailMin) - (positionEntryPrice * (1 - tailMin) - topPrice) * tailX);
-                                                    if (list[i].High > stopPrice)
-                                                    {
-                                                        tryCount++;
-                                                        stopCount++;
-                                                        failedCount++;
-                                                        float percent = 2 - (float)stopPrice / positionEntryPrice - takerFee;
-                                                        finalPercent *= percent;
-                                                        finalPercent2 *= 1 + (percent - 1) * leverage;
-                                                        maxProfit = Math.Max(maxProfit, percent);
-                                                        position = 0;
-                                                        positionEntryPrice = 0;
-                                                        i--;
-                                                    }
-                                                    else if (topPrice < positionEntryPrice * (1 - tailMin) && tailX > 0 && list[i].High >= tailPrice)
-                                                    {
-                                                        tryCount++;
-                                                        tailCount++;
-                                                        if (list[i].Open > tailPrice) tailPrice = list[i].Open;
-                                                        float percent = 2 - (float)tailPrice / positionEntryPrice - takerFee;
-                                                        if (percent > 1)
-                                                            succeedCount++;
-                                                        else
-                                                            failedCount++;
-                                                        finalPercent *= percent;
-                                                        finalPercent2 *= 1 + (percent - 1) * leverage;
-                                                        maxProfit = Math.Max(maxProfit, percent);
-                                                        position = 0;
-                                                        positionEntryPrice = 0;
-                                                        i--;
-                                                    }
-                                                    else if (closeX > 0 && list[i].Low < closePrice)
-                                                    {
-                                                        tryCount++;
-                                                        closeCount++;
-                                                        succeedCount++;
-                                                        float percent = 2 - (float)closePrice / positionEntryPrice - takerFee;
-                                                        finalPercent *= percent;
-                                                        finalPercent2 *= 1 + (percent - 1) * leverage;
-                                                        maxProfit = Math.Max(maxProfit, percent);
-                                                        position = 0;
-                                                        positionEntryPrice = 0;
-                                                        i--;
-                                                    }
-                                                    else if (macdList[i].Histogram > 0)
-                                                    {
-                                                        tryCount++;
-                                                        flipCount++;
-                                                        float percent = 2 - (float)list[i].Close / positionEntryPrice - takerFee;
-                                                        if (percent > 1)
-                                                            succeedCount++;
-                                                        else
-                                                            failedCount++;
-                                                        finalPercent *= percent;
-                                                        finalPercent2 *= 1 + (percent - 1) * leverage;
-                                                        maxProfit = Math.Max(maxProfit, percent);
-                                                        position = 0;
-                                                        positionEntryPrice = 0;
-                                                        i--;
-                                                    }
-                                                    topPrice = Math.Min(topPrice, list[i].Low);
-                                                }
+                                                //else if (lastPositionEntryPrice > 0 && macdList[i - 1].Histogram >= macdDeep && macdList[i].Histogram > macdDeep && list[i].Close >= lastPositionEntryPrice)
+                                                //{
+                                                //    if (rsiList[i].Rsi < rsiValue)
+                                                //    {
+                                                //        position = 1;
+                                                //        positionEntryPrice = list[i].Close;
+                                                //        topPrice = positionEntryPrice;
+                                                //    }
+                                                //    else
+                                                //    {
+                                                //        skipCount++;
+                                                //    }
+                                                //}
                                             }
-                                            float successRate = failedCount > 0 ? (float)succeedCount / failedCount : succeedCount;
-                                            if (finalPercent > 1f && succeedCount > 0)
+                                            //else if (buyOrSell == 2 && macdList[i - 2].Histogram > macdDeep && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && (skipX == 0 || list[i].Close > list[i - 1].Open * (1 - skipX)))
+                                            else if (buyOrSell == 2)
                                             {
-                                                Dictionary<string, float> dic = new Dictionary<string, float>
+                                                if (macdList2[i - 1].Histogram > macdDeep && macdList2[i].Histogram <= macdDeep)
+                                                {
+                                                    lastPositionEntryPrice = list[i].Open;
+                                                    if (rsiList[i].Rsi > 100 - rsiValue)
+                                                    {
+                                                        position = -1;
+                                                        positionEntryPrice = list[i].Open;
+                                                        topPrice = positionEntryPrice;
+                                                    }
+                                                    else
+                                                    {
+                                                        skipCount++;
+                                                    }
+                                                }
+                                                //else if (lastPositionEntryPrice > 0 && macdList[i - 1].Histogram <= macdDeep && macdList[i].Histogram < macdDeep && list[i].Close <= lastPositionEntryPrice)
+                                                //{
+                                                //    if (rsiList[i].Rsi > 100 - rsiValue)
+                                                //    {
+                                                //        position = -1;
+                                                //        positionEntryPrice = list[i].Close;
+                                                //        topPrice = positionEntryPrice;
+                                                //    }
+                                                //    else
+                                                //    {
+                                                //        skipCount++;
+                                                //    }
+                                                //}
+                                            }
+                                        }
+                                        else if (position == 1)
+                                        {
+                                            int closePrice = (int)Math.Floor(positionEntryPrice * (1 + closeX));
+                                            int stopPrice = (int)Math.Ceiling(positionEntryPrice * (1 - stopX));
+                                            int tailPrice = (int)Math.Ceiling(positionEntryPrice + (topPrice - positionEntryPrice) * tailX);
+                                            //int tailPrice = (int)Math.Ceiling(positionEntryPrice * (1 + tailMin) + (topPrice - positionEntryPrice * (1 + tailMin)) * tailX);
+                                            if (list[i].Low < stopPrice)
+                                            {
+                                                tryCount++;
+                                                stopCount++;
+                                                failedCount++;
+                                                float percent = (float)stopPrice / positionEntryPrice - takerFee;
+                                                finalPercent *= percent;
+                                                finalPercent2 *= 1 + (percent - 1) * leverage;
+                                                maxProfit = Math.Max(maxProfit, percent);
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                                i--;
+                                            }
+                                            else if (topPrice > positionEntryPrice * (1 + tailMin) && tailX > 0 && list[i].Low <= tailPrice)
+                                            {
+                                                tryCount++;
+                                                tailCount++;
+                                                if (list[i].Open < tailPrice) tailPrice = list[i].Open;
+                                                float percent = (float)tailPrice / positionEntryPrice - takerFee;
+                                                if (percent > 1)
+                                                    succeedCount++;
+                                                else
+                                                    failedCount++;
+                                                finalPercent *= percent;
+                                                finalPercent2 *= 1 + (percent - 1) * leverage;
+                                                maxProfit = Math.Max(maxProfit, percent);
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                                i--;
+                                            }
+                                            else if (closeX > 0 && list[i].High > closePrice)
+                                            {
+                                                tryCount++;
+                                                closeCount++;
+                                                succeedCount++;
+                                                float percent = (float)closePrice / positionEntryPrice - takerFee;
+                                                finalPercent *= percent;
+                                                finalPercent2 *= 1 + (percent - 1) * leverage;
+                                                maxProfit = Math.Max(maxProfit, percent);
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                                i--;
+                                            }
+                                            else if (macdList2[i].Histogram < 0)
+                                            {
+                                                tryCount++;
+                                                flipCount++;
+                                                float percent = (float)list[i].Open / positionEntryPrice - takerFee;
+                                                if (percent > 1)
+                                                    succeedCount++;
+                                                else
+                                                    failedCount++;
+                                                finalPercent *= percent;
+                                                finalPercent2 *= 1 + (percent - 1) * leverage;
+                                                maxProfit = Math.Max(maxProfit, percent);
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                                i--;
+                                            }
+                                            topPrice = Math.Max(topPrice, list[i].High);
+                                        }
+                                        else if (position == -1)
+                                        {
+                                            int closePrice = (int)Math.Ceiling(positionEntryPrice * (1 - closeX));
+                                            int stopPrice = (int)Math.Floor(positionEntryPrice * (1 + stopX));
+                                            //int tailPrice = (int)Math.Ceiling(positionEntryPrice - (positionEntryPrice - topPrice) * tailX);
+                                            int tailPrice = (int)Math.Ceiling(positionEntryPrice * (1 - tailMin) - (positionEntryPrice * (1 - tailMin) - topPrice) * tailX);
+                                            if (list[i].High > stopPrice)
+                                            {
+                                                tryCount++;
+                                                stopCount++;
+                                                failedCount++;
+                                                float percent = 2 - (float)stopPrice / positionEntryPrice - takerFee;
+                                                finalPercent *= percent;
+                                                finalPercent2 *= 1 + (percent - 1) * leverage;
+                                                maxProfit = Math.Max(maxProfit, percent);
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                                i--;
+                                            }
+                                            else if (topPrice < positionEntryPrice * (1 - tailMin) && tailX > 0 && list[i].High >= tailPrice)
+                                            {
+                                                tryCount++;
+                                                tailCount++;
+                                                if (list[i].Open > tailPrice) tailPrice = list[i].Open;
+                                                float percent = 2 - (float)tailPrice / positionEntryPrice - takerFee;
+                                                if (percent > 1)
+                                                    succeedCount++;
+                                                else
+                                                    failedCount++;
+                                                finalPercent *= percent;
+                                                finalPercent2 *= 1 + (percent - 1) * leverage;
+                                                maxProfit = Math.Max(maxProfit, percent);
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                                i--;
+                                            }
+                                            else if (closeX > 0 && list[i].Low < closePrice)
+                                            {
+                                                tryCount++;
+                                                closeCount++;
+                                                succeedCount++;
+                                                float percent = 2 - (float)closePrice / positionEntryPrice - takerFee;
+                                                finalPercent *= percent;
+                                                finalPercent2 *= 1 + (percent - 1) * leverage;
+                                                maxProfit = Math.Max(maxProfit, percent);
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                                i--;
+                                            }
+                                            else if (macdList2[i].Histogram > 0)
+                                            {
+                                                tryCount++;
+                                                flipCount++;
+                                                float percent = 2 - (float)list[i].Open / positionEntryPrice - takerFee;
+                                                if (percent > 1)
+                                                    succeedCount++;
+                                                else
+                                                    failedCount++;
+                                                finalPercent *= percent;
+                                                finalPercent2 *= 1 + (percent - 1) * leverage;
+                                                maxProfit = Math.Max(maxProfit, percent);
+                                                position = 0;
+                                                positionEntryPrice = 0;
+                                                i--;
+                                            }
+                                            topPrice = Math.Min(topPrice, list[i].Low);
+                                        }
+                                    }
+                                    float successRate = failedCount > 0 ? (float)succeedCount / failedCount : succeedCount;
+                                    if (finalPercent > 1f && succeedCount > 0)
+                                    {
+                                        Dictionary<string, float> dic = new Dictionary<string, float>
                                                 {
                                                     { "buyOrSell", buyOrSell },
                                                     { "binSize", binSize },
@@ -332,7 +347,6 @@ namespace Valloon.BitMEX.Backtest
                                                     { "rsiLength", rsiLength },
                                                     { "rsiValue", rsiValue },
                                                     { "macdDeep", macdDeep },
-                                                    { "skipX", skipX },
                                                     { "closeX", closeX },
                                                     { "stopX", stopX },
                                                     { "tailMin", tailMin },
@@ -349,37 +363,35 @@ namespace Valloon.BitMEX.Backtest
                                                     { "finalPercent", finalPercent },
                                                     { "finalPercent2", finalPercent2 },
                                                 };
-                                                int topListCount = topList.Count;
-                                                if (topListCount > 0)
-                                                {
-                                                    while (topListCount > 1000)
-                                                    {
-                                                        topList.RemoveAt(0);
-                                                        topListCount--;
-                                                    }
-                                                    for (int i = 0; i < topListCount; i++)
-                                                    {
-                                                        if (topList[i]["finalPercent2"] > finalPercent2)
-                                                        {
-                                                            topList.Insert(i, dic);
-                                                            goto topListEnd;
-                                                        }
-                                                    }
-                                                    topList.Add(dic);
-                                                topListEnd:;
-                                                }
-                                                else
-                                                {
-                                                    topList.Add(dic);
-                                                }
-                                                logger.WriteLine($"rsi = {rsiLength} / {rsiValue} \t limit = {closeX:F4} / {stopX:F4} / {tailMin:F4} / {tailX:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4} / {finalPercent2:F4}");
+                                        int topListCount = topList.Count;
+                                        if (topListCount > 0)
+                                        {
+                                            while (topListCount > 10000)
+                                            {
+                                                topList.RemoveAt(0);
+                                                topListCount--;
                                             }
-                                            //else if (finalPercent > .5f && succeedCount > 0)
-                                            //{
-                                            //    logger.WriteLine($"rsi = {rsiLength} / {rsiValue} \t limit = {closeX:F4} / {stopX:F4} / {tailX:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4} / {finalPercent2:F4}", ConsoleColor.DarkGray, false);
-                                            //}
+                                            for (int i = 0; i < topListCount; i++)
+                                            {
+                                                if (topList[i]["finalPercent2"] > finalPercent2)
+                                                {
+                                                    topList.Insert(i, dic);
+                                                    goto topListEnd;
+                                                }
+                                            }
+                                            topList.Add(dic);
+                                        topListEnd:;
                                         }
+                                        else
+                                        {
+                                            topList.Add(dic);
+                                        }
+                                        logger.WriteLine($"rsi = {rsiLength} / {rsiValue} \t limit = {closeX:F4} / {stopX:F4} / {tailMin:F4} / {tailX:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4} / {finalPercent2:F4}");
                                     }
+                                    //else if (finalPercent > .5f && succeedCount > 0)
+                                    //{
+                                    //    logger.WriteLine($"rsi = {rsiLength} / {rsiValue} \t limit = {closeX:F4} / {stopX:F4} / {tailX:F4} \t count = {tryCount} / {succeedCount} / {failedCount} / {successRate:F2} \t % = {finalPercent:F4} / {finalPercent2:F4}", ConsoleColor.DarkGray, false);
+                                    //}
                                 }
                             }
                         }
@@ -444,13 +456,13 @@ namespace Valloon.BitMEX.Backtest
             float closeX1 = 0.08f;
             float stopX1 = 0.04f;
             float skipX2 = 0;
-            float closeX2 = 0.145f;
+            float closeX2 = 0.25f;
             float stopX2 = 0.03f;
 
             const int binSize = 4;
 
-            //const float makerFee = 0.0003f;
-            const float takerFee = 0.002f;
+            const float makerFee = 0.0003f;
+            const float takerFee = 0.001f;
 
             var list1h = Dao.SelectAll(SYMBOL, "1h");
             var list = Loader.LoadBinListFrom1h(binSize, list1h, false, 0);
@@ -479,12 +491,28 @@ namespace Valloon.BitMEX.Backtest
 
             var rsiList = quoteList.GetRsi(rsiLength).ToList();
             rsiList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
-            var macdList = quoteList.GetMacd().ToList();
+            var macdList0 = quoteList.GetMacd().ToList();
+            macdList0.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
+
+            var macdList = new List<MacdResult>();
+            var quoteList2 = new List<Quote>
+            {
+                quoteList[0]
+            };
+            for (int i = 1; i < quoteList.Count; i++)
+            {
+                var q = quoteList[i];
+                quoteList2.Last().Close = q.Open;
+                q.Close = q.Open;
+                quoteList2.Add(q);
+                var macd = quoteList2.GetMacd().Last();
+                macdList.Add(macd);
+            }
             macdList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
             //for (int i = 0; i < count; i++)
             //{
-            //    Console.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t {rsiList[i].Rsi:F4}    {macdList[i].Macd:F4}  /  {macdList[i].Histogram:F4}  /  {macdList[i].Signal:F4}");
+            //    Console.WriteLine($"{list[i].Timestamp:yyyy-MM-dd HH:mm:ss} \t {list[i].Open} / {list[i].High} / {list[i].Low} / {list[i].Close} \t {rsiList[i].Rsi:F4}    {macdList[i].Macd:F4}  /  {macdList[i].Histogram:F4}  /  {macdList[i].Signal:F4}    {macdList0[i].Macd:F4}");
             //}
 
             int tryCount = 0;
