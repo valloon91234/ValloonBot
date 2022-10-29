@@ -16,7 +16,7 @@ namespace Valloon.BitMEX.Backtest
     {
         //static readonly string SYMBOL = BitMEXApiHelper.SYMBOL_ETHUSD;
         //static readonly string SYMBOL = BitMEXApiHelper.SYMBOL_SOLUSD;
-        static readonly string SYMBOL = "SOLUSDT";
+        static readonly string SYMBOL = "MATICUSDT";
 
         public static void Run()
         {
@@ -45,9 +45,9 @@ namespace Valloon.BitMEX.Backtest
             const float takerFee = 0.002f;
 
             //DateTime startTime = new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc);
-            DateTime startTime = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc);
+            //DateTime startTime = new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc);
             //DateTime startTime = new DateTime(2022, 5, 15, 0, 0, 0, DateTimeKind.Utc);
-            //DateTime startTime = new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime startTime = new DateTime(2022, 7, 1, 0, 0, 0, DateTimeKind.Utc);
             DateTime? endTime = null;
             //DateTime? endTime = new DateTime(2022, 5, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -80,8 +80,8 @@ namespace Valloon.BitMEX.Backtest
             macdList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
 
             List<Dictionary<string, float>> topList = new List<Dictionary<string, float>>();
-            //for (int rsiLength = 4; rsiLength <= 24; rsiLength += 2)
-            int rsiLength = 6;
+            //for (int rsiLength = 3; rsiLength <= 6; rsiLength += 1)
+            int rsiLength = 4;
             {
                 var rsiList = quoteList.GetRsi(rsiLength).ToList();
                 rsiList.RemoveAll(x => x.Date < startTime || endTime != null && x.Date > endTime.Value);
@@ -95,10 +95,10 @@ namespace Valloon.BitMEX.Backtest
                         //for (float skipX = 0.02f; skipX <= 0.1f; skipX += 0.005f)
                         float skipX = 0;
                         {
-                            for (float closeX = 0; closeX <= 0.16f; closeX += 0.005f)
+                            for (float closeX = 0; closeX <= 0.2f; closeX += 0.005f)
                             //float closeX = 0.24f;
                             {
-                                for (float stopX = 0.01f; stopX < 0.1f; stopX += 0.005f)
+                                for (float stopX = 0.01f; stopX < 0.05f; stopX += 0.005f)
                                 //float stopX = .03f;
                                 {
                                     //float leverage = 0.1f / stopX;
@@ -397,7 +397,9 @@ namespace Valloon.BitMEX.Backtest
             //Test(new DateTime(2022, 3, 16, 0, 0, 0, DateTimeKind.Utc)); return null;
 
             string result = "";
-            result += Test(new DateTime(2022, 8, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
+            result += Test(new DateTime(2022, 10, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
+            result += Test(new DateTime(2022, 9, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 10, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
+            result += Test(new DateTime(2022, 8, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 9, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 7, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 8, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 7, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 5, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
@@ -411,8 +413,7 @@ namespace Valloon.BitMEX.Backtest
             result += Test(new DateTime(2021, 9, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2021, 10, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2021, 8, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2021, 9, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2021, 8, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
-            result += Test(new DateTime(2022, 6, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
-            result += Test(new DateTime(2022, 5, 15, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
+            result += Test(new DateTime(2022, 7, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2022, 2, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2021, 11, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
             result += Test(new DateTime(2021, 7, 1, 0, 0, 0, DateTimeKind.Utc)) + "\r\n\r\n";
@@ -436,16 +437,16 @@ namespace Valloon.BitMEX.Backtest
             //float closeX2 = 0.25f;
             //float stopX2 = 0.03f;
 
-            int rsiLength = 6;
-            int rsiValue1 = 80;
-            int rsiValue2 = 26;
+            int rsiLength = 4;
+            int rsiValue1 = 75;
+            int rsiValue2 = 27;
             int macdDeep = 0;
             float skipX1 = 0;
-            float closeX1 = 0.08f;
-            float stopX1 = 0.04f;
+            float closeX1 = 0;
+            float stopX1 = 0.03f;
             float skipX2 = 0;
-            float closeX2 = 0.145f;
-            float stopX2 = 0.03f;
+            float closeX2 = 0.1f;
+            float stopX2 = 0.035f;
 
             const int binSize = 4;
 

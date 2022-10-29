@@ -28,6 +28,8 @@ namespace Valloon.BitMEX.Backtest
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 
+            //BinaryStrategy.Run();
+            BollingerBands.Run();
             //Candle.Run();
             //PSar.Run();
             //SMA2.Run();
@@ -36,7 +38,7 @@ namespace Valloon.BitMEX.Backtest
             //MACD_M.Run();
             //MACD_BBW.Run();
             //MACD_GRID.Run();
-            RSI_BBW.Run();
+            //RSI_BBW.Run();
             //EMACross.Run();
 
             Console.WriteLine($"\nCompleted. Press any key to exit... ");

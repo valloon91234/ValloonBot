@@ -54,8 +54,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BollingerBands.cs" />
     <Compile Include="Dao.cs" />
     <Compile Include="EMACross.cs" />
+    <Compile Include="BinaryStrategy.cs" />
     <Compile Include="RSI_BBW.cs" />
     <Compile Include="MACD_GRID.cs" />
     <Compile Include="MACD_BBW_M.cs" />
