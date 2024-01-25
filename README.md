@@ -1,1 +1,3 @@
-# ValloonBot2
+# ValloonBot
+
+Simple Crypto Trading Bot on Bybit.com using C#.
